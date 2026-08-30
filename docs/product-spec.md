@@ -68,8 +68,11 @@ the unit that the fire model learns against — a burn cadence learned on a
 
 ### 4.2 Start a cook
 
-Pick equipment, pick a meat type, enter weight, optionally a target internal
-temperature and ambient temperature. The cook starts and the app moves into the
+Pick equipment, pick a meat type, confirm the weight, optionally a target
+internal temperature and ambient temperature. **Weight is pre-filled from the
+meat type** (brisket ~6 kg, ribs ~1.5 kg) and adjusted rather than typed from
+scratch — it is required, because it feeds the fire model's thermal load for the
+whole rig, so it must never be a blocker. The cook starts and the app moves into the
 **active cook screen**.
 
 **Meat type is a closed enum with an "Other" free-text escape hatch.** Analytics
@@ -92,7 +95,7 @@ one-handed, outdoors, in daylight and at 3am, with cold or greasy hands. It
 shows the current state (elapsed time, last meat temp, last pit temp, time since
 last fuel, next predicted fire check) and offers four actions:
 
-- **Log temp** — meat temp, optionally pit temp, optional note.
+- **Log temp** — meat temp and pit temp on one sheet, optional note. (Stored as two records — the pit belongs to the rig, the meat to the cook — but that is invisible and costs no extra tap.)
 - **Log fuel** — see §4.4; must be ≤2 taps.
 - **Log event** — wrapped / spritzed / rested / other.
 - **Finish cook** — records `finishedAt`, prompts for a rating and notes.
@@ -109,10 +112,15 @@ This is a hard interaction requirement, not a nice-to-have. A cook adding a
 split to the firebox is standing at an open firebox door with a glove on.
 
 The design that satisfies it: the fuel button on the active cook screen opens a
-sheet whose **wood type and fuel form are pre-filled from the last fuel event of
-this cook** (or, for the first event of a cook, from the last cook on the same
-equipment). What remains is a single size-class tap — small / medium / large —
-which commits the event immediately with `count = 1`.
+sheet whose **wood type and fuel form are pre-filled from the last fuel event on
+this rig** (falling back to the previous fire on the same equipment). What
+remains is a single size-class tap — small / medium / large — which commits the
+event immediately with `count = 1`.
+
+Fuel belongs to the equipment, not to a cook, so the sheet never asks "which
+cook is this for?" even when two cooks are running on one smoker — the answer is
+always "the fire". That is what keeps this at two taps in the case where a
+per-cook model would have needed three.
 
 - Tap 1: "Add fuel".
 - Tap 2: size class → **saved**.

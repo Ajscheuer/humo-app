@@ -67,7 +67,7 @@ One session.
 | `equipmentId` | `Guid` | ✅ | FK → Equipment. |
 | `meatType` | `MeatType` | ✅ | Enum + `Other` escape hatch. `Other` cooks are excluded from cross-cook grouping. |
 | `meatTypeOther` | `string?` | | Free text, only when `meatType == Other`. |
-| `weightKg` | `double` | ✅ | Kilograms. Displayed in lb per user preference. |
+| `weightKg` | `double` | ✅ | Kilograms. **Pre-filled from the meat type**, adjustable. Displayed in lb per user preference. |
 | `targetInternalTempC` | `double?` | | Optional: a parrilla cook working by feel has no target temp. |
 | `startedAt` | `DateTimeOffset` | ✅ | UTC. |
 | `finishedAt` | `DateTimeOffset?` | | Null = cook in progress. |
@@ -75,12 +75,26 @@ One session.
 | `notes` | `string?` | | |
 | `rating` | `int?` | | **1–5, rating the result** — how the food turned out, not how well the cook was executed. Outcome is the useful analytics signal. |
 
+**`weightKg` stays required, but is never a blocker.** Each `MeatType` carries a
+typical weight (brisket ~6 kg, pork butt ~4 kg, pork ribs ~1.5 kg) which
+pre-fills the field for the user to adjust. A cook who did not weigh their meat
+is not stopped, and the number is roughly right rather than absent.
+
+Required rather than optional because weight no longer only feeds this cook's
+own analytics — it feeds the fire model's **thermal load** for the whole rig
+(`fire-model.md` §2.1). One unweighted cook would corrupt the load figure for
+everything else sharing that fire, which is a much worse failure than a slightly
+wrong time-per-kg on one cook.
+
 **Derived, cached at sync (server-computed, read-only on client):** total
 duration, time per kg, stall start/end/duration, pit temp stability score, fuel
 efficiency, anomaly flags. Stored in a separate `CookAnalytics` row keyed by
 cook ID so recomputation never rewrites user-entered data.
 
-### 3.3 TempEntry
+### 3.3 TempEntry — the meat
+
+A reading taken from the meat. **Per cook**, because each piece of meat has its
+own internal temperature.
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
@@ -88,21 +102,43 @@ cook ID so recomputation never rewrites user-entered data.
 | `cookId` | `Guid` | ✅ | FK → Cook. |
 | `recordedAt` | `DateTimeOffset` | ✅ | UTC. Not necessarily entry time — see below. |
 | `meatTempC` | `double` | ✅ | |
-| `pitTempC` | `double?` | | |
 | `note` | `string?` | | |
-| `ambientTempC` | `double?` | | Ambient at this moment, if the cook recorded it. |
 | `source` | `TempSource` | ✅ | `Manual` today; `Probe`/`Import` reserved — see §6. |
-
-`ambientTempC` is optional here as well as on `Cook`. Ambient changes over a
-14-hour cook, and fire model Level 2 wants it as a time-varying feature. Putting
-it on the entry the cook is already creating gives a time series for free, with
-no new entity, no extra interaction, and no location permission.
 
 `recordedAt` defaults to now but is **editable**, because cooks routinely log a
 reading a few minutes after taking it, and a wrong timestamp distorts both the
 stall calculation and the fire model.
 
-### 3.4 FuelEvent
+### 3.4 PitTempEntry — the fire
+
+A reading of the cook chamber, and of the weather around it. **Per equipment**,
+for the same reason fuel is (§3.5): there is one fire, and it has one
+temperature. Two cooks sharing a rig cannot have different pit temps at the same
+instant, and modelling it per cook would let them contradict each other —
+visibly wrong to anyone comparing the two, and quietly wrong in the pit
+stability score and in Level 2's expected envelope.
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `id` | `Guid` | ✅ | |
+| `equipmentId` | `Guid` | ✅ | FK → Equipment. The fire this measured. |
+| `recordedAt` | `DateTimeOffset` | ✅ | UTC. Editable, as above. |
+| `pitTempC` | `double` | ✅ | |
+| `ambientTempC` | `double?` | | Ambient at this moment, if recorded. |
+| `note` | `string?` | | |
+| `source` | `TempSource` | ✅ | `Manual` today; `Probe`/`Import` reserved — see §6. |
+
+Ambient lives here rather than on `TempEntry` because it is environmental: two
+cooks on one rig share the same weather, just as they share the same fire.
+`Cook.ambientTempC` remains as the value captured at the start; this gives the
+fire model the **time series** it wants for Level 2, with no new interaction and
+no location permission.
+
+**The logging screen still presents these together.** A cook taking a reading
+enters meat temp and pit temp on one sheet; the app writes two records. The
+split is a storage decision, not an interaction one, and must not cost a tap.
+
+### 3.5 FuelEvent
 
 The record the fire model learns from. Its capture must stay ≤2 taps
 (`product-spec.md` §4.4).
@@ -144,21 +180,24 @@ a fuel load and lengthens its recovery. That figure is derived — the sum of
 new field, but it is only computable *because* fuel and cooks are both anchored
 to equipment. See `fire-model.md` §2.1.
 
-### 3.5 CookEvent
+### 3.6 Event
 
-Milestones. **Named `CookEvent`, not `Event`** — `Event` collides with C#'s
-`event` keyword in enough contexts to be a persistent annoyance, and reads
-ambiguously next to domain events in the sync layer. Same shape as the brief.
+Milestones. Named `Event`, as in the original schema.
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
 | `id` | `Guid` | ✅ | |
-| `cookId` | `Guid` | ✅ | FK → Cook. |
+| `cookId` | `Guid` | ✅ | FK → Cook. Milestones are per cook: wrapping one brisket says nothing about the ribs beside it. |
 | `recordedAt` | `DateTimeOffset` | ✅ | UTC. |
-| `type` | `CookEventType` | ✅ | `Wrapped \| Spritzed \| Rested \| Other` |
+| `type` | `EventType` | ✅ | `Wrapped \| Spritzed \| Rested \| Other` |
 | `note` | `string?` | | |
 
-### 3.6 Photo
+> **Implementation note.** `Event` is a legal C# type name but sits awkwardly
+> next to the `event` keyword and next to domain events in the sync layer. If it
+> proves annoying in code, alias it at the class level rather than renaming the
+> concept in these docs.
+
+### 3.7 Photo
 
 Photos ship in v1. A photo belongs to a cook, and may optionally be pinned to a
 moment within it — "here's the bark at the wrap" belongs on the timeline where it
@@ -168,8 +207,8 @@ happened, not in an undifferentiated gallery.
 |---|---|---|---|
 | `id` | `Guid` | ✅ | |
 | `cookId` | `Guid` | ✅ | FK → Cook. Every photo belongs to a cook. |
-| `subjectId` | `Guid?` | | The TempEntry / FuelEvent / CookEvent it is pinned to. |
-| `subjectType` | `PhotoSubject?` | | `TempEntry \| FuelEvent \| CookEvent`. Null = cook-level. |
+| `subjectId` | `Guid?` | | The TempEntry / PitTempEntry / FuelEvent / Event it is pinned to. |
+| `subjectType` | `PhotoSubject?` | | `TempEntry \| PitTempEntry \| FuelEvent \| Event`. Null = cook-level. |
 | `capturedAt` | `DateTimeOffset` | ✅ | UTC. |
 | `localPath` | `string?` | ✅ local | **Local only**, never sent. Where the file is on device. |
 | `storageKey` | `string?` | | Blob name once uploaded. Null = not synced. |
@@ -186,7 +225,7 @@ Images are compressed on device before upload (long edge ~2048px, JPEG). Bytes
 go phone↔Blob Storage directly via SAS URLs; they never pass through the API,
 which owns authorization and metadata only.
 
-### 3.7 Supporting records (not in the original brief)
+### 3.8 Supporting records (not in the original brief)
 
 - **`FireCheckPrompt`** — a scheduled or delivered fire-check notification and
   its response (`AddedFuel \| StillFine \| Snoozed \| Ignored`). The fire model
@@ -208,9 +247,9 @@ values are never renumbered.
 - `InsulationLevel`: None, Light, Heavy
 - `FuelForm`: Split, Chunk, Charcoal, Pellets
 - `SizeClass`: Small, Medium, Large
-- `CookEventType`: Wrapped, Spritzed, Rested, Other
+- `EventType`: Wrapped, Spritzed, Rested, Other
 - `TempSource`: Manual (Probe, Import reserved — §6)
-- `PhotoSubject`: TempEntry, FuelEvent, CookEvent
+- `PhotoSubject`: TempEntry, PitTempEntry, FuelEvent, Event
 - `PromptResponse`: AddedFuel, StillFine, Snoozed, Ignored, Dismissed
 - `MeatType`: proposed — Brisket, PorkButt, PorkRibs, BeefRibs, Chicken, Turkey,
   Pork Loin, Lamb, Sausage, Other. Argentine cuts to be added with the parrilla
@@ -222,7 +261,7 @@ values are never renumbered.
 
 ### 5.1 Append-only records
 
-`TempEntry`, `FuelEvent`, `CookEvent`, and `FireCheckPrompt` are **immutable
+`TempEntry`, `PitTempEntry`, `FuelEvent`, `Event`, and `FireCheckPrompt` are **immutable
 after creation** in the normal case. They arrive at the server, are inserted by
 `id`, and re-sending the same `id` is a no-op. No conflict is possible.
 
@@ -305,38 +344,34 @@ Settled 2026-08-30.
 | 1 | `meatType` and `woodType` are **enums + `Other` free text** | Analytics must group and the UI must translate; free text does neither. `Other` cooks are excluded from grouping — the honest cost of the escape hatch. |
 | 2 | `rating` is **1–5 on the result** | Outcome is the useful analytics signal; self-assessed execution tracks how the cook felt. |
 | 3 | `targetInternalTempC` is **optional** | Parrilla cooks have no target temp. One field, one form; the form varies by equipment type, the schema does not. |
-| 4 | **Ambient moves onto `TempEntry`** as an optional field | Gives a time series for Level 2 with no new entity, no extra interaction, and no location permission. Wind stays unmodelled until Level 2 proves it needs it. |
+| 4 | **Ambient moves onto the rig-scoped pit reading** | Gives a time series for Level 2 with no new interaction and no location permission. Ambient is environmental, so it belongs with the fire, not with one piece of meat. Wind stays unmodelled until Level 2 proves it needs it. |
 | 5 | **Photos ship in v1** — cook-level, optionally pinned to an entry; free = local, Pro = synced | Photos are the most engaging part of a cook log. Upload runs on its own resumable queue so a 3 MB image never blocks a 200-byte reading. |
 | 6 | Out-of-order arrival: **ordered within a batch, reject-and-retry across batches** | Holding orphans means a pending table and an expiry policy; accepting them allows referentially broken rows every query must defend against. |
 | 7 | Account deletion: **immediate soft-delete, hard purge at 30 days**, blobs included | See `architecture.md` §5.2. Deleted data contributes to no baseline or aggregate from the moment of the request. |
 | 8 | Free tier limits **visibility, not retention** | The server keeps everything, so upgrading reveals real history and real baselines rather than an empty screen. Requires an explicit privacy-policy statement. |
 | 9 | Device migrations are **sequential and versioned** | Users skip versions; v1→v5 runs 2, 3, 4, 5 in order. Every migration tested from every prior version. |
+| 10 | **Pit temperature and ambient move to a rig-scoped `PitTempEntry`** | One fire has one temperature. Two cooks on a rig could otherwise record contradicting pit temps for the same instant, corrupting the stability score and Level 2's envelope. The logging screen still shows meat and pit together, so the split costs no taps. |
+| 11 | `weightKg` stays **required, pre-filled from meat type** | Weight feeds the whole rig's thermal load, so one unweighted cook would corrupt the fire prediction for everything sharing that fire. A seeded default means nobody is blocked. |
+| 12 | `viaNotification` **kept**; `Event` **keeps its original name** | The first makes Level 1's anti-circularity safeguard possible. The second reverts my rename back to your schema. |
 
 ## Open questions
 
-1. **`viaNotification` on `FuelEvent` is an addition to your schema.** Justified
-   in §3.4 — without it the fire model partly trains on its own predictions —
-   but it is my invention, not your spec. Confirm or drop.
-2. **Renaming `Event` → `CookEvent` is a deviation from your schema.** Flagged so
-   it stays a decision rather than a silent edit.
-3. **Photo storage has no ceiling.** No per-account limit, no per-cook cap, and
+1. **Photo storage has no ceiling.** No per-account limit, no per-cook cap, and
    no defined behaviour when a Pro subscription lapses with photos already
    synced — do they stay, expire, or become read-only?
-4. **`subjectType`/`subjectId` on `Photo` is a loose polymorphic reference.** It
+2. **`subjectType`/`subjectId` on `Photo` is a loose polymorphic reference.** It
    cannot be enforced by a foreign key, so integrity depends on application code.
-   A per-parent nullable column (`tempEntryId`, `fuelEventId`, `cookEventId`)
-   would be enforceable but wider. Worth revisiting when photos are implemented.
-5. **`weightKg` is required on `Cook`, but not every cook is weighed.** A cook
-   who does not weigh their meat currently cannot start a cook without inventing
-   a number, and time-per-kg is meaningless for them. Making it optional is the
-   obvious fix — but weight now also feeds the fire model's thermal load, so an
-   unweighted cook degrades the fire prediction for everything sharing that rig,
-   not just its own analytics. Needs deciding with that cost in view.
-6. **Pit temperature is ambiguous when two cooks share a rig.** `TempEntry`
-   couples `meatTempC` (per cook) with `pitTempC` (per fire), so two concurrent
-   cooks can record conflicting pit temps for the same fire at the same instant.
-   Fuel events moved to the equipment; pit temperature arguably should too.
-7. **`FuelEvent.cookId` is display-only and could drift.** It records which cook
+   Per-parent nullable columns would be enforceable but wider. Worth revisiting
+   when photos are implemented.
+3. **`FuelEvent.cookId` is display-only and could drift.** It records which cook
    was on screen, which may not be the cook a reader later associates with that
-   fire. Harmless if it stays display-only, misleading if anything starts
-   treating it as ownership.
+   fire. Harmless while it stays display-only, misleading the moment anything
+   treats it as ownership.
+4. **A cook can now exist with no pit data at all**, if the user only ever logs
+   meat temps. Stall detection survives that; the stability score and Level 2 do
+   not. The UI needs to make logging a pit temp feel natural rather than
+   optional, and the analytics need an honest "no pit data" state.
+5. **Nothing defines which cooks count as "active on a rig" for thermal load.** A
+   cook left unfinished for three days would keep inflating that rig's load and
+   corrupting predictions for later cooks. Needs a rule — an explicit finish, an
+   auto-finish after N hours, or a prompt.

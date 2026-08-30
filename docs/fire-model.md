@@ -18,9 +18,9 @@ develop a feel for their own rig's cadence. Humo's job is to learn that cadence
 from logged data and tell the cook *before* the fire needs attention rather than
 after the temperature has already fallen.
 
-**This is a reminder, not a safety device.** That framing belongs in the product
-copy (`product-spec.md` open question 9) and constrains how confident the
-notification wording may sound.
+**This is a reminder, not a safety device.** That framing is settled in
+`product-spec.md` §4.5 and constrains how confident the notification wording may
+sound.
 
 ## 2. Shared predictor interface
 
@@ -40,7 +40,7 @@ public sealed record FirePredictionContext(
     IReadOnlyList<Cook> ActiveCooks,                // may be more than one per rig
     double TotalLoadKg,                             // combined thermal mass in the chamber
     IReadOnlyList<FuelEvent> FuelEventsThisFire,    // scoped to the rig, not a cook
-    IReadOnlyList<TempEntry> TempEntriesThisFire,   // ignored by Level 1
+    IReadOnlyList<PitTempEntry> PitTempsThisFire,   // rig-scoped; ignored by Level 1
     IReadOnlyList<FireCheckPrompt> PromptsThisFire,
     BurnCadenceProfile? LearnedProfile,             // null on cold start
     AmbientConditions? Ambient,                     // ignored by Level 1
@@ -98,7 +98,7 @@ curves show it matters.
 A firebox does not know how many pieces of meat are above it. Cooks routinely run
 a brisket and a rack of ribs in the same smoker, and both are fed by one fire.
 
-So **`FuelEvent` is scoped to equipment, not to a cook** (`data-model.md` §3.4).
+So **`FuelEvent` is scoped to equipment, not to a cook** (`data-model.md` §3.5).
 Every cook active on that rig at that time shows the same fuel events on its
 timeline, and the fire model learns from one series per rig rather than one per
 cook. Modelling each cook independently would make the predictor see every fuel
@@ -109,21 +109,6 @@ This keeps fuel logging at ≤2 taps even with two cooks running: there is no
 
 It also means the model can see the **combined thermal load** on the rig (§2.1),
 which it could not do if it only knew about one of two briskets.
-
-### 3.6 What Level 1 does and does not do with load
-
-Level 1 is a median of clock intervals. It does **not** condition on load —
-grouping cadence by weight as well as by equipment, wood type and size class
-would fragment a small dataset into bins with one sample each, and the fallback
-ladder would collapse to "no prediction" for almost everyone.
-
-The consequence is a known, documented bias: **Level 1 will call for fuel
-slightly late on an unusually heavy load and slightly early on a light one**,
-because it is predicting from a cadence learned across all of that rig's cooks.
-Level 2 is where load stops being averaged away and becomes a fitted feature.
-
-Level 1 still *records* `TotalLoadKg` on every prediction, so that when Level 2
-arrives there is a history to fit against rather than a cold start.
 
 ### 3.1 The estimator
 
@@ -205,6 +190,21 @@ fire or tracks itself, with no ground truth to tune it against.
 **Level 2 is what makes prompt-driven events usable.** Once pit temperature
 provides independent evidence of whether the fire actually needed fuel, a
 confirmed prompt stops being circular and can be learned from.
+
+### 3.6 What Level 1 does and does not do with load
+
+Level 1 is a median of clock intervals. It does **not** condition on load —
+grouping cadence by weight as well as by equipment, wood type and size class
+would fragment a small dataset into bins with one sample each, and the fallback
+ladder would collapse to "no prediction" for almost everyone.
+
+The consequence is a known, documented bias: **Level 1 will call for fuel
+slightly late on an unusually heavy load and slightly early on a light one**,
+because it is predicting from a cadence learned across all of that rig's cooks.
+Level 2 is where load stops being averaged away and becomes a fitted feature.
+
+Level 1 still *records* `TotalLoadKg` on every prediction, so that when Level 2
+arrives there is a history to fit against rather than a cold start.
 
 ## 4. The notification loop
 
@@ -306,8 +306,8 @@ replace it. If temperature data is sparse (a cook logging meat temp only), Level
   is where that becomes measurable rather than assumed. Fit the curve *per unit
   of load* where there is enough data, rather than treating a 20 kg cook and a
   5 kg cook as the same event.
-- **Ambient temperature**, now available as a time series from `TempEntry`
-  (`data-model.md` §3.3) rather than a single value at the start.
+- **Ambient temperature**, now available as a time series from `PitTempEntry`
+  (`data-model.md` §3.4) rather than a single value at the start.
 - Equipment `insulation`, `fireboxVolumeL` and `cookChamberVolumeL` — which is
   exactly why those fields exist on `Equipment`. Chamber volume and load
   together approximate the thermal mass the fire is fighting.
@@ -330,9 +330,10 @@ Same `IFirePredictor`, same notification loop, much better input: pit temp every
 30 seconds from a FireBoard (API or CSV import) or MEATER (cloud API).
 
 Because the interface is shared, Level 3 is a data-source change plus a better
-curve fit — not a new feature. Ingested readings become `TempEntry` rows with
-`source = Probe` or `Import` (`data-model.md` §6), so charts, analytics, stall
-detection and the fire model all consume them without special cases.
+curve fit — not a new feature. Ingested readings become `PitTempEntry` rows (pit probes) or `TempEntry` rows
+(meat probes) with `source = Probe` or `Import` (`data-model.md` §6), so charts,
+analytics, stall detection and the fire model all consume them without special
+cases.
 
 Volume is the design constraint: a 14-hour cook at 30-second intervals is ~1,700
 readings, against maybe 20 manual entries. Storage, sync batching, chart
@@ -383,14 +384,11 @@ Settled 2026-08-30.
 | 3 | Level 2 **fits server-side, applies on device** | Prediction stays offline-capable by applying a compact profile rather than fitting one. Cost: profile freshness depends on syncing, and guests get none — both degrade to Level 1 rather than failing. |
 | 4 | **Wind is deferred** until Level 2 shows it is needed | Ambient now rides on `TempEntry` for free; wind would need either a manual field or location-based weather, and neither is worth its cost on speculation. |
 | 5 | Clock-skew-flagged records are **excluded from learned intervals** | A wrong device clock corrupts cadence far more damagingly than it corrupts sync ordering. |
+| 6 | **Pit temperature is rig-scoped** (`PitTempEntry`) | One fire has one temperature. Per-cook pit temps would let two cooks on a rig contradict each other, corrupting the stability score and Level 2's envelope. |
+| 7 | Free users' logging **does** train a model — strictly **their own** | Nobody's data trains anyone else's model. A free user's history is waiting for them on upgrade rather than starting from zero, and the privacy statement stays a single honest sentence. |
 
 ## Open questions
 
-1. **Is a free user's logging meant to train a model they cannot use?** The fire
-   model is Pro-gated but every fuel event a free user logs is training data.
-   Per-user-only training makes this defensible — nobody's data trains anyone
-   else's model — but it should be a deliberate decision, and it affects whether
-   a free user is even asked for notification permission.
 2. **Minimum interval counts in §3.2 are invented.** 5 / 5 / 4 / 4 are plausible
    starting numbers, not derived ones. They need calibrating against real data,
    and the first real data will be yours.
@@ -399,11 +397,6 @@ Settled 2026-08-30.
    with equipment type and insulation instead of being a constant?
 4. **Snooze increment (15 min) and "sustained below envelope" thresholds are
    placeholders.** Both need real cooks to calibrate.
-5. **Pit temperature is now ambiguous when two cooks share a rig.** A `TempEntry`
-   couples `meatTempC` (per cook) with `pitTempC` (per fire), so two concurrent
-   cooks can record conflicting pit temps for the same fire at the same moment.
-   Fuel events moved to the equipment; pit temperature arguably should too.
-   Unresolved — it affects the stability score and Level 2's envelope.
 6. **Notification reliability is unverified.** iOS's 64 pending-notification cap,
    background-response handling without launching the app, and Android's
    aggressive OEM battery optimizations all threaten the delivery mechanism this
