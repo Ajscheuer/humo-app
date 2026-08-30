@@ -6,9 +6,20 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
+  <ItemGroup Label="MAUI">
+    <!-- Versions for the package references the MAUI SDK adds implicitly.
+         Required by central package management; see Directory.Build.props. -->
+    <PackageVersion Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
+  </ItemGroup>
+
   <ItemGroup Label="App and shared">
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageVersion Include="sqlite-net-pcl" Version="1.9.172" />
+    <!-- sqlite-net-pcl pulls SQLitePCLRaw 2.1.2, whose native .so is not 16 KB
+         page aligned, which Android 16 will reject (build warning XA0141).
+         Pinned forward here; remove once sqlite-net-pcl ships a newer dependency. -->
+    <PackageVersion Include="SQLitePCLRaw.bundle_green" Version="2.1.11" />
   </ItemGroup>
 
   <ItemGroup Label="Testing">

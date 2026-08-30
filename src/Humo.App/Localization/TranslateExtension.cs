@@ -1,5 +1,6 @@
 using Humo.App.Services;
 using Humo.Core.Localization;
+using Microsoft.Maui.Controls.Xaml;
 
 namespace Humo.App.Localization;
 
@@ -13,6 +14,7 @@ namespace Humo.App.Localization;
 /// </para>
 /// </summary>
 [ContentProperty(nameof(Key))]
+[AcceptEmptyServiceProvider]  // resolves the localizer from DI, not from the XAML service provider
 public sealed class TranslateExtension : IMarkupExtension<BindingBase>
 {
     /// <summary>The resource key. Prefer the constants in <see cref="AppStrings"/> when binding from code.</summary>

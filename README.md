@@ -38,8 +38,15 @@ interfaces declared in `Humo.Core` and implemented in `Humo.App`.
 ## Prerequisites
 
 - .NET SDK 9.0
-- For the app: `dotnet workload install maui` (Android builds anywhere; **iOS
-  requires a Mac**)
+- For the app: `dotnet workload install maui-android` (or `maui` on macOS), plus
+  a JDK and the Android SDK. `dotnet build src/Humo.App -t:InstallAndroidDependencies
+  -p:AcceptAndroidSDKLicenses=True` installs the Android SDK if you don't have
+  Android Studio.
+
+`Humo.App` targets `net9.0-android` everywhere, and adds `net9.0-ios` **only on
+macOS and Windows**. NuGet restore evaluates every target framework listed, so an
+unconditional iOS target would break restore on Linux even when building Android.
+Building and running the iOS target still requires a Mac.
 
 ## Build and test
 
@@ -53,6 +60,19 @@ dotnet run --project src/Humo.Api
 `Humo.NoMaui.slnf` is a solution filter that excludes `Humo.App`. It exists so
 CI and development machines without the MAUI workload can still run the full
 test suite.
+
+### If the Android build misbehaves
+
+- **`type or namespace 'Microsoft.Maui' not found`** — the `Microsoft.Maui.Controls`
+  package reference is missing. `UseMaui=true` does *not* add it implicitly, and
+  under central package management a missing `PackageVersion` makes the reference
+  vanish silently rather than erroring.
+- **Every package suddenly has "no inclusive lower bound" (NU1604)** — MSBuild
+  failed to load `Directory.Packages.props` and central package management is
+  off. An XML comment containing `--` will do this without an obvious error.
+- **`CommonUtilities.Helpers.UserName must have a valid value`** — the Android SDK
+  installer needs a username; export `USER` before running it. Affects bare
+  containers, not normal dev machines.
 
 ## Localization
 

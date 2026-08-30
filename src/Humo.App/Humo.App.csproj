@@ -1,11 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0-android;net9.0-ios</TargetFrameworks>
     <!-- iOS and Android only. Windows and Mac Catalyst are a csproj line away
          if they are ever wanted; carrying them now would mean maintaining
-         layouts for surfaces with no users. Building the iOS target requires
-         a Mac; Android builds anywhere. -->
+         layouts for surfaces with no users.
+
+         The iOS target framework is added only on hosts that can build it. NuGet
+         restore evaluates every TargetFramework listed, so an unconditional
+         net9.0-ios entry fails restore on Linux — including CI and any Linux dev
+         machine — even when the build only asks for Android. Conditioning it
+         keeps `dotnet build -f net9.0-android` working everywhere. -->
+    <TargetFrameworks>net9.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('osx')) or $([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-ios</TargetFrameworks>
 
     <OutputType>Exe</OutputType>
     <RootNamespace>Humo.App</RootNamespace>
@@ -25,13 +31,26 @@
   <ItemGroup>
     <MauiIcon Include="Resources\AppIcon\appicon.svg" Color="#2B1B12" />
     <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#2B1B12" BaseSize="128,128" />
-    <MauiImage Include="Resources\Images\*" />
-    <MauiXaml Include="**\*.xaml" Exclude="bin\**;obj\**" />
+    <!-- .gitkeep holds the empty folder in git; Resizetizer would otherwise try
+         to treat it as an image and reject the filename. -->
+    <MauiImage Include="Resources\Images\*" Exclude="Resources\Images\.gitkeep" />
   </ItemGroup>
+
+  <!-- No MauiXaml glob here: the MAUI SDK already includes **\*.xaml by default,
+       and adding our own registers every page twice (CS1508). -->
 
   <!-- No custom fonts are registered yet: system fonts are legible, and every
        added font is another asset to license and ship. Add them when the design
        calls for them, not before. -->
+
+  <ItemGroup>
+    <!-- MAUI is referenced explicitly. `UseMaui=true` brings in the SDK and its
+         targets but does NOT add this package reference; without it the project
+         restores cleanly and then fails to compile with "type or namespace
+         Microsoft.Maui not found". Versions come from Directory.Packages.props. -->
+    <PackageReference Include="Microsoft.Maui.Controls" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Humo.Core\Humo.Core.csproj" />
