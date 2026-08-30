@@ -1,0 +1,17 @@
+<Project>
+
+  <!-- Settings shared by every project in the solution. Per-project csproj files
+       should stay small; anything true for all of Humo belongs here. -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <!-- InvariantGlobalization must stay false: Humo formats dates and numbers per
+       culture (English and Spanish), which requires real ICU data. -->
+
+</Project>

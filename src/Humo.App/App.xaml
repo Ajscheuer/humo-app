@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Humo.App.App">
+    <Application.Resources>
+        <ResourceDictionary>
+
+            <!-- Smoke and fire. Kept deliberately small until there is a design. -->
+            <Color x:Key="Ember">#C1440E</Color>
+            <Color x:Key="Charcoal">#2B1B12</Color>
+            <Color x:Key="Ash">#F4F1EC</Color>
+
+            <Style TargetType="Label">
+                <Setter Property="TextColor" Value="{StaticResource Charcoal}" />
+                <!-- No fixed widths anywhere: Spanish runs about 25% longer than
+                     English and every label must be free to grow. -->
+                <Setter Property="LineBreakMode" Value="WordWrap" />
+            </Style>
+
+            <Style TargetType="Button">
+                <Setter Property="BackgroundColor" Value="{StaticResource Ember}" />
+                <Setter Property="TextColor" Value="{StaticResource Ash}" />
+                <Setter Property="Padding" Value="16,10" />
+            </Style>
+
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

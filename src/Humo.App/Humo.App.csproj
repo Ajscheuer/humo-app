@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net9.0-android;net9.0-ios</TargetFrameworks>
+    <!-- iOS and Android only. Windows and Mac Catalyst are a csproj line away
+         if they are ever wanted; carrying them now would mean maintaining
+         layouts for surfaces with no users. Building the iOS target requires
+         a Mac; Android builds anywhere. -->
+
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Humo.App</RootNamespace>
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
+    <EnableDefaultCssItems>false</EnableDefaultCssItems>
+
+    <ApplicationTitle>Humo</ApplicationTitle>
+    <ApplicationId>com.humoapp.humo</ApplicationId>
+    <ApplicationDisplayVersion>0.1</ApplicationDisplayVersion>
+    <ApplicationVersion>1</ApplicationVersion>
+
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <MauiIcon Include="Resources\AppIcon\appicon.svg" Color="#2B1B12" />
+    <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#2B1B12" BaseSize="128,128" />
+    <MauiImage Include="Resources\Images\*" />
+    <MauiXaml Include="**\*.xaml" Exclude="bin\**;obj\**" />
+  </ItemGroup>
+
+  <!-- No custom fonts are registered yet: system fonts are legible, and every
+       added font is another asset to license and ship. Add them when the design
+       calls for them, not before. -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\Humo.Core\Humo.Core.csproj" />
+    <ProjectReference Include="..\Humo.Shared\Humo.Shared.csproj" />
+  </ItemGroup>
+
+  <!-- Humo.App holds Views, platform service implementations and DI wiring, and
+       nothing else. ViewModels and services live in Humo.Core so they can be
+       unit-tested without the MAUI workload or a device. -->
+
+</Project>

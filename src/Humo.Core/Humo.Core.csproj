@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>Humo.Core</RootNamespace>
+    <!-- SQLitePCLRaw ships distro-specific RIDs that .NET 8+ no longer probes by
+         default. Harmless here: the app uses the platform bundle on iOS and
+         Android, and tests use the default provider. -->
+    <NoWarn>$(NoWarn);NETSDK1206</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Humo.Core.Tests" />
+  </ItemGroup>
+
+  <!-- Humo.Core holds ViewModels, services, repositories and the fire predictor.
+       It targets plain net9.0 on purpose: everything here is unit-testable with
+       `dotnet test` on any machine, with no MAUI workload and no device.
+
+       It must never reference Microsoft.Maui.*. Platform capabilities
+       (preferences, connectivity, notifications, secure storage) go behind
+       interfaces declared here and implemented in Humo.App. -->
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="sqlite-net-pcl" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Humo.Shared\Humo.Shared.csproj" />
+  </ItemGroup>
+
+  <!-- Strings are resolved through ILocalizer / ResourceManager rather than a
+       generated designer class, so there is no .Designer.cs to keep in sync by
+       hand. Compile-time safety on keys comes from the AppStrings constants,
+       which ResourceParityTests verifies against both .resx files. -->
+
+</Project>

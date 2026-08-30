@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:loc="clr-namespace:Humo.App.Localization"
+             xmlns:vm="clr-namespace:Humo.Core.ViewModels;assembly=Humo.Core"
+             x:Class="Humo.App.Views.MainPage"
+             x:DataType="vm:AppSettingsViewModel"
+             Title="{loc:Translate App_Name}">
+
+    <!-- Slice 0 scaffold page. It exists to prove three things work end to end:
+         strings resolve from .resx, switching language re-resolves them at
+         runtime, and the temperature unit is independent of the language.
+         Slice 1 replaces this with the real cook flow. -->
+
+    <ContentPage.Resources>
+        <loc:ResourceKeyConverter x:Key="ResourceKey" />
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <!-- Star-sized and auto-sized only. Nothing here is a fixed width, so
+             Spanish text is free to run ~25% longer than English. -->
+        <VerticalStackLayout Padding="24" Spacing="20">
+
+            <Label Text="{Binding Title}"
+                   FontSize="28"
+                   FontAttributes="Bold" />
+
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{loc:Translate Settings_Language}"
+                       FontAttributes="Bold" />
+                <Picker ItemsSource="{Binding LanguageOptions}"
+                        SelectedItem="{Binding SelectedLanguage}"
+                        ItemDisplayBinding="{Binding DisplayNameKey, Converter={StaticResource ResourceKey}}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{loc:Translate Settings_TemperatureUnit}"
+                       FontAttributes="Bold" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <Label Grid.Column="0"
+                           Text="{Binding TemperatureUnitExplanation}"
+                           VerticalOptions="Center" />
+                    <Switch Grid.Column="1"
+                            IsToggled="{Binding UseFahrenheit}"
+                            VerticalOptions="Center" />
+                </Grid>
+                <Label Text="{Binding TemperatureUnitSymbol}"
+                       FontSize="22" />
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

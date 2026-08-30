@@ -1,0 +1,13 @@
+{
+  "solution": {
+    "path": "Humo.sln",
+    "projects": [
+      "src\\Humo.Api\\Humo.Api.csproj",
+      "src\\Humo.Core\\Humo.Core.csproj",
+      "src\\Humo.Shared\\Humo.Shared.csproj",
+      "tests\\Humo.Api.Tests\\Humo.Api.Tests.csproj",
+      "tests\\Humo.Core.Tests\\Humo.Core.Tests.csproj",
+      "tests\\Humo.Shared.Tests\\Humo.Shared.Tests.csproj"
+    ]
+  }
+}

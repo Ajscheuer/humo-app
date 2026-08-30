@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>Humo.Shared</RootNamespace>
+  </PropertyGroup>
+
+  <!-- Humo.Shared references nothing. It is the wire contract between app and
+       API, and it stays free of every framework so it cannot drift toward
+       either side. Do not add package references here without a good reason. -->
+
+</Project>

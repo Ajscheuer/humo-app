@@ -52,7 +52,9 @@ BBQ cook-tracking app. Cross-platform mobile, offline-first, bilingual.
 
 ## Before you call something done
 
-- **Run `dotnet test`.** All tests pass, or it isn't done.
+- **Run `dotnet test`.** All tests pass, or it isn't done. On a machine without
+  the MAUI workload, run `dotnet test Humo.NoMaui.slnf` — the same tests, without
+  building the app project.
 - **Read the relevant `/docs` file before implementing a feature** —
   `product-spec.md`, `architecture.md`, `data-model.md`, `fire-model.md`.
 - If the docs are ambiguous or contradict the code, raise it as an open question

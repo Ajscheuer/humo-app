@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!--
+    English strings. The neutral fallback culture for Humo.
+
+    RULES (see CLAUDE.md):
+      - Every user-facing string in the app lives here. Never hardcode a string
+        in XAML or in a ViewModel.
+      - Every key added here MUST be added to AppResources.es.resx in the SAME
+        commit. ResourceParityTests fails the build otherwise.
+      - Keys are PascalCase and grouped by area with an underscore prefix
+        (Common_, Settings_, Cook_, ...).
+  -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="App_Name" xml:space="preserve">
+    <value>Humo</value>
+    <comment>Product name. Not translated.</comment>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Common_Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Common_Done" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="Settings_Title" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Settings_Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="Settings_Language_System" xml:space="preserve">
+    <value>Use device language</value>
+    <comment>Option that clears the in-app language override.</comment>
+  </data>
+  <data name="Settings_Language_English" xml:space="preserve">
+    <value>English</value>
+    <comment>Language names are shown in their own language, so this stays "English" in the Spanish file too.</comment>
+  </data>
+  <data name="Settings_Language_Spanish" xml:space="preserve">
+    <value>Español</value>
+    <comment>Shown in its own language in both files.</comment>
+  </data>
+  <data name="Settings_TemperatureUnit" xml:space="preserve">
+    <value>Temperature unit</value>
+  </data>
+  <data name="Settings_TemperatureUnit_Explanation" xml:space="preserve">
+    <value>Independent of your app language.</value>
+    <comment>Explains that choosing Spanish does not force Celsius.</comment>
+  </data>
+  <data name="Unit_Celsius_Short" xml:space="preserve">
+    <value>°C</value>
+  </data>
+  <data name="Unit_Fahrenheit_Short" xml:space="preserve">
+    <value>°F</value>
+  </data>
+  <data name="Unit_Kilograms_Short" xml:space="preserve">
+    <value>kg</value>
+  </data>
+  <data name="Unit_Pounds_Short" xml:space="preserve">
+    <value>lb</value>
+  </data>
+</root>

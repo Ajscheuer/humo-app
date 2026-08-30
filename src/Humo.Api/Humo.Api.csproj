@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>Humo.Api</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Humo.Shared\Humo.Shared.csproj" />
+  </ItemGroup>
+
+  <!-- The API references Humo.Shared and nothing from the client. Sharing the
+       DTOs with the app is what stops the wire contract drifting. -->
+
+</Project>
