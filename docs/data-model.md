@@ -107,10 +107,20 @@ stall calculation and the fire model.
 The record the fire model learns from. Its capture must stay ≤2 taps
 (`product-spec.md` §4.4).
 
+**A fuel event belongs to the equipment, not to a cook.** A firebox does not know
+how many pieces of meat are above it: cooks routinely run a brisket and ribs in
+one smoker, fed by one fire. Scoping fuel to the rig means concurrent cooks share
+one fuel series and one learned cadence, instead of the model seeing every load
+twice and predicting roughly twice as often as the fire needs.
+
+It also keeps logging at ≤2 taps with two cooks running — there is no "which cook
+is this for?" question, because the answer is "the fire".
+
 | Field | Type | Required | Notes |
 |---|---|---|---|
 | `id` | `Guid` | ✅ | |
-| `cookId` | `Guid` | ✅ | FK → Cook. |
+| `equipmentId` | `Guid` | ✅ | FK → Equipment. The fire this fed. |
+| `cookId` | `Guid?` | | The cook that was on screen when it was logged, for display only. Never used by the fire model. |
 | `recordedAt` | `DateTimeOffset` | ✅ | UTC. |
 | `woodType` | `WoodType` | ✅ | Enum + `Other`. Pre-filled from previous event. |
 | `woodTypeOther` | `string?` | | |
@@ -123,7 +133,16 @@ The record the fire model learns from. Its capture must stay ≤2 taps
 `viaNotification` is an addition to the brief's schema. Without it, an event
 created *because we asked* is indistinguishable from one created because the
 fire needed it — which biases the learned cadence toward whatever cadence we
-already predicted. Flagged rather than assumed; drop it if you disagree.
+already predicted. Level 1 excludes prompt-driven events from cadence learning
+entirely (`fire-model.md` §3.5). Flagged rather than assumed; drop it if you
+disagree.
+
+**Thermal load.** The fire model needs the combined weight of everything in the
+chamber, because meat is a heat sink: more protein flattens the pit's rise after
+a fuel load and lengthens its recovery. That figure is derived — the sum of
+`weightKg` across every cook active on the rig at that moment — so it needs no
+new field, but it is only computable *because* fuel and cooks are both anchored
+to equipment. See `fire-model.md` §2.1.
 
 ### 3.5 CookEvent
 
@@ -309,4 +328,15 @@ Settled 2026-08-30.
    would be enforceable but wider. Worth revisiting when photos are implemented.
 5. **`weightKg` is required on `Cook`, but not every cook is weighed.** A cook
    who does not weigh their meat currently cannot start a cook without inventing
-   a number, and time-per-kg is meaningless for them. Should it be optional?
+   a number, and time-per-kg is meaningless for them. Making it optional is the
+   obvious fix — but weight now also feeds the fire model's thermal load, so an
+   unweighted cook degrades the fire prediction for everything sharing that rig,
+   not just its own analytics. Needs deciding with that cost in view.
+6. **Pit temperature is ambiguous when two cooks share a rig.** `TempEntry`
+   couples `meatTempC` (per cook) with `pitTempC` (per fire), so two concurrent
+   cooks can record conflicting pit temps for the same fire at the same instant.
+   Fuel events moved to the equipment; pit temperature arguably should too.
+7. **`FuelEvent.cookId` is display-only and could drift.** It records which cook
+   was on screen, which may not be the cook a reader later associates with that
+   fire. Harmless if it stays display-only, misleading if anything starts
+   treating it as ownership.
