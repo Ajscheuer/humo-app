@@ -14,6 +14,7 @@ Read the relevant document before implementing a feature:
 | [`docs/architecture.md`](docs/architecture.md) | Client and API structure, identity, sync shape, testing strategy |
 | [`docs/data-model.md`](docs/data-model.md) | Entities, enums, units, sync semantics |
 | [`docs/fire-model.md`](docs/fire-model.md) | The three-level fire predictor and its notification loop |
+| [`docs/testing.md`](docs/testing.md) | Where tests live, and the edge cases that recur in this domain |
 
 [`CLAUDE.md`](CLAUDE.md) holds the always-true conventions. Each doc ends with
 open questions — decisions that are deliberately unresolved, not oversights.
@@ -25,7 +26,8 @@ src/Humo.Shared    DTOs, enums, contracts, unit conversion  (references nothing)
 src/Humo.Core      ViewModels, services, repositories, fire predictor  (net9.0, no MAUI)
 src/Humo.App       Views, platform services, DI wiring  (MAUI, iOS + Android)
 src/Humo.Api       ASP.NET Core Minimal API
-tests/…            One test project per source project except Humo.App
+tests/…            One test project per source project except Humo.App,
+                   plus Humo.Conventions.Tests, which enforces CLAUDE.md
 ```
 
 `Humo.Core` targets plain `net9.0` and must never reference `Microsoft.Maui.*`.

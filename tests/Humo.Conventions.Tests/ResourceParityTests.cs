@@ -1,7 +1,7 @@
 using System.Xml.Linq;
 using Humo.Core.Localization;
 
-namespace Humo.Core.Tests.Localization;
+namespace Humo.Conventions.Tests;
 
 /// <summary>
 /// Mechanical enforcement of the localization rule in CLAUDE.md: an English
@@ -101,7 +101,7 @@ public class ResourceParityTests
 
     private static Dictionary<string, string> LoadResx(string fileName)
     {
-        var path = Path.Combine(RepositoryRoot(), "src", "Humo.Core", "Resources", "Strings", fileName);
+        var path = RepositoryPaths.Source("Humo.Core", "Resources", "Strings", fileName);
 
         return XDocument.Load(path)
             .Root!
@@ -109,18 +109,5 @@ public class ResourceParityTests
             .ToDictionary(
                 element => element.Attribute("name")!.Value,
                 element => element.Element("value")?.Value ?? string.Empty);
-    }
-
-    private static string RepositoryRoot()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-
-        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Humo.sln")))
-        {
-            directory = directory.Parent;
-        }
-
-        return directory?.FullName
-               ?? throw new InvalidOperationException("Could not locate the repository root (no Humo.sln found).");
     }
 }

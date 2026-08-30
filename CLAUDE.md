@@ -50,12 +50,30 @@ BBQ cook-tracking app. Cross-platform mobile, offline-first, bilingual.
   containers around labels.
 - Dates and numbers follow culture; temperature unit does not.
 
+## Testing
+
+- **Every feature ships with unit tests in the same commit.** A ViewModel,
+  service, conversion, or endpoint added without tests is not done.
+- **Cover edge cases, not just the happy path.** At minimum, for anything you
+  write: empty and missing input, invalid enum values, boundary values, absent
+  optionals, culture-dependent formatting, UTC and timezone boundaries, and
+  duplicate or out-of-order input wherever a sequence is accepted.
+  `docs/testing.md` lists the edge cases that recur in this domain — read it
+  before writing a test list.
+- **Name the behaviour, not the method.**
+  `Choosing_Spanish_does_not_change_the_temperature_unit`, not `TestSetLanguage`.
+- Test through the public surface. Don't assert on private state.
+- A bug fix starts with a failing test that reproduces it.
+- Deliberately *not* unit-tested: XAML, code-behind constructors, and generated
+  code. Keeping logic out of them is what makes that safe.
+
 ## Before you call something done
 
 - **Run `dotnet test`.** All tests pass, or it isn't done. On a machine without
   the MAUI workload, run `dotnet test Humo.NoMaui.slnf` — the same tests, without
   building the app project.
 - **Read the relevant `/docs` file before implementing a feature** —
-  `product-spec.md`, `architecture.md`, `data-model.md`, `fire-model.md`.
+  `product-spec.md`, `architecture.md`, `data-model.md`, `fire-model.md`,
+  `testing.md`.
 - If the docs are ambiguous or contradict the code, raise it as an open question
   rather than silently picking an answer.

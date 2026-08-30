@@ -27,4 +27,46 @@ public class HealthEndpointTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("ok", await response.Content.ReadAsStringAsync());
     }
+
+    [Fact]
+    public async Task Health_returns_JSON()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/health");
+
+        Assert.Equal("application/json", response.Content.Headers.ContentType?.MediaType);
+    }
+
+    [Fact]
+    public async Task Health_needs_no_authentication()
+    {
+        // App Service probes it with no token. If auth is ever applied globally,
+        // this endpoint has to stay exempt or the app looks dead to Azure.
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/health");
+
+        Assert.NotEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task An_unknown_route_is_a_404_rather_than_a_500()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/does-not-exist");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Health_does_not_answer_a_POST()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.PostAsync("/health", content: null);
+
+        Assert.Equal(HttpStatusCode.MethodNotAllowed, response.StatusCode);
+    }
 }

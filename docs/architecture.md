@@ -199,20 +199,30 @@ RevenueCat is the source of truth for subscription state.
 
 ## 9. Testing strategy
 
+Every feature ships with unit tests in the same commit, covering edge cases and
+not just the happy path. **`docs/testing.md` is the working definition of "edge
+case" for this domain** — read it before writing a test list.
+
 - **Humo.Shared.Tests** — validation, conversions (notably °C/°F round-tripping),
   and pure model logic.
-- **Humo.App.Tests** — ViewModel unit tests against mocked service interfaces.
-  This is what "no logic in code-behind" buys us: the interesting client
-  behaviour is testable without a device or emulator.
+- **Humo.Core.Tests** — ViewModel and service unit tests against mocked
+  interfaces. This is what "no logic in code-behind" plus the `Humo.Core` split
+  buys us: the interesting client behaviour is testable without a device, an
+  emulator, or the MAUI workload.
 - **Humo.Api.Tests** — endpoint tests via `WebApplicationFactory`, including
   sync merge semantics (out-of-order arrival, replay, conflicting updates) and
   analytics computation against fixture cooks.
-- Localization has a **test that asserts key parity** between `AppResources.resx`
-  and `AppResources.es.resx`, so an English string added without its Spanish
-  counterpart fails the build rather than shipping as an English string inside a
-  Spanish UI.
+- **Humo.Conventions.Tests** — the rules in `CLAUDE.md`, enforced mechanically
+  rather than by review: resource parity between `AppResources.resx` and
+  `AppResources.es.resx`, `Humo.Core` staying free of MAUI references,
+  `Humo.Shared` referencing nothing, and no hardcoded user-facing strings in
+  XAML or ViewModels.
 
-`dotnet test` must pass before any work is called done.
+There is no `Humo.App.Tests`. If something in the app project is worth a unit
+test, it belongs in `Humo.Core` behind an interface.
+
+`dotnet test` must pass before any work is called done — or
+`dotnet test Humo.NoMaui.slnf` on a machine without the MAUI workload.
 
 ## 10. Repository layout (proposed)
 
@@ -223,10 +233,12 @@ RevenueCat is the source of truth for subscription state.
   Humo.Api/            ASP.NET Core Minimal API
   Humo.Shared/         DTOs, enums, contracts, conversions
 /tests
-  Humo.App.Tests/
+  Humo.Core.Tests/
   Humo.Api.Tests/
   Humo.Shared.Tests/
+  Humo.Conventions.Tests/
 Humo.sln
+Humo.NoMaui.slnf      solution filter: everything except the MAUI app
 CLAUDE.md
 ```
 
