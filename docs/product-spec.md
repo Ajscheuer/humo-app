@@ -149,7 +149,29 @@ fire checks are first enabled, and again in the terms — not on every
 notification, where a repeated warning would be tuned out within a week and
 would bloat a message whose entire value is being glanceable.
 
-### 4.6 Photos
+### 4.6 Forgotten cooks
+
+Cooks get abandoned — someone pulls the brisket at midnight, eats, and never taps
+*Finish*. Humo handles that without nagging and without leaving a zombie cook
+running forever:
+
+- **After 24 hours of no activity**, a notification asks whether the cook is
+  still going: *Still cooking* / *Finish it*. Answering finishes it properly,
+  with the rating prompt.
+- **After 72 hours**, the cook is finished automatically. Its end time is set to
+  the last thing actually recorded, not to the 72-hour mark, because the cook
+  plainly did not run for three days.
+
+Auto-finished cooks are marked as such and **excluded from duration and
+time-per-kg trends**, since their end time is inferred rather than observed.
+Everything else they recorded stays fully valid.
+
+This is not only tidiness. An unfinished cook keeps counting toward its rig's
+thermal load, which would distort the fire prediction for the *next* cook on that
+smoker — so a cook forgotten on Saturday stops counting at 24 hours, well before
+it is auto-finished.
+
+### 4.7 Photos
 
 Photos ship in v1. A photo belongs to a cook and can optionally be **pinned to a
 moment within it** — the bark at the wrap, the fire at 2am, the slice at the end
@@ -160,7 +182,7 @@ Sync is the part that actually costs money, so sync is the part that is paid.
 The trade-off to watch: "your photos didn't sync" needs clear in-app language,
 or it reads as a bug rather than a tier boundary.
 
-### 4.7 After the cook
+### 4.8 After the cook
 
 The cook summary shows a temperature chart (meat and pit over time, with fuel
 events and milestones marked), computed statistics, and — for Pro users —

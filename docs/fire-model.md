@@ -86,6 +86,12 @@ that rig**, not just the cook being viewed. This is the second reason fuel and
 fire are modelled per-rig rather than per-cook: a predictor that only knew about
 one of two briskets would systematically underestimate the load it is heating.
 
+"Active" is defined by the cook lifecycle in `data-model.md` §3.2.1: a cook with
+no activity for 24 hours goes **stale** and stops counting toward load, and is
+auto-finished at 72 hours. Without that rule a cook someone forgot to finish on
+Saturday would still be inflating the load — and depressing the predicted
+cadence — for a completely different cook on Sunday.
+
 Load also changes *during* a cook — meat loses moisture and mass over 14 hours,
 and cooks are sometimes added mid-session — but v1 treats load as fixed at each
 cook's start weight. Refining that is not worth the complexity until the fitted
@@ -134,7 +140,7 @@ order, and confidence drops at each step:
 | equipment + woodType + sizeClass | 5 | High |
 | equipment + sizeClass | 5 | Medium |
 | equipment (any fuel) | 4 | Medium |
-| equipment type + sizeClass (across the user's rigs) | 4 | Low |
+| pit type + sizeClass (across the user's rigs, using `Cook.pitType`) | 4 | Low |
 | — nothing sufficient — | | **None → no prediction** |
 
 There is **no global/population fallback.** A stranger's offset tells us nothing
@@ -386,6 +392,8 @@ Settled 2026-08-30.
 | 5 | Clock-skew-flagged records are **excluded from learned intervals** | A wrong device clock corrupts cadence far more damagingly than it corrupts sync ordering. |
 | 6 | **Pit temperature is rig-scoped** (`PitTempEntry`) | One fire has one temperature. Per-cook pit temps would let two cooks on a rig contradict each other, corrupting the stability score and Level 2's envelope. |
 | 7 | Free users' logging **does** train a model — strictly **their own** | Nobody's data trains anyone else's model. A free user's history is waiting for them on upgrade rather than starting from zero, and the privacy statement stays a single honest sentence. |
+| 8 | **Stale cooks (24 h idle) are excluded from thermal load**; auto-finished at 72 h | A forgotten cook would otherwise inflate its rig's load indefinitely and depress the predicted cadence for every later cook on that smoker. |
+| 9 | Cadence grouping uses `Cook.pitType`, the **snapshot** taken at start | The fallback ladder groups across a user's rigs by equipment type. Reading the live equipment record would let an edited or deleted rig silently rewrite that grouping for historical cooks. |
 
 ## Open questions
 

@@ -65,6 +65,7 @@ One session.
 |---|---|---|---|
 | `id` | `Guid` | ✅ | |
 | `equipmentId` | `Guid` | ✅ | FK → Equipment. |
+| `pitType` | `EquipmentType` | ✅ | **Snapshot** of the equipment's type at the moment the cook started. See below. |
 | `meatType` | `MeatType` | ✅ | Enum + `Other` escape hatch. `Other` cooks are excluded from cross-cook grouping. |
 | `meatTypeOther` | `string?` | | Free text, only when `meatType == Other`. |
 | `weightKg` | `double` | ✅ | Kilograms. **Pre-filled from the meat type**, adjustable. Displayed in lb per user preference. |
@@ -74,6 +75,16 @@ One session.
 | `ambientTempC` | `double?` | | At start; may be refined by later entries. |
 | `notes` | `string?` | | |
 | `rating` | `int?` | | **1–5, rating the result** — how the food turned out, not how well the cook was executed. Outcome is the useful analytics signal. |
+| `finishReason` | `CookFinishReason?` | | How the cook ended: `Manual \| AutoFinished`. Null while in progress. See §3.2.1. |
+| `lastActivityAt` | `DateTimeOffset` | ✅ | UTC. Latest of `startedAt` and any entry, fuel event or milestone on this cook. Drives the stale-cook rules. |
+
+**`pitType` is deliberately denormalized.** The type is already reachable through
+`equipmentId`, but equipment is mutable and deletable: a user who edits "Old
+Country Brazos" from Offset to Kettle, or deletes the rig entirely, would
+silently rewrite the history of every cook ever run on it. Since the fire model's
+fallback ladder groups by equipment type, and analytics compare cooks across
+rigs, that history has to be stable. The snapshot is written once at
+`startedAt` and never updated.
 
 **`weightKg` stays required, but is never a blocker.** Each `MeatType` carries a
 typical weight (brisket ~6 kg, pork butt ~4 kg, pork ribs ~1.5 kg) which
@@ -90,6 +101,48 @@ wrong time-per-kg on one cook.
 duration, time per kg, stall start/end/duration, pit temp stability score, fuel
 efficiency, anomaly flags. Stored in a separate `CookAnalytics` row keyed by
 cook ID so recomputation never rewrites user-entered data.
+
+#### 3.2.1 Cook lifecycle — forgotten cooks
+
+Cooks get abandoned. Someone pulls a brisket at midnight, eats, goes to bed, and
+never taps *Finish*. Left alone, that cook stays "in progress" forever, keeps
+inflating its rig's thermal load, and corrupts the fire prediction for every
+later cook on that smoker.
+
+Three rules, all driven by `lastActivityAt`:
+
+| Elapsed since last activity | State | Behaviour |
+|---|---|---|
+| < 24 h | **Active** | Normal. Counts toward the rig's thermal load. |
+| ≥ 24 h | **Stale** | Prompt the user: still cooking, or finish it? **Excluded from thermal load** from this point. |
+| ≥ 72 h | **Auto-finished** | `finishedAt` set, `finishReason = AutoFinished`. |
+
+**A stale cook stops counting toward load immediately, before auto-finish.** This
+goes beyond the literal rule and is worth stating plainly: without it, a cook
+forgotten on Saturday would still be inflating that rig's load when a new cook
+starts on Sunday, which is the exact failure the rules exist to prevent. Twenty-
+four idle hours on a cook is already strong evidence the fire is out.
+
+**`finishedAt` for an auto-finished cook is set to `lastActivityAt`, not to the
+72-hour mark.** The 72-hour timestamp is certainly wrong — the cook did not run
+for three days. The last activity is the best available lower bound, and
+`finishReason` records that it is an estimate rather than something the user
+asserted.
+
+Auto-finished cooks are therefore **excluded from duration and time-per-kg
+baselines**, since their end time is inferred. Their temperature entries, fuel
+events and milestones stay fully valid and continue to feed the fire model —
+only the duration-derived metrics are untrustworthy.
+
+The 24-hour prompt is a **local notification** with quick responses (*Still
+cooking* / *Finish it*), reusing the fire-check notification machinery. Where
+notification permission is denied it degrades to an in-app banner on next
+launch, consistent with `product-spec.md` §4.5.
+
+Both transitions are computed **on device**, so they work offline, and sync as
+ordinary edits under last-write-wins. Two devices auto-finishing the same cook
+converge on the same `finishedAt`, because both derive it from `lastActivityAt`
+rather than from the moment they noticed.
 
 ### 3.3 TempEntry — the meat
 
@@ -250,6 +303,7 @@ values are never renumbered.
 - `EventType`: Wrapped, Spritzed, Rested, Other
 - `TempSource`: Manual (Probe, Import reserved — §6)
 - `PhotoSubject`: TempEntry, PitTempEntry, FuelEvent, Event
+- `CookFinishReason`: Manual, AutoFinished
 - `PromptResponse`: AddedFuel, StillFine, Snoozed, Ignored, Dismissed
 - `MeatType`: proposed — Brisket, PorkButt, PorkRibs, BeefRibs, Chicken, Turkey,
   Pork Loin, Lamb, Sausage, Other. Argentine cuts to be added with the parrilla
@@ -353,6 +407,9 @@ Settled 2026-08-30.
 | 10 | **Pit temperature and ambient move to a rig-scoped `PitTempEntry`** | One fire has one temperature. Two cooks on a rig could otherwise record contradicting pit temps for the same instant, corrupting the stability score and Level 2's envelope. The logging screen still shows meat and pit together, so the split costs no taps. |
 | 11 | `weightKg` stays **required, pre-filled from meat type** | Weight feeds the whole rig's thermal load, so one unweighted cook would corrupt the fire prediction for everything sharing that fire. A seeded default means nobody is blocked. |
 | 12 | `viaNotification` **kept**; `Event` **keeps its original name** | The first makes Level 1's anti-circularity safeguard possible. The second reverts my rename back to your schema. |
+| 13 | `Cook.pitType` **snapshots the equipment type** at start | Equipment is mutable and deletable; without a snapshot, editing a rig would silently rewrite the history of every cook run on it, and the fire model groups by equipment type. |
+| 14 | Forgotten cooks: **prompt at 24 h idle, auto-finish at 72 h** | An abandoned cook otherwise stays "in progress" forever and inflates its rig's thermal load. A stale cook stops counting toward load at 24 h, not 72 h. |
+| 15 | Auto-finished cooks take `finishedAt = lastActivityAt` and are **excluded from duration baselines** | The 72-hour mark is certainly wrong; last activity is the best lower bound. Their entries stay valid for the fire model — only duration-derived metrics are untrustworthy. |
 
 ## Open questions
 
@@ -371,7 +428,13 @@ Settled 2026-08-30.
    meat temps. Stall detection survives that; the stability score and Level 2 do
    not. The UI needs to make logging a pit temp feel natural rather than
    optional, and the analytics need an honest "no pit data" state.
-5. **Nothing defines which cooks count as "active on a rig" for thermal load.** A
-   cook left unfinished for three days would keep inflating that rig's load and
-   corrupting predictions for later cooks. Needs a rule — an explicit finish, an
-   auto-finish after N hours, or a prompt.
+5. **`lastActivityAt` is denormalized and must be maintained.** Every write of a
+   temp entry, pit reading, fuel event or milestone has to update the parent
+   cook, and a missed update would make a live cook look stale. Deriving it with
+   a query instead would be correct by construction but costs a join on a path
+   the fire model hits constantly. Worth revisiting if it proves fragile.
+6. **A stale cook that resumes is not specified.** If a user answers "still
+   cooking" at hour 25, the cook returns to active — but its load was excluded
+   for those hours, and any fire prediction made in that window used a lower
+   figure. Probably fine; worth confirming the model does not need to
+   retroactively correct.
