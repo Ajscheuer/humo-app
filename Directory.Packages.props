@@ -22,7 +22,7 @@
 
   <!-- Deliberately not here yet, added by the slice that first needs them:
        LiveCharts2 and the notification plugin (slice 3 / slice 8, MAUI-side),
-       RevenueCat (slice 6), EF Core + Azure SQL provider (slice 5).
+       RevenueCat (slice 6), EF Core + Azure SQL provider (slice 5), Azure.Storage.Blobs (photos).
 
        FluentAssertions is deliberately absent despite being named in the plan:
        version 8 requires a paid licence for commercial use. Tests use xUnit's

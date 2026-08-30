@@ -65,15 +65,15 @@ One session.
 |---|---|---|---|
 | `id` | `Guid` | ✅ | |
 | `equipmentId` | `Guid` | ✅ | FK → Equipment. |
-| `meatType` | `MeatType` | ✅ | Enum + `Other` escape hatch — see open questions. |
+| `meatType` | `MeatType` | ✅ | Enum + `Other` escape hatch. `Other` cooks are excluded from cross-cook grouping. |
 | `meatTypeOther` | `string?` | | Free text, only when `meatType == Other`. |
 | `weightKg` | `double` | ✅ | Kilograms. Displayed in lb per user preference. |
-| `targetInternalTempC` | `double?` | | Nullable — see open questions (asado). |
+| `targetInternalTempC` | `double?` | | Optional: a parrilla cook working by feel has no target temp. |
 | `startedAt` | `DateTimeOffset` | ✅ | UTC. |
 | `finishedAt` | `DateTimeOffset?` | | Null = cook in progress. |
 | `ambientTempC` | `double?` | | At start; may be refined by later entries. |
 | `notes` | `string?` | | |
-| `rating` | `int?` | | Scale undefined — see open questions. |
+| `rating` | `int?` | | **1–5, rating the result** — how the food turned out, not how well the cook was executed. Outcome is the useful analytics signal. |
 
 **Derived, cached at sync (server-computed, read-only on client):** total
 duration, time per kg, stall start/end/duration, pit temp stability score, fuel
@@ -90,7 +90,13 @@ cook ID so recomputation never rewrites user-entered data.
 | `meatTempC` | `double` | ✅ | |
 | `pitTempC` | `double?` | | |
 | `note` | `string?` | | |
+| `ambientTempC` | `double?` | | Ambient at this moment, if the cook recorded it. |
 | `source` | `TempSource` | ✅ | `Manual` today; `Probe`/`Import` reserved — see §6. |
+
+`ambientTempC` is optional here as well as on `Cook`. Ambient changes over a
+14-hour cook, and fire model Level 2 wants it as a time-varying feature. Putting
+it on the entry the cook is already creating gives a time series for free, with
+no new entity, no extra interaction, and no location permission.
 
 `recordedAt` defaults to now but is **editable**, because cooks routinely log a
 reading a few minutes after taking it, and a wrong timestamp distorts both the
@@ -133,7 +139,35 @@ ambiguously next to domain events in the sync layer. Same shape as the brief.
 | `type` | `CookEventType` | ✅ | `Wrapped \| Spritzed \| Rested \| Other` |
 | `note` | `string?` | | |
 
-### 3.6 Supporting records (not in the original brief)
+### 3.6 Photo
+
+Photos ship in v1. A photo belongs to a cook, and may optionally be pinned to a
+moment within it — "here's the bark at the wrap" belongs on the timeline where it
+happened, not in an undifferentiated gallery.
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `id` | `Guid` | ✅ | |
+| `cookId` | `Guid` | ✅ | FK → Cook. Every photo belongs to a cook. |
+| `subjectId` | `Guid?` | | The TempEntry / FuelEvent / CookEvent it is pinned to. |
+| `subjectType` | `PhotoSubject?` | | `TempEntry \| FuelEvent \| CookEvent`. Null = cook-level. |
+| `capturedAt` | `DateTimeOffset` | ✅ | UTC. |
+| `localPath` | `string?` | ✅ local | **Local only**, never sent. Where the file is on device. |
+| `storageKey` | `string?` | | Blob name once uploaded. Null = not synced. |
+| `widthPx` / `heightPx` | `int` | ✅ | For layout without reading the file. |
+| `byteSize` | `long` | ✅ | Post-compression size. |
+| `caption` | `string?` | | User text. Note: user-authored, so never localized. |
+
+**Free users keep photos on device only; Pro users get them synced.** Sync is the
+part that actually costs money, so sync is the part that is paid. The client
+therefore treats photo upload as a **separate, resumable queue** from record
+sync — a failed 3 MB upload must never block a 200-byte temperature entry.
+
+Images are compressed on device before upload (long edge ~2048px, JPEG). Bytes
+go phone↔Blob Storage directly via SAS URLs; they never pass through the API,
+which owns authorization and metadata only.
+
+### 3.7 Supporting records (not in the original brief)
 
 - **`FireCheckPrompt`** — a scheduled or delivered fire-check notification and
   its response (`AddedFuel \| StillFine \| Snoozed \| Ignored`). The fire model
@@ -157,6 +191,8 @@ values are never renumbered.
 - `SizeClass`: Small, Medium, Large
 - `CookEventType`: Wrapped, Spritzed, Rested, Other
 - `TempSource`: Manual (Probe, Import reserved — §6)
+- `PhotoSubject`: TempEntry, FuelEvent, CookEvent
+- `PromptResponse`: AddedFuel, StillFine, Snoozed, Ignored, Dismissed
 - `MeatType`: proposed — Brisket, PorkButt, PorkRibs, BeefRibs, Chicken, Turkey,
   Pork Loin, Lamb, Sausage, Other. Argentine cuts to be added with the parrilla
   work; the enum is designed to grow.
@@ -203,9 +239,16 @@ Analytics and the fire model read only records where `deletedAt is null`.
   a new cursor.
 - **Idempotent:** a replayed batch produces the same state. Insert-by-`id`,
   LWW-by-`updatedAt`.
-- **Ordering-tolerant:** a child arriving before its parent (possible across
-  retries) is either rejected with a retryable error or held; it must never be
-  silently dropped. Decision pending — see open questions.
+- **Ordering:** records are ordered **parents before children within a batch**,
+  so the normal case never fails. A genuinely orphaned record — possible across
+  retries and partial batches — is **rejected with a retryable error**, and the
+  client re-sends it with its parent. It is never held server-side and never
+  silently dropped.
+
+  Holding orphans would mean a pending-records table, an expiry policy for
+  orphans whose parent never arrives, and a second state machine to reason
+  about. Accepting them would allow referentially broken rows that every query
+  and every analytic then has to defend against.
 - `accountId` is always taken from the token, never from the payload.
 
 ## 6. Designing for probe data (Level 3) now
@@ -234,44 +277,36 @@ round-trip cases (`225°F → °C → °F`). Display rounds; storage never does.
 
 ---
 
+## Decisions
+
+Settled 2026-08-30.
+
+| # | Decision | Rationale |
+|---|---|---|
+| 1 | `meatType` and `woodType` are **enums + `Other` free text** | Analytics must group and the UI must translate; free text does neither. `Other` cooks are excluded from grouping — the honest cost of the escape hatch. |
+| 2 | `rating` is **1–5 on the result** | Outcome is the useful analytics signal; self-assessed execution tracks how the cook felt. |
+| 3 | `targetInternalTempC` is **optional** | Parrilla cooks have no target temp. One field, one form; the form varies by equipment type, the schema does not. |
+| 4 | **Ambient moves onto `TempEntry`** as an optional field | Gives a time series for Level 2 with no new entity, no extra interaction, and no location permission. Wind stays unmodelled until Level 2 proves it needs it. |
+| 5 | **Photos ship in v1** — cook-level, optionally pinned to an entry; free = local, Pro = synced | Photos are the most engaging part of a cook log. Upload runs on its own resumable queue so a 3 MB image never blocks a 200-byte reading. |
+| 6 | Out-of-order arrival: **ordered within a batch, reject-and-retry across batches** | Holding orphans means a pending table and an expiry policy; accepting them allows referentially broken rows every query must defend against. |
+| 7 | Account deletion: **immediate soft-delete, hard purge at 30 days**, blobs included | See `architecture.md` §5.2. Deleted data contributes to no baseline or aggregate from the moment of the request. |
+| 8 | Free tier limits **visibility, not retention** | The server keeps everything, so upgrading reveals real history and real baselines rather than an empty screen. Requires an explicit privacy-policy statement. |
+| 9 | Device migrations are **sequential and versioned** | Users skip versions; v1→v5 runs 2, 3, 4, 5 in order. Every migration tested from every prior version. |
+
 ## Open questions
 
-1. **`meatType` and `woodType`: enum or free text?** Modelled above as enums
-   with an `Other` escape hatch, because analytics group by them and the UI is
-   bilingual — free text can be neither grouped nor translated. If you want free
-   text, analytics grouping and the Spanish UI both need a different answer.
-2. **`Cook.rating` scale is undefined.** 1–5 or 1–10, and rating *what* — the
-   food, or how well the cook was executed? They trend differently and one of
-   them is a useful analytics input while the other is mostly vanity.
-3. **`targetInternalTemp` modelled as nullable, against the brief.** The brief
-   lists it as required, but a parrilla cook has no target internal temp. Either
-   it is nullable (chosen here) or the parrilla equipment type gets a different
-   cook-creation flow. Needs your call.
-4. **`viaNotification` on FuelEvent is an addition.** Justified in §3.4 —
-   without it the fire model trains partly on its own predictions. Confirm or
-   remove.
-5. **Renaming `Event` → `CookEvent` is a deviation from the brief's schema.**
-   Called out so it is a decision, not a silent edit.
-6. **Out-of-order arrival policy is undecided.** Reject-and-retry is simpler;
-   hold-and-resolve is friendlier on a flaky connection. Pick one before the
-   sync slice.
-7. **Account deletion vs. append-only.** App stores require account deletion,
-   and append-only tombstones do not delete anything. We need an explicit purge
-   path, a stated retention period, and a decision on whether deleted-account
-   data contributes to anything (it should not).
-8. **Free-tier history limit interacts with this model.** If free users are
-   limited to N cooks, does the *server* keep the rest? If it does not, upgrading
-   to Pro produces an empty analytics view and permanently poorer baselines.
-   Recommendation in `product-spec.md` open question 2: retain, gate visibility.
-9. **`ambientTempC` is a single value on Cook, but ambient changes over a 14-hour
-   cook.** Fire model Level 2 wants ambient as a time-varying feature (and wind,
-   which is not modelled at all). Options: periodic ambient readings on
-   `TempEntry`, a separate `ConditionsEntry`, or fetching weather by location and
-   time. Each has a privacy or accuracy cost. Undecided.
-10. **No photo support anywhere in the model.** Not in the brief, but a BBQ
-    logging app without photos of the bark is a surprising omission and the
-    storage/sync design for binaries is very different from rows. Confirm it is
-    genuinely out of scope for v1.
-11. **SQLite migration strategy for the device database.** Users skip versions;
-    a migration path must handle v1 → v5 directly. Needs deciding before the
-    first post-launch schema change.
+1. **`viaNotification` on `FuelEvent` is an addition to your schema.** Justified
+   in §3.4 — without it the fire model partly trains on its own predictions —
+   but it is my invention, not your spec. Confirm or drop.
+2. **Renaming `Event` → `CookEvent` is a deviation from your schema.** Flagged so
+   it stays a decision rather than a silent edit.
+3. **Photo storage has no ceiling.** No per-account limit, no per-cook cap, and
+   no defined behaviour when a Pro subscription lapses with photos already
+   synced — do they stay, expire, or become read-only?
+4. **`subjectType`/`subjectId` on `Photo` is a loose polymorphic reference.** It
+   cannot be enforced by a foreign key, so integrity depends on application code.
+   A per-parent nullable column (`tempEntryId`, `fuelEventId`, `cookEventId`)
+   would be enforceable but wider. Worth revisiting when photos are implemented.
+5. **`weightKg` is required on `Cook`, but not every cook is weighed.** A cook
+   who does not weigh their meat currently cannot start a cook without inventing
+   a number, and time-per-kg is meaningless for them. Should it be optional?

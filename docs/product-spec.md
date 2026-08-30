@@ -68,9 +68,22 @@ the unit that the fire model learns against — a burn cadence learned on a
 
 ### 4.2 Start a cook
 
-Pick equipment, pick a meat type, enter weight and a target internal
-temperature, optionally record ambient temperature. The cook starts and the app
-moves into the **active cook screen**.
+Pick equipment, pick a meat type, enter weight, optionally a target internal
+temperature and ambient temperature. The cook starts and the app moves into the
+**active cook screen**.
+
+**Meat type is a closed enum with an "Other" free-text escape hatch.** Analytics
+group by meat type and the UI is bilingual, and free text can be neither grouped
+nor translated — "brisket", "Brisket" and "packer brisket" are three groups, and
+a Spanish user would see whatever an English user typed. Cooks logged as "Other"
+are excluded from cross-cook grouping, which is the honest cost of the escape
+hatch. The same applies to wood type.
+
+**Target internal temperature is optional.** A parrilla cook working by feel has
+no target temp, and forcing a number would put meaningless data in every asado
+cook. One nullable field and one cook-creation form; the form prompts for it
+prominently on smoker equipment types and omits it for parrilla, which is a UI
+decision rather than a schema fork.
 
 ### 4.3 During the cook (the screen that matters)
 
@@ -83,6 +96,12 @@ last fuel, next predicted fire check) and offers four actions:
 - **Log fuel** — see §4.4; must be ≤2 taps.
 - **Log event** — wrapped / spritzed / rested / other.
 - **Finish cook** — records `finishedAt`, prompts for a rating and notes.
+
+The rating is **1–5 stars on the result** — "how did it turn out?" — not on how
+well the cook was executed. Result is what makes the rating useful to analytics:
+correlating technique against outcome is the entire point, whereas self-assessed
+execution tracks how the cook *felt*, which is a much weaker signal. Five points
+is as much resolution as anyone applies honestly.
 
 ### 4.4 Fuel logging in ≤2 taps
 
@@ -108,7 +127,32 @@ The app schedules a local notification predicting when fuel will next be needed
 **Still fine**, **Snooze** — and every response is training data. "Added log"
 creates a `FuelEvent` without the user opening the app at all.
 
-### 4.6 After the cook
+**The feature degrades rather than disappears without notification permission.**
+The active cook screen always shows a live countdown to the next predicted fire
+check, whether or not notifications are allowed. Permission is requested **once,
+at the moment the first prediction is ready** — not at launch, where the request
+has no context and gets denied reflexively. If denied, Humo does not nag; the
+countdown carries the feature, and the setting stays reachable.
+
+**Framing: this is a reminder, not a safety device.** Store copy and in-app text
+describe fire checks as a prompt to go look at your fire, never as monitoring,
+supervision, or a safety guarantee. The distinction is stated once, in-app, when
+fire checks are first enabled, and again in the terms — not on every
+notification, where a repeated warning would be tuned out within a week and
+would bloat a message whose entire value is being glanceable.
+
+### 4.6 Photos
+
+Photos ship in v1. A photo belongs to a cook and can optionally be **pinned to a
+moment within it** — the bark at the wrap, the fire at 2am, the slice at the end
+— so the cook log reads as a timeline rather than an undifferentiated gallery.
+
+**Free users keep photos on device; Pro users get them synced and backed up.**
+Sync is the part that actually costs money, so sync is the part that is paid.
+The trade-off to watch: "your photos didn't sync" needs clear in-app language,
+or it reads as a bug rather than a tier boundary.
+
+### 4.7 After the cook
 
 The cook summary shows a temperature chart (meat and pit over time, with fuel
 events and milestones marked), computed statistics, and — for Pro users —
@@ -120,14 +164,48 @@ comparison against the user's own baseline for that meat type and equipment.
 |---|---|---|
 | Equipment profiles | ✅ unlimited | ✅ unlimited |
 | Logging a cook (temps, fuel, events) | ✅ | ✅ |
-| Cook history | ⚠️ limited — **policy TBD, see open questions** | ✅ unlimited |
+| Cook history | ⚠️ 5 most recent cooks | ✅ unlimited |
 | Per-cook chart and summary | ✅ | ✅ |
+| Photos | ✅ on device only | ✅ synced and backed up |
 | Cross-cook analytics (§6) | ❌ | ✅ |
 | Anomaly detection | ❌ | ✅ |
 | Fire model Level 1 (learned cadence) | ❌ | ✅ |
 | Fire model Level 2 (temp-informed) | ❌ | ✅ |
 | Probe integrations (Level 3, later) | ❌ | ✅ |
 | AI cook coach (later phase) | ❌ | ✅ |
+
+### 5.1 The free history limit
+
+Free users keep their **5 most recent cooks**. Older cooks stay **visible but
+locked** — listed, dated, and named, with their contents behind an upgrade
+prompt. They are never hidden and never appear deleted: an empty list reads as
+data loss, a locked list reads as an offer.
+
+**The server retains everything regardless of tier.** The limit gates
+*visibility*, not *retention*. A user who upgrades gets their real history and
+real anomaly baselines immediately, rather than paying for an empty analytics
+screen. The consequence is that Humo holds cook data a free user can no longer
+see, which **must be stated plainly in the privacy policy** — it is exactly the
+kind of thing users are right to be annoyed about discovering later.
+
+The number 5 lives as a **server-side policy value**, not a client constant, so
+changing it is configuration rather than an app release.
+
+### 5.2 Accounts and subscriptions
+
+**Subscribing requires an account.** The paywall prompts account creation before
+purchase. RevenueCat can attach an entitlement to an anonymous device ID, but
+that user loses their subscription on a new phone and is then owed a refund;
+requiring an account at the moment money changes hands avoids the whole class of
+problem and matches what users expect.
+
+Guest use is otherwise unrestricted — a user can log cooks indefinitely without
+an account, they simply cannot subscribe or sync.
+
+**When a guest creates or signs into an account, Humo asks once** whether to add
+their existing local cooks to that account, with "yes" preselected. It is not
+silent: a guest signing into an existing account on a borrowed or shared phone
+would otherwise absorb someone else's cooks into their history irreversibly.
 
 Subscriptions are sold through **RevenueCat**. Entitlements are **checked
 server-side** — the client may cache an entitlement state for offline use, but
@@ -159,9 +237,15 @@ device.
   **user's own baseline** for that (meat type, equipment) pair. Never against a
   global population baseline; the whole point is "unusual *for you*".
 
-Baselines need history to exist. A user with two cooks gets no anomaly
-detection, and the UI must say so plainly rather than showing a meaningless
-flag. Minimum sample size is an open question below.
+Baselines need history to exist. **Anomaly flags require at least 8 cooks** for
+the (meat type, equipment) pair being compared. Below that the UI says how many
+more cooks are needed and shows no flags at all — a false "this cook is unusual"
+alarm on a baseline of three is worse than silence, because it teaches the user
+to ignore the feature permanently.
+
+Eight is a judgement call, not a derived number: it is roughly where ±2σ stops
+being dominated by sampling noise, while still being reachable within a season
+for a monthly cook. It should be revisited against real data.
 
 ## 7. Localization
 
@@ -258,45 +342,36 @@ Terms marked *TODO: confirm* stay marked until you replace them. The
 
 ---
 
+## Decisions
+
+Settled 2026-08-30. Recorded so they are not silently relitigated; each can be
+reopened deliberately.
+
+| # | Decision | Rationale |
+|---|---|---|
+| 1 | Free tier = **5 most recent cooks**, visible but locked | Easy to explain and enforce; locked-but-visible converts where an empty list reads as a bug. Stored as a server-side policy value, so the number is configuration. |
+| 2 | **Retain all data server-side; gate visibility only** | Upgrading must reveal real history and real baselines, not an empty screen. Requires an explicit privacy-policy statement. |
+| 3 | Anomaly flags need **≥8 cooks** per (meat type, equipment) | ±2σ below that is sampling noise, and one false alarm permanently costs trust. Revisit against real data. |
+| 4 | `meatType` and `woodType` are **enums + "Other" free text** | Analytics must group and the UI must translate; free text does neither. Other-typed cooks are excluded from grouping. |
+| 5a | **An account is required to subscribe** | Device-bound entitlements strand users on a new phone and generate refunds. |
+| 5b | Guest → account **asks once, defaults to merge** | Silent merge would absorb someone else's cooks when signing into an existing account on a shared phone. |
+| 6 | `rating` is **1–5 stars on the result** | Outcome is the useful analytics signal; self-assessed execution tracks how the cook felt. |
+| 7 | `targetInternalTemp` is **optional for everyone** | One field, one form. Parrilla cooks have no target temp; the form varies, the schema does not. |
+| 8 | Notification denial **degrades to an in-app countdown**; permission asked once, in context | The feature must survive a reflexive denial at launch. |
+| 9 | Fire checks are framed as a **reminder, not a safety device** — stated once in-app and in the terms | Repeated warnings get tuned out and bloat a glanceable notification. |
+
 ## Open questions
 
-1. **Free tier limit is undefined.** "Limited cook history" needs a concrete
-   rule — last N cooks, a rolling time window, or unlimited logging with Pro
-   gating analytics only. You said you'd decide later; until then nothing in the
-   entitlement design hard-codes a number, and the limit must be expressed as a
-   server-side policy value rather than a client constant.
-2. **Does the free tier limit *display* or *retention*?** These are very
-   different. If the server deletes cooks beyond the free limit, a user who
-   later upgrades has no history to analyse and their anomaly baselines are
-   permanently poorer. Recommendation: retain everything server-side, gate
-   *visibility*. This has a privacy consequence (holding data users may think is
-   gone) that should be stated in the privacy policy.
-3. **Anomaly detection minimum sample size.** ±2σ against a baseline of three
-   cooks is noise. What is the minimum cook count per (meat type, equipment)
-   before flags appear — 5? 8? — and what does the UI show below that threshold?
-4. **Is `meatType` a free-text field or a closed enum?** The brief lists it as a
-   plain field, but analytics group by meat type and the UI must display it in
-   two languages. Free text cannot be localized or grouped reliably ("brisket",
-   "Brisket", "packer brisket", "tapa de asado" are four groups). Recommendation:
-   closed enum with localized display names plus an "other + free text" escape
-   hatch. Same question applies to `woodType`.
-5. **Guest mode and account upgrade.** You chose: prompt for Apple / Google /
-   email account at first launch, with anonymous device ID for users who decline.
-   Two things follow that need answers — (a) does a guest user get Pro at all
-   (RevenueCat can attach a subscription to an anonymous ID, but the user loses
-   it on device change), and (b) when a guest later creates an account, do we
-   merge their local cooks into the new account automatically, or ask?
-6. **Rating scale on `Cook.rating` is unspecified.** 1–5 stars? 1–10? What is it
-   rating — the food, or the cook's execution? These give different analytics.
-7. **Asado cooks may not have a target internal temp.** `Cook.targetInternalTemp`
-   is modelled as required, but a parrilla cook working by feel and time has no
-   target temp. Should it be optional, or does the parrilla equipment type
-   change the cook-creation form?
-8. **Notification permission is a hard dependency for the headline feature.** If
-   a user denies notification permission, the fire model's entire delivery
-   mechanism is gone. What does the app do — degrade to in-app-only reminders,
-   or re-prompt with an explanation?
-9. **App Store positioning of a "fire alert" feature.** Predicting when a fire
-   needs attention is adjacent to a safety claim. We should decide early whether
-   the copy is explicitly non-safety ("a reminder to check, not a safety
-   device") and where that disclaimer lives.
+1. **The Spanish glossary in §7.1 is entirely unreviewed.** Every term is still
+   marked `TODO: confirm`. The highest-risk entries are *the stall* (no settled
+   Spanish equivalent) and *brisket* (US and Argentine butchery cut differently,
+   so "tapa de asado" may not be the same meat at all). This is yours to correct.
+2. **Privacy policy and terms do not exist yet.** Decisions 2 and 9 both create
+   text that has to live in them, and both app stores require a privacy policy
+   before submission.
+3. **The paywall's timing and content are unspecified.** Decision 5a says an
+   account is required to subscribe, but not when a free user first meets the
+   paywall — at the 6th cook, on opening analytics, or on a trial expiry. This
+   shapes conversion more than the tier definition does.
+4. **No trial period is defined.** Free-with-limits and a time-limited trial of
+   Pro are different products; RevenueCat supports either.

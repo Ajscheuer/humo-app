@@ -25,7 +25,7 @@ open questions — decisions that are deliberately unresolved, not oversights.
 src/Humo.Shared    DTOs, enums, contracts, unit conversion  (references nothing)
 src/Humo.Core      ViewModels, services, repositories, fire predictor  (net9.0, no MAUI)
 src/Humo.App       Views, platform services, DI wiring  (MAUI, iOS + Android)
-src/Humo.Api       ASP.NET Core Minimal API
+src/Humo.Api       ASP.NET Core Minimal API  (Azure App Service + Azure SQL)
 tests/…            One test project per source project except Humo.App,
                    plus Humo.Conventions.Tests, which enforces CLAUDE.md
 ```
