@@ -1,0 +1,124 @@
+name: CI
+
+# Three jobs, split by what each platform can actually prove:
+#
+#   test     (Linux) — the 93 unit tests. Fast, and the only job that gates
+#                      every push.
+#   android  (Linux) — builds the MAUI app for Android. Deliberately NOT on the
+#                      macOS runner: Linux minutes bill at 1x and macOS at 10x,
+#                      and Android builds identically on both.
+#   ios      (macOS) — the only thing that genuinely needs a Mac. Apple ships the
+#                      iOS SDK for macOS only, so this is the sole job that can
+#                      compile Platforms/iOS and process Info.plist.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to the same branch cancels the run already in flight. Matters most
+# for the macOS job, which is the expensive one.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  test:
+    name: Tests (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Directory.Packages.props') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      # Humo.NoMaui.slnf excludes only the app project, so this runs the full
+      # test suite without needing the MAUI workload — which is the whole point
+      # of keeping ViewModels in Humo.Core.
+      - name: Test
+        run: dotnet test Humo.NoMaui.slnf --configuration Release
+
+  android:
+    name: Build app (Android)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-android-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Directory.Packages.props') }}
+          restore-keys: nuget-android-${{ runner.os }}-
+
+      - name: Install MAUI Android workload
+        run: dotnet workload install maui-android
+
+      # .NET 10 targets a newer Android API level than the runner image ships
+      # with, so the platform has to be fetched before the build.
+      - name: Install Android SDK dependencies
+        run: >
+          dotnet build src/Humo.App/Humo.App.csproj
+          -f net10.0-android
+          -t:InstallAndroidDependencies
+          -p:AcceptAndroidSDKLicenses=True
+
+      - name: Build
+        run: dotnet build src/Humo.App/Humo.App.csproj -f net10.0-android --configuration Release
+
+  ios:
+    name: Build app (iOS)
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-ios-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Directory.Packages.props') }}
+          restore-keys: nuget-ios-${{ runner.os }}-
+
+      # Recorded in the log on purpose: MAUI's minimum Xcode moves with each
+      # release, and "which Xcode did this run use?" is the first question when
+      # an iOS build starts failing for no apparent reason.
+      - name: Report Xcode version
+        run: xcodebuild -version
+
+      - name: Install MAUI workload
+        run: dotnet workload install maui
+
+      # Built for the simulator so no signing identity or provisioning profile
+      # is needed. This still compiles Platforms/iOS and processes Info.plist,
+      # which is everything CI can usefully check without Apple credentials.
+      - name: Build
+        run: >
+          dotnet build src/Humo.App/Humo.App.csproj
+          -f net10.0-ios
+          -p:RuntimeIdentifier=iossimulator-arm64
+          --configuration Release

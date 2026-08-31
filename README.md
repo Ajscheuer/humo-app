@@ -82,6 +82,26 @@ test suite.
   working as intended: pin the offending package forward in
   `Directory.Packages.props` rather than suppressing it.
 
+## Continuous integration
+
+`.github/workflows/ci.yml` runs on every PR to `main`, on pushes to `main`, and
+on demand:
+
+| Job | Runner | Proves |
+|---|---|---|
+| Tests | Linux | The full test suite, no MAUI workload needed |
+| Build app (Android) | Linux | `Humo.App` compiles for `net10.0-android` |
+| Build app (iOS) | macOS | `Humo.App` compiles for `net10.0-ios`, simulator target |
+
+Android builds on Linux rather than macOS on purpose: it builds identically on
+both, and on a private repository macOS minutes bill at 10x. The iOS job is the
+only one that genuinely needs a Mac, since Apple ships the iOS SDK for macOS
+only.
+
+The iOS job targets the simulator, so it needs no signing identity or
+provisioning profile. It still compiles `Platforms/iOS` and processes
+`Info.plist`, which is the part worth checking automatically.
+
 ## Localization
 
 All user-facing strings live in

@@ -358,6 +358,14 @@ Settled 2026-08-30. Recorded so they are not silently relitigated.
    separate upload queue are specified, but not the retry policy, the per-account
    storage ceiling, or what happens when a Pro subscription lapses with photos
    already synced.
-6. **No CI/CD pipeline is defined.** Build, migration application, and deployment
-   to App Service all need somewhere to run — GitHub Actions being the obvious
-   candidate given the repository.
+6. **CI exists; CD does not.** `.github/workflows/ci.yml` runs the tests and
+   builds the app for Android (Linux) and iOS (macOS) on every PR to `main`.
+   Nothing yet deploys: publishing the API to App Service, applying EF Core
+   migrations on deploy, and distributing app builds to TestFlight or Play
+   internal testing are all still unbuilt, and each needs credentials stored as
+   repository secrets.
+7. **The iOS CI job builds for the simulator only.** That compiles
+   `Platforms/iOS` and processes `Info.plist` — enough to catch the class of
+   defect that the Android build caught — but it does not sign, archive, or
+   prove the app runs on a device. Device builds need an Apple Developer
+   account and certificates in secrets.
