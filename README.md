@@ -131,6 +131,21 @@ The iOS job targets the simulator, so it needs no signing identity or
 provisioning profile. It still compiles `Platforms/iOS` and processes
 `Info.plist`, which is the part worth checking automatically.
 
+### Automated PR review
+
+`.github/workflows/claude-review.yml` reviews every PR against `CLAUDE.md` and
+`/docs`, then approves, requests changes, or comments. It requires an
+**`ANTHROPIC_API_KEY` repository secret**; without it the job fails and the
+review simply does not happen — CI is unaffected.
+
+The reviewer is a fresh Claude that sees only the diff. That independence is the
+point: a model reviewing work it just wrote re-checks its own assumptions with
+the same blind spots that produced them, so a self-review is close to worthless
+as a quality gate.
+
+Treat its approval as one signal, not a merge authorization. It reviews a diff;
+it does not run the app.
+
 ## Localization
 
 All user-facing strings live in

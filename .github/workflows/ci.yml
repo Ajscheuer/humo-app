@@ -89,9 +89,13 @@ jobs:
 
   ios:
     name: Build app (iOS)
-    # macos-26, not macos-15: .NET 10's iOS workload requires Xcode 26.6, and the
-    # macos-15 image tops out at Xcode 16.4. This is a hard toolchain floor, not
-    # a preference — the build refuses to run on an older Xcode.
+    # macos-26, not macos-15: the macos-15 image's Xcode is too old for .NET 10's
+    # iOS workload. The macos-26 image ships Xcode 26.x, which builds fine.
+    #
+    # An earlier comment here claimed 26.6 was a hard floor. That was wrong: it
+    # came from a stub Xcode_26.6.0.app that this job used to select, which
+    # reported a version it could not actually build with. The image's real
+    # Xcodes are 26.0 through 26.2 and they work.
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
