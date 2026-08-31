@@ -36,7 +36,12 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Pin the model instead of taking the action's default, so the review
+          # does not silently change behaviour when that default moves. The
+          # default at the time of writing was claude-opus-5[1m], the
+          # 1M-context variant.
           claude_args: >-
+            --model claude-opus-5
             --allowedTools "Read,Grep,Glob,Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr review:*),Bash(git diff:*),Bash(git log:*)"
           prompt: |
             Review this pull request as a careful senior engineer on the Humo
