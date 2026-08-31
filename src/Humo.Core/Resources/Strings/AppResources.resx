@@ -120,4 +120,103 @@
   <data name="Unit_Pounds_Short" xml:space="preserve">
     <value>lb</value>
   </data>
+  <data name="StartCook_Title" xml:space="preserve">
+    <value>Start a cook</value>
+  </data>
+  <data name="StartCook_MeatType" xml:space="preserve">
+    <value>What are you cooking?</value>
+  </data>
+  <data name="StartCook_Weight" xml:space="preserve">
+    <value>Weight</value>
+  </data>
+  <data name="StartCook_TargetTemp" xml:space="preserve">
+    <value>Target internal temperature</value>
+  </data>
+  <data name="StartCook_Optional" xml:space="preserve">
+    <value>Optional</value>
+    <comment>Hint shown beside fields that may be left blank.</comment>
+  </data>
+  <data name="StartCook_Start" xml:space="preserve">
+    <value>Start cook</value>
+  </data>
+  <data name="ActiveCook_Elapsed" xml:space="preserve">
+    <value>Elapsed</value>
+    <comment>Label above the running cook timer.</comment>
+  </data>
+  <data name="ActiveCook_LastMeatTemp" xml:space="preserve">
+    <value>Meat</value>
+    <comment>Label for the most recent internal temperature.</comment>
+  </data>
+  <data name="ActiveCook_LastPitTemp" xml:space="preserve">
+    <value>Pit</value>
+    <comment>Label for the most recent cook chamber temperature.</comment>
+  </data>
+  <data name="ActiveCook_NoReadings" xml:space="preserve">
+    <value>No readings yet</value>
+  </data>
+  <data name="ActiveCook_LogTemp" xml:space="preserve">
+    <value>Log temp</value>
+    <comment>Button on the active cook screen. Short: it sits under a thumb.</comment>
+  </data>
+  <data name="ActiveCook_Finish" xml:space="preserve">
+    <value>Finish cook</value>
+  </data>
+  <data name="ActiveCook_NoActiveCook" xml:space="preserve">
+    <value>No cook in progress</value>
+  </data>
+  <data name="LogTemp_Title" xml:space="preserve">
+    <value>Log a temperature</value>
+  </data>
+  <data name="LogTemp_MeatTemp" xml:space="preserve">
+    <value>Meat temperature</value>
+  </data>
+  <data name="LogTemp_PitTemp" xml:space="preserve">
+    <value>Pit temperature</value>
+  </data>
+  <data name="LogTemp_RecordedAt" xml:space="preserve">
+    <value>Taken at</value>
+    <comment>Editable: cooks often log a reading minutes after taking it.</comment>
+  </data>
+  <data name="LogTemp_Note" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="Cook_Finished" xml:space="preserve">
+    <value>Finished</value>
+  </data>
+  <data name="Cook_Rating" xml:space="preserve">
+    <value>How did it turn out?</value>
+    <comment>Rates the result, not how well the cook was run.</comment>
+  </data>
+  <data name="MeatType_Brisket" xml:space="preserve">
+    <value>Brisket</value>
+    <comment>Kept in English per the glossary; the Argentine cut differs.</comment>
+  </data>
+  <data name="MeatType_PorkButt" xml:space="preserve">
+    <value>Pork butt</value>
+  </data>
+  <data name="MeatType_PorkRibs" xml:space="preserve">
+    <value>Pork ribs</value>
+  </data>
+  <data name="MeatType_BeefRibs" xml:space="preserve">
+    <value>Beef ribs</value>
+  </data>
+  <data name="MeatType_Chicken" xml:space="preserve">
+    <value>Chicken</value>
+  </data>
+  <data name="MeatType_Turkey" xml:space="preserve">
+    <value>Turkey</value>
+  </data>
+  <data name="MeatType_PorkLoin" xml:space="preserve">
+    <value>Pork loin</value>
+  </data>
+  <data name="MeatType_Lamb" xml:space="preserve">
+    <value>Lamb</value>
+  </data>
+  <data name="MeatType_Sausage" xml:space="preserve">
+    <value>Sausage</value>
+    <comment>TODO: confirm - 'chorizo' is the asado default; 'salchicha' is generic.</comment>
+  </data>
+  <data name="MeatType_Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
 </root>

@@ -5,8 +5,15 @@
        xmlns:views="clr-namespace:Humo.App.Views"
        x:Class="Humo.App.AppShell">
 
-    <ShellContent Title="{loc:Translate App_Name}"
-                  ContentTemplate="{DataTemplate views:MainPage}"
-                  Route="main" />
+    <!-- The cook screen is the app's home: opening Humo mid-cook must land on
+         the thing that is happening, not on a menu. -->
+    <TabBar>
+        <ShellContent Title="{loc:Translate App_Name}"
+                      ContentTemplate="{DataTemplate views:ActiveCookPage}"
+                      Route="activecook" />
+        <ShellContent Title="{loc:Translate Settings_Title}"
+                      ContentTemplate="{DataTemplate views:MainPage}"
+                      Route="settings" />
+    </TabBar>
 
 </Shell>

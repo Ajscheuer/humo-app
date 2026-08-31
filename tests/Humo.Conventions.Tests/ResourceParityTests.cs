@@ -28,6 +28,10 @@ public class ResourceParityTests
         AppStrings.Unit_Fahrenheit_Short,
         AppStrings.Unit_Kilograms_Short,
         AppStrings.Unit_Pounds_Short,
+        // Spanish-speaking barbecue borrows the English cut name; "pecho" is the
+        // anatomical word, not what a parrillero calls the cut. See the glossary
+        // in docs/product-spec.md §7.1.
+        AppStrings.MeatType_Brisket,
     ];
 
     [Fact]

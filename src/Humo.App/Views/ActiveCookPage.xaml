@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:behaviors="clr-namespace:Humo.App.Behaviors"
+             xmlns:conv="clr-namespace:Humo.App.Converters"
+             xmlns:loc="clr-namespace:Humo.App.Localization"
+             xmlns:vm="clr-namespace:Humo.Core.ViewModels;assembly=Humo.Core"
+             x:Class="Humo.App.Views.ActiveCookPage"
+             x:DataType="vm:ActiveCookViewModel"
+             Title="{loc:Translate App_Name}">
+
+    <!-- The app's centre of gravity. Usable one-handed, outdoors, at 3am, with
+         cold hands: what is happening now, and the two actions that matter. -->
+
+    <ContentPage.Behaviors>
+        <!-- Reload on every appearance, so coming back from starting a cook or
+             from settings shows the current state rather than a stale screen. -->
+        <behaviors:AppearingCommandBehavior Command="{Binding LoadCommand}" />
+    </ContentPage.Behaviors>
+
+    <ContentPage.Resources>
+        <conv:InvertedBoolConverter x:Key="Not" />
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="20">
+
+            <!-- Empty state: no cook running, or the last one just finished. -->
+            <VerticalStackLayout Spacing="16"
+                                 IsVisible="{Binding HasActiveCook, Converter={StaticResource Not}}">
+                <Label Text="{loc:Translate ActiveCook_NoActiveCook}"
+                       IsVisible="{Binding IsFinished, Converter={StaticResource Not}}" />
+                <Label Text="{loc:Translate Cook_Finished}"
+                       FontSize="22"
+                       FontAttributes="Bold"
+                       IsVisible="{Binding IsFinished}" />
+                <Button Text="{loc:Translate StartCook_Title}"
+                        Command="{Binding StartANewCookCommand}" />
+            </VerticalStackLayout>
+
+            <!-- The two numbers a cook actually looks at, as large as they go. -->
+            <Grid ColumnDefinitions="*,*"
+                  ColumnSpacing="16"
+                  IsVisible="{Binding IsCookLoaded}">
+                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                    <Label Text="{loc:Translate ActiveCook_Elapsed}" />
+                    <Label Text="{Binding ElapsedDisplay}"
+                           FontSize="40"
+                           FontAttributes="Bold" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                    <Label Text="{loc:Translate ActiveCook_LastMeatTemp}" />
+                    <Label FontSize="40" FontAttributes="Bold">
+                        <Label.Text>
+                            <MultiBinding StringFormat="{}{0:0.#}{1}">
+                                <Binding Path="LastMeatTemp" />
+                                <Binding Path="TemperatureUnitSymbol" />
+                            </MultiBinding>
+                        </Label.Text>
+                    </Label>
+                    <Label Text="{loc:Translate ActiveCook_NoReadings}"
+                           IsVisible="{Binding HasReadings, Converter={StaticResource Not}}" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- The logging sheet, inline rather than behind a tap. -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding HasActiveCook}">
+
+                <Label Text="{loc:Translate LogTemp_Title}"
+                       FontAttributes="Bold" />
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <VerticalStackLayout Grid.Column="0" Spacing="4">
+                        <Label Text="{loc:Translate LogTemp_MeatTemp}" />
+                        <Entry Text="{Binding MeatTempInput}" Keyboard="Numeric" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="4">
+                        <Label Text="{loc:Translate LogTemp_PitTemp}" />
+                        <Entry Text="{Binding PitTempInput}"
+                               Keyboard="Numeric"
+                               Placeholder="{loc:Translate StartCook_Optional}" />
+                    </VerticalStackLayout>
+                </Grid>
+
+                <Entry Text="{Binding NoteInput}"
+                       Placeholder="{loc:Translate LogTemp_Note}" />
+
+                <!-- Off means "now", which is the common case and takes no taps.
+                     On reveals the pickers, because readings do get logged late. -->
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <Label Grid.Column="0"
+                           Text="{loc:Translate LogTemp_RecordedAt}"
+                           VerticalOptions="Center" />
+                    <Switch Grid.Column="1"
+                            IsToggled="{Binding UseCustomTime}"
+                            VerticalOptions="Center" />
+                </Grid>
+                <Grid ColumnDefinitions="*,*"
+                      ColumnSpacing="12"
+                      IsVisible="{Binding UseCustomTime}">
+                    <DatePicker Grid.Column="0" Date="{Binding RecordedDate}" />
+                    <TimePicker Grid.Column="1" Time="{Binding RecordedTime}" />
+                </Grid>
+
+                <Button Text="{loc:Translate ActiveCook_LogTemp}"
+                        Command="{Binding LogTemperatureCommand}" />
+            </VerticalStackLayout>
+
+            <!-- The story of the cook so far, oldest first. -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding HasReadings}">
+                <CollectionView ItemsSource="{Binding Entries}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:TempEntryDisplay">
+                            <Grid ColumnDefinitions="Auto,Auto,*"
+                                  ColumnSpacing="12"
+                                  Padding="0,6">
+                                <Label Grid.Column="0"
+                                       Text="{Binding RecordedAtLocal, StringFormat='{0:t}'}" />
+                                <Label Grid.Column="1"
+                                       Text="{Binding MeatTemp, StringFormat='{0:0.#}'}"
+                                       FontAttributes="Bold" />
+                                <Label Grid.Column="2"
+                                       Text="{Binding Note}"
+                                       LineBreakMode="TailTruncation" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+
+            <Button Text="{loc:Translate ActiveCook_Finish}"
+                    Command="{Binding FinishCommand}"
+                    IsVisible="{Binding HasActiveCook}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
