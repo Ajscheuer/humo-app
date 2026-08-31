@@ -12,7 +12,7 @@ predictor in `fire-model.md`; testing in `testing.md`.
 
 ```
 ┌─────────────────────────────────────────┐
-│  Humo.App  (.NET MAUI, net9.0)          │
+│  Humo.App  (.NET MAUI, net10.0)         │
 │  ┌───────────┐  ┌──────────┐            │
 │  │ Views     │◄─┤ ViewModels│           │   iOS + Android
 │  │ (XAML)    │  └─────┬─────┘           │
@@ -306,7 +306,7 @@ test, it belongs in `Humo.Core` behind an interface.
 ```
 /docs
 /src
-  Humo.App/            MAUI, net9.0-ios;net9.0-android
+  Humo.App/            MAUI, net10.0-android (+ net10.0-ios off Linux)
   Humo.Core/           ViewModels, services, repositories, fire predictor
   Humo.Api/            ASP.NET Core Minimal API
   Humo.Shared/         DTOs, enums, contracts, conversions
@@ -352,7 +352,7 @@ Settled 2026-08-30. Recorded so they are not silently relitigated.
    verification — **spike this before the fire model slice**, not during it. If
    background responses cannot reliably write data, the whole interaction design
    changes.
-4. **LiveCharts2 on MAUI net9.0** — version, licensing, and iOS/Android
+4. **LiveCharts2 on MAUI net10.0** — version, licensing, and iOS/Android
    rendering behaviour need verification before the charts slice.
 5. **Photo upload retry and storage cost are unmodelled.** SAS URLs and a
    separate upload queue are specified, but not the retry policy, the per-account

@@ -23,37 +23,38 @@ open questions — decisions that are deliberately unresolved, not oversights.
 
 ```
 src/Humo.Shared    DTOs, enums, contracts, unit conversion  (references nothing)
-src/Humo.Core      ViewModels, services, repositories, fire predictor  (net9.0, no MAUI)
+src/Humo.Core      ViewModels, services, repositories, fire predictor  (net10.0, no MAUI)
 src/Humo.App       Views, platform services, DI wiring  (MAUI, iOS + Android)
 src/Humo.Api       ASP.NET Core Minimal API  (Azure App Service + Azure SQL)
 tests/…            One test project per source project except Humo.App,
                    plus Humo.Conventions.Tests, which enforces CLAUDE.md
 ```
 
-`Humo.Core` targets plain `net9.0` and must never reference `Microsoft.Maui.*`.
+`Humo.Core` targets plain `net10.0` and must never reference `Microsoft.Maui.*`.
 That is what lets every ViewModel and service be unit-tested with `dotnet test`
 on any machine, with no workload and no device. Platform capabilities go behind
 interfaces declared in `Humo.Core` and implemented in `Humo.App`.
 
 ## Prerequisites
 
-- .NET SDK 9.0
+- .NET SDK 10.0 (pinned in `global.json`)
 - For the app: `dotnet workload install maui-android` (or `maui` on macOS), plus
   a JDK and the Android SDK. `dotnet build src/Humo.App -t:InstallAndroidDependencies
   -p:AcceptAndroidSDKLicenses=True` installs the Android SDK if you don't have
   Android Studio.
 
-`Humo.App` targets `net9.0-android` everywhere, and adds `net9.0-ios` **only on
-macOS and Windows**. NuGet restore evaluates every target framework listed, so an
-unconditional iOS target would break restore on Linux even when building Android.
-Building and running the iOS target still requires a Mac.
+`Humo.App` targets `net10.0-android` everywhere, and adds `net10.0-ios`
+**everywhere except Linux**. NuGet restore evaluates every target framework
+listed, so an unconditional iOS target breaks restore on Linux even when building
+Android — this is the same condition the .NET 10 MAUI template uses. Building and
+running the iOS target requires a Mac.
 
 ## Build and test
 
 ```bash
 dotnet test                      # everything, needs the MAUI workload
 dotnet test Humo.NoMaui.slnf     # the same tests, no workload required
-dotnet build src/Humo.App -f net9.0-android
+dotnet build src/Humo.App -f net10.0-android
 dotnet run --project src/Humo.Api
 ```
 
@@ -73,6 +74,13 @@ test suite.
 - **`CommonUtilities.Helpers.UserName must have a valid value`** — the Android SDK
   installer needs a username; export `USER` before running it. Affects bare
   containers, not normal dev machines.
+- **`XA5207: Could not find android.jar for API level 36`** — run the
+  `InstallAndroidDependencies` command above; .NET 10 targets a newer Android API
+  level than .NET 9 did.
+- **`NU1903: known high severity vulnerability`** — .NET 10 reports NuGet audit
+  findings, and `TreatWarningsAsErrors` turns them into build failures. That is
+  working as intended: pin the offending package forward in
+  `Directory.Packages.props` rather than suppressing it.
 
 ## Localization
 

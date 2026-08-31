@@ -7,11 +7,11 @@
 
          The iOS target framework is added only on hosts that can build it. NuGet
          restore evaluates every TargetFramework listed, so an unconditional
-         net9.0-ios entry fails restore on Linux — including CI and any Linux dev
-         machine — even when the build only asks for Android. Conditioning it
-         keeps `dotnet build -f net9.0-android` working everywhere. -->
-    <TargetFrameworks>net9.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('osx')) or $([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-ios</TargetFrameworks>
+         net10.0-ios entry fails restore on Linux, including CI and any Linux dev
+         machine, even when the build only asks for Android. This condition is
+         the same one the .NET 10 MAUI template now uses. -->
+    <TargetFrameworks>net10.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">$(TargetFrameworks);net10.0-ios</TargetFrameworks>
 
     <OutputType>Exe</OutputType>
     <RootNamespace>Humo.App</RootNamespace>
@@ -24,7 +24,7 @@
     <ApplicationDisplayVersion>0.1</ApplicationDisplayVersion>
     <ApplicationVersion>1</ApplicationVersion>
 
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
   </PropertyGroup>
 

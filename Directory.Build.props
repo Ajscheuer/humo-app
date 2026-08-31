@@ -22,7 +22,7 @@
        like a code error rather than the restore error it is. Keep this in step
        with the installed workload. -->
   <PropertyGroup>
-    <MauiVersion>9.0.120</MauiVersion>
+    <MauiVersion>10.0.20</MauiVersion>
   </PropertyGroup>
 
 </Project>
