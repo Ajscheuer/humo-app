@@ -107,17 +107,48 @@ jobs:
           key: nuget-ios-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Directory.Packages.props') }}
           restore-keys: nuget-ios-${{ runner.os }}-
 
-      # Runner images ship several Xcodes and the default selection is not
-      # always the newest. Select the newest explicitly, and log what was
-      # available: "which Xcode did this run use?" is the first question when an
-      # iOS build starts failing for no apparent reason, and the answer is what
-      # made the first red run here diagnosable in one read.
-      - name: Select newest Xcode
+      # Pick an Xcode by capability, not by version number. Two things have to
+      # be true and neither is implied by the other:
+      #
+      #   1. New enough for the iOS workload (.NET 10 requires Xcode 26.6+).
+      #   2. Carries the macOS platform SDK — actool, the asset catalog
+      #      compiler, runs as a macOS tool and fails with "unable to find
+      #      utility actool" without it.
+      #
+      # Runner images ship several Xcodes and not all are complete, so simply
+      # taking the highest version number selects a broken toolchain. Walk them
+      # newest-first and take the first one that actually has the macOS SDK.
+      - name: Select a usable Xcode
         run: |
-          ls -d /Applications/Xcode*.app || true
-          latest="$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)"
-          if [ -n "$latest" ]; then sudo xcode-select -s "$latest"; fi
+          echo "Available Xcode installs:"
+          for app in /Applications/Xcode*.app; do
+            [ -e "$app" ] || continue
+            if [ -d "$app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk" ]; then
+              echo "  $app (has macOS SDK)"
+            else
+              echo "  $app (NO macOS SDK)"
+            fi
+          done
+
+          selected=""
+          for app in $(ls -d /Applications/Xcode*.app 2>/dev/null | sort -Vr); do
+            if [ -d "$app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk" ]; then
+              selected="$app"
+              break
+            fi
+          done
+
+          if [ -z "$selected" ]; then
+            echo "::error::No Xcode on this runner has the macOS platform SDK, which actool requires."
+            exit 1
+          fi
+
+          echo "Selecting $selected"
+          sudo xcode-select -s "$selected"
           xcodebuild -version
+
+          # Fail here, with a clear message, rather than deep inside actool.
+          xcrun --find actool
 
       - name: Install MAUI workload
         run: dotnet workload install maui
