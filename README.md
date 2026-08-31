@@ -104,8 +104,10 @@ test suite.
   sudo xcodebuild -runFirstLaunch
   ```
 
-  **.NET 10's iOS workload requires Xcode 26.6 or newer** and refuses to build
-  on anything older, so check `xcodebuild -version` before chasing other causes.
+  **.NET 10's iOS workload needs a recent Xcode**, but check what you have
+  before chasing a version theory: Xcode 26.0–26.2 build this project fine on
+  CI. An earlier note here claimed a hard 26.6 floor; that was wrong, and came
+  from a stub Xcode install that reported a version it could not build with.
 - **`xcrun: unable to find utility "actool"` / `"ibtool"`** — the selected Xcode
   is missing its macOS platform SDK or its component tools. Same family as the
   problem above: the Xcode is incomplete or is really the Command Line Tools.
