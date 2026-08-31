@@ -76,7 +76,7 @@ dotnet run --project src/Humo.Api
 CI and development machines without the MAUI workload can still run the full
 test suite.
 
-### If the Android build misbehaves
+### If the build misbehaves
 
 - **`type or namespace 'Microsoft.Maui' not found`** — the `Microsoft.Maui.Controls`
   package reference is missing. `UseMaui=true` does *not* add it implicitly, and
@@ -95,6 +95,21 @@ test suite.
   findings, and `TreatWarningsAsErrors` turns them into build failures. That is
   working as intended: pin the offending package forward in
   `Directory.Packages.props` rather than suppressing it.
+- **`A valid Xcode installation was not found at '/Library/Developer/CommandLineTools'`**
+  — `xcode-select` is pointing at the Command Line Tools, which have compilers
+  but none of the iOS platform tooling. Point it at a full Xcode:
+
+  ```bash
+  sudo xcode-select -s /Applications/Xcode.app
+  sudo xcodebuild -runFirstLaunch
+  ```
+
+  **.NET 10's iOS workload requires Xcode 26.6 or newer** and refuses to build
+  on anything older, so check `xcodebuild -version` before chasing other causes.
+- **`xcrun: unable to find utility "actool"` / `"ibtool"`** — the selected Xcode
+  is missing its macOS platform SDK or its component tools. Same family as the
+  problem above: the Xcode is incomplete or is really the Command Line Tools.
+  `sudo xcodebuild -runFirstLaunch` installs the missing components.
 
 ## Continuous integration
 
