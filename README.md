@@ -42,10 +42,20 @@ interfaces declared in `Humo.Core` and implemented in `Humo.App`.
   installed is used. Pin a *specific* build there only with a reason: naming the
   exact SDK from one machine locks every other machine out, even ones with a
   perfectly good newer .NET 10.
-- For the app: `dotnet workload install maui-android` (or `maui` on macOS), plus
-  a JDK and the Android SDK. `dotnet build src/Humo.App -t:InstallAndroidDependencies
-  -p:AcceptAndroidSDKLicenses=True` installs the Android SDK if you don't have
-  Android Studio.
+- For the app:
+  - **macOS:** `sudo dotnet workload install maui` — `sudo` because .NET usually
+    lives in `/usr/local/share/dotnet`, which is not user-writable.
+  - **Linux:** `dotnet workload install maui-android` (there is no iOS workload
+    for Linux, and none is needed — see the target framework note below).
+  - Both need a JDK and the Android SDK. If you don't have Android Studio,
+    `dotnet build src/Humo.App -t:InstallAndroidDependencies -p:AcceptAndroidSDKLicenses=True`
+    fetches the SDK.
+
+  **On macOS you need the Android workload even to build iOS.** NuGet restore
+  evaluates every target framework the project lists, not just the one passed to
+  `-f`, so `dotnet build -f net10.0-ios` fails with `NETSDK1147: maui-android`
+  until the full `maui` workload is installed. Installing `maui` rather than
+  `maui-ios` covers it.
 
 `Humo.App` targets `net10.0-android` everywhere, and adds `net10.0-ios`
 **everywhere except Linux**. NuGet restore evaluates every target framework
