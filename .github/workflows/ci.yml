@@ -107,58 +107,32 @@ jobs:
           key: nuget-ios-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Directory.Packages.props') }}
           restore-keys: nuget-ios-${{ runner.os }}-
 
-      # Pick an Xcode by capability, not by version number. Two things have to
-      # be true and neither is implied by the other:
+      # Use the Xcode the runner image already selected, and only report it.
       #
-      #   1. New enough for the iOS workload (.NET 10 requires Xcode 26.6+).
-      #   2. Carries the macOS platform SDK — actool, the asset catalog
-      #      compiler, runs as a macOS tool and fails with "unable to find
-      #      utility actool" without it.
+      # Earlier revisions of this job picked the highest-numbered Xcode in
+      # /Applications. That was wrong: the image provisions one Xcode properly
+      # and ships others that are incomplete, so "newest" replaced a working
+      # toolchain with a broken one. Three separate tools (actool, ibtool,
+      # install_name_tool) went missing one after another as a result.
       #
-      # Runner images ship several Xcodes and not all are complete, so simply
-      # taking the highest version number selects a broken toolchain. Walk them
-      # newest-first and take the first one that actually has the macOS SDK.
-      - name: Select a usable Xcode
+      # The assertions below use the SDK-qualified form the build itself uses
+      # (`xcrun -sdk macosx --find`). A plain `xcrun --find` succeeds even when
+      # the SDK-qualified lookup fails, so checking the plain form gave a false
+      # all-clear.
+      - name: Report and verify Xcode
         run: |
-          echo "Available Xcode installs:"
-          for app in /Applications/Xcode*.app; do
-            [ -e "$app" ] || continue
-            if [ -d "$app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk" ]; then
-              echo "  $app (has macOS SDK)"
-            else
-              echo "  $app (NO macOS SDK)"
-            fi
-          done
-
-          selected=""
-          for app in $(ls -d /Applications/Xcode*.app 2>/dev/null | sort -Vr); do
-            if [ -d "$app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk" ]; then
-              selected="$app"
-              break
-            fi
-          done
-
-          if [ -z "$selected" ]; then
-            echo "::error::No Xcode on this runner has the macOS platform SDK, which actool requires."
-            exit 1
-          fi
-
-          echo "Selecting $selected"
-          sudo xcode-select -s "$selected"
-
-          # Installs component tools the image may have left out. Without this,
-          # a selected-and-otherwise-valid Xcode can still be missing actool and
-          # ibtool, which surfaces much later as "xcrun: unable to find utility"
-          # rather than as a setup problem.
-          sudo xcodebuild -runFirstLaunch
-
+          echo "Xcode installs present:"
+          ls -d /Applications/Xcode*.app 2>/dev/null || echo "  (none)"
+          echo "Selected: $(xcode-select -p)"
           xcodebuild -version
 
-          # Assert the tools the build will actually reach for, so an incomplete
-          # toolchain fails here with a clear message rather than deep inside
-          # asset or storyboard compilation.
-          xcrun --find actool
-          xcrun --find ibtool
+          for tool in actool ibtool install_name_tool; do
+            if ! xcrun -sdk macosx --find "$tool" >/dev/null 2>&1; then
+              echo "::error::$tool is not available via 'xcrun -sdk macosx --find', which is how the iOS build resolves it."
+              exit 1
+            fi
+            echo "ok: $tool -> $(xcrun -sdk macosx --find "$tool")"
+          done
 
       - name: Install MAUI workload
         run: dotnet workload install maui
