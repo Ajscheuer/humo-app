@@ -148,6 +148,15 @@ as a quality gate.
 Treat its approval as one signal, not a merge authorization. It reviews a diff;
 it does not run the app.
 
+**A PR that changes `claude-review.yml` will not be reviewed.** The action
+refuses to run when the workflow on the PR branch differs from the copy on the
+default branch — otherwise a PR could rewrite the review job to print the API
+key. The change has to land on `main` before it takes effect.
+
+Watch for this: when the action skips for that reason, **the job still reports
+green**. A skipped review and a clean review look the same on the PR checks
+list, so confirm a review was actually posted rather than trusting the tick.
+
 ## Localization
 
 All user-facing strings live in
