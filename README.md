@@ -37,7 +37,11 @@ interfaces declared in `Humo.Core` and implemented in `Humo.App`.
 
 ## Prerequisites
 
-- .NET SDK 10.0 (pinned in `global.json`)
+- **.NET SDK 10.0** — any feature band. `global.json` pins the floor at
+  `10.0.100` with `rollForward: latestFeature`, so whichever 10.0.x SDK you have
+  installed is used. Pin a *specific* build there only with a reason: naming the
+  exact SDK from one machine locks every other machine out, even ones with a
+  perfectly good newer .NET 10.
 - For the app: `dotnet workload install maui-android` (or `maui` on macOS), plus
   a JDK and the Android SDK. `dotnet build src/Humo.App -t:InstallAndroidDependencies
   -p:AcceptAndroidSDKLicenses=True` installs the Android SDK if you don't have
