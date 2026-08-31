@@ -36,7 +36,13 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Pin the model. Left unset, the action picked the 1M-context variant
+          # (claude-opus-5[1m]), and the run died on turn 1 in 276ms with zero
+          # tokens billed -- a request refused before any inference, which is
+          # what an unavailable model looks like. Pinning also keeps review
+          # behaviour from drifting when the default moves.
           claude_args: >-
+            --model claude-opus-5
             --allowedTools "Read,Grep,Glob,Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr review:*),Bash(git diff:*),Bash(git log:*)"
           prompt: |
             Review this pull request as a careful senior engineer on the Humo
