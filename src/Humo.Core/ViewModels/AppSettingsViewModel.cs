@@ -7,6 +7,16 @@ using Humo.Shared.Units;
 namespace Humo.Core.ViewModels;
 
 /// <summary>
+/// A language the user can pick, or "follow the device" when <see cref="Culture"/>
+/// is null.
+/// <para>
+/// Declared top-level rather than nested inside the ViewModel so XAML can name it
+/// as an <c>x:DataType</c> — compiled bindings cannot reference a nested type.
+/// </para>
+/// </summary>
+public sealed record LanguageOption(CultureInfo? Culture, string DisplayNameKey);
+
+/// <summary>
 /// Language and unit settings.
 /// <para>
 /// This is the slice-0 ViewModel: it exists to prove the two settings are
@@ -78,6 +88,4 @@ public sealed partial class AppSettingsViewModel : ObservableObject
         OnPropertyChanged(nameof(TemperatureUnitSymbol));
     }
 
-    /// <summary>A language the user can pick, or "follow the device" when <see cref="Culture"/> is null.</summary>
-    public sealed record LanguageOption(CultureInfo? Culture, string DisplayNameKey);
 }

@@ -1,0 +1,152 @@
+name: CI
+
+# Three jobs, split by what each platform can actually prove:
+#
+#   test     (Linux) — the 93 unit tests. Fast, and the only job that gates
+#                      every push.
+#   android  (Linux) — builds the MAUI app for Android. Deliberately NOT on the
+#                      macOS runner: Linux minutes bill at 1x and macOS at 10x,
+#                      and Android builds identically on both.
+#   ios      (macOS) — the only thing that genuinely needs a Mac. Apple ships the
+#                      iOS SDK for macOS only, so this is the sole job that can
+#                      compile Platforms/iOS and process Info.plist.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to the same branch cancels the run already in flight. Matters most
+# for the macOS job, which is the expensive one.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  test:
+    name: Tests (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Directory.Packages.props') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      # Humo.NoMaui.slnf excludes only the app project, so this runs the full
+      # test suite without needing the MAUI workload — which is the whole point
+      # of keeping ViewModels in Humo.Core.
+      - name: Test
+        run: dotnet test Humo.NoMaui.slnf --configuration Release
+
+  android:
+    name: Build app (Android)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-android-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Directory.Packages.props') }}
+          restore-keys: nuget-android-${{ runner.os }}-
+
+      - name: Install MAUI Android workload
+        run: dotnet workload install maui-android
+
+      # .NET 10 targets a newer Android API level than the runner image ships
+      # with, so the platform has to be fetched before the build.
+      - name: Install Android SDK dependencies
+        run: >
+          dotnet build src/Humo.App/Humo.App.csproj
+          -f net10.0-android
+          -t:InstallAndroidDependencies
+          -p:AcceptAndroidSDKLicenses=True
+
+      - name: Build
+        run: dotnet build src/Humo.App/Humo.App.csproj -f net10.0-android --configuration Release
+
+  ios:
+    name: Build app (iOS)
+    # macos-26, not macos-15: the macos-15 image's Xcode is too old for .NET 10's
+    # iOS workload. The macos-26 image ships Xcode 26.x, which builds fine.
+    #
+    # An earlier comment here claimed 26.6 was a hard floor. That was wrong: it
+    # came from a stub Xcode_26.6.0.app that this job used to select, which
+    # reported a version it could not actually build with. The image's real
+    # Xcodes are 26.0 through 26.2 and they work.
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-ios-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Directory.Packages.props') }}
+          restore-keys: nuget-ios-${{ runner.os }}-
+
+      # Use the Xcode the runner image already selected, and only report it.
+      #
+      # Earlier revisions of this job picked the highest-numbered Xcode in
+      # /Applications. That was wrong: the image provisions one Xcode properly
+      # and ships others that are incomplete, so "newest" replaced a working
+      # toolchain with a broken one. Three separate tools (actool, ibtool,
+      # install_name_tool) went missing one after another as a result.
+      #
+      # The assertions below use the SDK-qualified form the build itself uses
+      # (`xcrun -sdk macosx --find`). A plain `xcrun --find` succeeds even when
+      # the SDK-qualified lookup fails, so checking the plain form gave a false
+      # all-clear.
+      - name: Report and verify Xcode
+        run: |
+          echo "Xcode installs present:"
+          ls -d /Applications/Xcode*.app 2>/dev/null || echo "  (none)"
+          echo "Selected: $(xcode-select -p)"
+          xcodebuild -version
+
+          for tool in actool ibtool install_name_tool; do
+            if ! xcrun -sdk macosx --find "$tool" >/dev/null 2>&1; then
+              echo "::error::$tool is not available via 'xcrun -sdk macosx --find', which is how the iOS build resolves it."
+              exit 1
+            fi
+            echo "ok: $tool -> $(xcrun -sdk macosx --find "$tool")"
+          done
+
+      - name: Install MAUI workload
+        run: dotnet workload install maui
+
+      # Built for the simulator so no signing identity or provisioning profile
+      # is needed. This still compiles Platforms/iOS and processes Info.plist,
+      # which is everything CI can usefully check without Apple credentials.
+      - name: Build
+        run: >
+          dotnet build src/Humo.App/Humo.App.csproj
+          -f net10.0-ios
+          -p:RuntimeIdentifier=iossimulator-arm64
+          --configuration Release

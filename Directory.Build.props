@@ -14,4 +14,15 @@
   <!-- InvariantGlobalization must stay false: Humo formats dates and numbers per
        culture (English and Spanish), which requires real ICU data. -->
 
+  <!-- The MAUI workload version, pinned here so central package management can
+       resolve MAUI's implicit package references. Without a PackageVersion for
+       them (see Directory.Packages.props), CPM strips the version off those
+       implicit references and they are dropped SILENTLY. The app then fails to
+       compile with "type or namespace Microsoft.Maui not found", which reads
+       like a code error rather than the restore error it is. Keep this in step
+       with the installed workload. -->
+  <PropertyGroup>
+    <MauiVersion>10.0.20</MauiVersion>
+  </PropertyGroup>
+
 </Project>

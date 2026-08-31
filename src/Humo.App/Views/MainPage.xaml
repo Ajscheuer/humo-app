@@ -30,7 +30,7 @@
                        FontAttributes="Bold" />
                 <Picker ItemsSource="{Binding LanguageOptions}"
                         SelectedItem="{Binding SelectedLanguage}"
-                        ItemDisplayBinding="{Binding DisplayNameKey, Converter={StaticResource ResourceKey}}" />
+                        ItemDisplayBinding="{Binding DisplayNameKey, x:DataType=vm:LanguageOption, Converter={StaticResource ResourceKey}}" />
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="8">

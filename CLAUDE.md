@@ -4,7 +4,7 @@ BBQ cook-tracking app. Cross-platform mobile, offline-first, bilingual.
 
 ## Stack
 
-- **App:** .NET MAUI, `net9.0` (iOS + Android)
+- **App:** .NET MAUI, `net10.0` (iOS + Android)
 - **API:** ASP.NET Core Minimal API on Azure App Service
 - **Database:** Azure SQL serverless (server), SQLite (device)
 - **Cloud:** Azure — Entra External ID (identity), Blob Storage (photos)

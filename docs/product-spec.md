@@ -298,68 +298,76 @@ for a monthly cook. It should be revisited against real data.
 
 ### 7.1 Spanish glossary — BBQ domain terms
 
-> ⚠️ **Every translation below is a placeholder and must be reviewed.** These are
-> proposals from an English-speaking model, flavored toward Argentine usage
-> where possible. BBQ vocabulary is dialect-specific and much of American
-> low-and-slow terminology has no settled Spanish equivalent — some terms may
-> genuinely be best left in English, as loanwords are common among asadores who
-> follow American BBQ. **Do not treat any line here as final.**
+**Reviewed and confirmed by the product owner (a native Argentine speaker),
+2026-08-30.** These are the authoritative terms — `AppResources.es.resx` should
+carry them verbatim, and new BBQ vocabulary should be added here first rather
+than invented at the point of use.
 
-| English | Proposed Spanish | Notes |
+Two standing rules came out of that review:
+
+1. **Proper nouns and brand names stay in English.** Weber, MEATER, FireBoard,
+   Texas crutch, and equipment marketed under an English name are not
+   translated. Neither are loanwords the Argentine BBQ community already uses in
+   English.
+2. **Where an English term is already the working word among asadores, keep it.**
+   "Offset" is the clearest case: nobody says *ahumador de desplazamiento*.
+
+| English | Spanish | Notes |
 |---|---|---|
-| Cook (noun, the session) | `la cocción` — *TODO: confirm* | "el asado" means the event socially; "cocción" is more clinical. Which reads better in-app? |
-| Cook (person) | `el asador` / `la asadora` — *TODO: confirm* | Gendered; check UI strings avoid assuming. |
-| Smoker | `el ahumador` — *TODO: confirm* | |
-| Offset smoker | `el ahumador de desplazamiento` — *TODO: confirm* | Clunky. "Offset" may be better kept in English. |
-| Kettle | `la parrilla tipo kettle` — *TODO: confirm* | Weber-branded in practice. |
-| Kamado | `el kamado` — *TODO: confirm* | Likely unchanged. |
-| WSM (bullet smoker) | `el ahumador vertical` — *TODO: confirm* | |
-| Pellet grill | `la parrilla de pellets` — *TODO: confirm* | |
+| Cook (noun, the session) | `la cocción` | Confirmed over *el asado*, which names the social event rather than the session. |
+| Cook (person) | `el parrillero` / `la parrillera` | Gendered — UI strings must not assume one form. Preferred over *asador*. |
+| Smoker | `el ahumador` | |
+| Offset smoker | `el offset` | Kept in English: the loanword is what asadores actually say. |
+| Kettle | `la parrilla tipo kettle` | Weber-branded in practice. |
+| Kamado | `el kamado` | Unchanged — proper noun. |
+| WSM (bullet smoker) | `el ahumador vertical` | |
+| Pellet grill | `la parrilla de pellets` | |
 | Parrilla | `la parrilla` | Native term; no translation needed. |
-| Firebox | `la cámara de fuego` — *TODO: confirm* | Compare: "el hogar", "el fogón". |
-| Cook chamber | `la cámara de cocción` — *TODO: confirm* | |
+| Firebox | `la cámara de fuego` | Compare: "el hogar", "el fogón". |
+| Cook chamber | `la cámara de cocción` | |
 | Brasero (coal basket) | `el brasero` | Native term. |
 | Embers / coals | `las brasas` | Native term. Central to asado. |
 | Firewood | `la leña` | Native term. |
-| Split (of wood) | `el leño` / `la astilla` — *TODO: confirm* | "Leño" = log; a *split* is specifically a quartered log. May need a phrase. |
-| Chunk | `el trozo de leña` — *TODO: confirm* | |
+| Split (of wood) | `el leño` / `la astilla` | "Leño" = log; a *split* is specifically a quartered log. May need a phrase. |
+| Chunk | `el trozo de leña` | |
 | Charcoal | `el carbón` | |
-| Lump charcoal | `el carbón de leña` — *TODO: confirm* | vs. briquettes below. |
-| Briquettes | `las briquetas` — *TODO: confirm* | |
-| Pellets | `los pellets` — *TODO: confirm* | Loanword in practice. |
-| Fuel event | `la carga de combustible` — *TODO: confirm* | "Carga" (load) may read better than "combustible". |
-| Pit temperature | `la temperatura de la cámara` — *TODO: confirm* | |
+| Lump charcoal | `el carbón de leña` | vs. briquettes below. |
+| Briquettes | `las briquetas` | |
+| Pellets | `los pellets` | Loanword in practice. |
+| Fuel event | `la carga de combustible` | "Carga" (load) may read better than "combustible". |
+| Pit temperature | `la temperatura de la cámara` | |
 | Internal temperature | `la temperatura interna` | |
 | Ambient temperature | `la temperatura ambiente` | |
-| Target temperature | `la temperatura objetivo` — *TODO: confirm* | |
-| Probe | `la sonda` — *TODO: confirm* | |
-| Grate | `la parrilla` (the grill surface) — *TODO: confirm* | Collides with "parrilla" the equipment. Disambiguate. |
-| Vents / dampers | `los reguladores de aire` — *TODO: confirm* | |
-| The stall | `el estancamiento` — *TODO: confirm* | **Most uncertain term in this table.** No settled Spanish equivalent; "la meseta" (plateau) is another candidate. May be best left as "el stall". |
-| Wrap (verb) | `envolver` — *TODO: confirm* | |
-| The Texas crutch | `el método Texas crutch` — *TODO: confirm* | Probably untranslatable; keep English. |
-| Bark | `la corteza` — *TODO: confirm* | Literally "bark/crust"; check it isn't read as tree bark. |
-| Smoke ring | `el anillo de humo` — *TODO: confirm* | |
-| Rest (verb / noun) | `reposar` / `el reposo` — *TODO: confirm* | |
-| Spritz (verb) | `rociar` — *TODO: confirm* | |
-| Rub | `el aderezo seco` — *TODO: confirm* | "Rub" often kept in English. |
-| Trim (verb) | `recortar` — *TODO: confirm* | |
-| Thin blue smoke | `humo azul fino` — *TODO: confirm* | Jargon; may need explanation, not translation. |
-| Low and slow | `baja y lenta` — *TODO: confirm* | Idiom; may not carry. |
-| Reverse sear | `el sellado inverso` — *TODO: confirm* | |
-| Brisket | `el brisket` / `la tapa de asado` — *TODO: confirm* | **Cut geometry differs between US and Argentine butchery.** Argentine "tapa de asado" is not the same cut. Needs a real butcher's answer. |
-| Point / flat (brisket) | `la punta` / `la parte plana` — *TODO: confirm* | Depends on brisket answer above. |
-| Pork butt / Boston butt | `la paleta de cerdo` — *TODO: confirm* | |
-| Ribs (pork) | `el costillar de cerdo` — *TODO: confirm* | |
-| Ribs (beef) | `el costillar` / `la tira de asado` — *TODO: confirm* | Cut differs; "tira de asado" is a cross-cut style. |
+| Target temperature | `la temperatura objetivo` | |
+| Probe | `la sonda` | |
+| Grate | `la parrilla` (the grill surface) | Collides with "parrilla" the equipment. Disambiguate. |
+| Vents / dampers | `los reguladores de aire` | |
+| The stall | `el estancamiento` | Confirmed over *la meseta* and the English loanword. |
+| Wrap (verb) | `envolver` | |
+| The Texas crutch | `el método Texas crutch` | Proper noun kept in English, per rule 1. |
+| Bark | `la corteza` | Literally "bark/crust"; check it isn't read as tree bark. |
+| Smoke ring | `el anillo de humo` | |
+| Rest (verb / noun) | `reposar` / `el reposo` | |
+| Spritz (verb) | `rociar` | |
+| Rub | `el aderezo seco` | "Rub" often kept in English. |
+| Trim (verb) | `recortar` | |
+| Thin blue smoke | `humo azul fino` | Jargon; may need explanation, not translation. |
+| Low and slow | `baja y lenta` | Idiom; may not carry. |
+| Reverse sear | `el sellado inverso` | |
+| Brisket | `el brisket` | Kept in English. *Tapa de asado* is a different cut — see open question 1. |
+| Point / flat (brisket) | `la punta` / `la parte plana` | Depends on brisket answer above. |
+| Pork butt / Boston butt | `la paleta de cerdo` | |
+| Ribs (pork) | `el costillar de cerdo` | |
+| Ribs (beef) | `el costillar` / `la tira de asado` | Cut differs; "tira de asado" is a cross-cut style. |
 | Chicken | `el pollo` | |
-| Fire check | `el control del fuego` — *TODO: confirm* | Notification title; needs to be short. |
-| Add a log | `agregar leña` — *TODO: confirm* | Notification quick-response; must be very short. |
-| Still fine | `todo bien` — *TODO: confirm* | Notification quick-response. |
-| Snooze | `posponer` — *TODO: confirm* | |
+| Fire check | `el control del fuego` | Notification title; needs to be short. |
+| Add a log | `agregar leña` | Notification quick-response; must be very short. |
+| Still fine | `todo bien` | Notification quick-response. |
+| Snooze | `posponer` | |
 
-Terms marked *TODO: confirm* stay marked until you replace them. The
-`AppResources.es.resx` values should carry the reviewed strings, not these.
+Where a row still carries a note, the note is context for whoever writes the UI
+string — a gender caveat, a disambiguation, or a reminder that a term is a
+loanword — not an unresolved question.
 
 ## 8. Non-goals for v1
 
@@ -392,10 +400,11 @@ reopened deliberately.
 
 ## Open questions
 
-1. **The Spanish glossary in §7.1 is entirely unreviewed.** Every term is still
-   marked `TODO: confirm`. The highest-risk entries are *the stall* (no settled
-   Spanish equivalent) and *brisket* (US and Argentine butchery cut differently,
-   so "tapa de asado" may not be the same meat at all). This is yours to correct.
+1. **The `MeatType` enum still needs Argentine cuts.** The glossary (§7.1) is
+   confirmed, but it records that *brisket* and *ribs* map onto different
+   butchery in Argentina — "tira de asado" is a cross-cut, not the American rack.
+   Adding parrilla support means adding cuts to the enum, not just translating
+   the ones that exist. Deferred to the asado work, noted so it is not forgotten.
 2. **Privacy policy and terms do not exist yet.** Decisions 2 and 9 both create
    text that has to live in them, and both app stores require a privacy policy
    before submission.

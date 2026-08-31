@@ -12,7 +12,7 @@ predictor in `fire-model.md`; testing in `testing.md`.
 
 ```
 ┌─────────────────────────────────────────┐
-│  Humo.App  (.NET MAUI, net9.0)          │
+│  Humo.App  (.NET MAUI, net10.0)         │
 │  ┌───────────┐  ┌──────────┐            │
 │  │ Views     │◄─┤ ViewModels│           │   iOS + Android
 │  │ (XAML)    │  └─────┬─────┘           │
@@ -306,7 +306,7 @@ test, it belongs in `Humo.Core` behind an interface.
 ```
 /docs
 /src
-  Humo.App/            MAUI, net9.0-ios;net9.0-android
+  Humo.App/            MAUI, net10.0-android (+ net10.0-ios off Linux)
   Humo.Core/           ViewModels, services, repositories, fire predictor
   Humo.Api/            ASP.NET Core Minimal API
   Humo.Shared/         DTOs, enums, contracts, conversions
@@ -352,12 +352,20 @@ Settled 2026-08-30. Recorded so they are not silently relitigated.
    verification — **spike this before the fire model slice**, not during it. If
    background responses cannot reliably write data, the whole interaction design
    changes.
-4. **LiveCharts2 on MAUI net9.0** — version, licensing, and iOS/Android
+4. **LiveCharts2 on MAUI net10.0** — version, licensing, and iOS/Android
    rendering behaviour need verification before the charts slice.
 5. **Photo upload retry and storage cost are unmodelled.** SAS URLs and a
    separate upload queue are specified, but not the retry policy, the per-account
    storage ceiling, or what happens when a Pro subscription lapses with photos
    already synced.
-6. **No CI/CD pipeline is defined.** Build, migration application, and deployment
-   to App Service all need somewhere to run — GitHub Actions being the obvious
-   candidate given the repository.
+6. **CI exists; CD does not.** `.github/workflows/ci.yml` runs the tests and
+   builds the app for Android (Linux) and iOS (macOS) on every PR to `main`.
+   Nothing yet deploys: publishing the API to App Service, applying EF Core
+   migrations on deploy, and distributing app builds to TestFlight or Play
+   internal testing are all still unbuilt, and each needs credentials stored as
+   repository secrets.
+7. **The iOS CI job builds for the simulator only.** That compiles
+   `Platforms/iOS` and processes `Info.plist` — enough to catch the class of
+   defect that the Android build caught — but it does not sign, archive, or
+   prove the app runs on a device. Device builds need an Apple Developer
+   account and certificates in secrets.

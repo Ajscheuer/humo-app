@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Humo.Core</RootNamespace>
     <!-- SQLitePCLRaw ships distro-specific RIDs that .NET 8+ no longer probes by
          default. Harmless here: the app uses the platform bundle on iOS and
@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <!-- Humo.Core holds ViewModels, services, repositories and the fire predictor.
-       It targets plain net9.0 on purpose: everything here is unit-testable with
+       It targets plain net10.0 on purpose: everything here is unit-testable with
        `dotnet test` on any machine, with no MAUI workload and no device.
 
        It must never reference Microsoft.Maui.*. Platform capabilities
@@ -24,6 +24,7 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="sqlite-net-pcl" />
+    <PackageReference Include="SQLitePCLRaw.bundle_green" />
   </ItemGroup>
 
   <ItemGroup>
