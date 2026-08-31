@@ -363,7 +363,7 @@ Two standing rules came out of that review:
 | Turkey | `el pavo` | |
 | Pork loin | `el lomo de cerdo` | |
 | Lamb | `el cordero` | |
-| Sausage | `el chorizo` | **TODO: confirm.** *Chorizo* is what goes on a parrilla, but it names a specific seasoned sausage, not the category — a Texas hot link is not a chorizo. *La salchicha* is the neutral category word and reads as a frankfurter. Shipping `Chorizo`; tell me if the picker should say `Salchicha` instead. |
+| Sausage | `el chorizo` | Confirmed over *la salchicha*, which reads as a frankfurter. Names a specific seasoned sausage rather than the category, and is still the word a parrillero uses. |
 | Other (meat type) | `otro` | Picker option, followed by a free-text field. |
 | Fire check | `el control del fuego` | Notification title; needs to be short. |
 | Add a log | `agregar leña` | Notification quick-response; must be very short. |
