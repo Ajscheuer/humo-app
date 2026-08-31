@@ -145,10 +145,20 @@ jobs:
 
           echo "Selecting $selected"
           sudo xcode-select -s "$selected"
+
+          # Installs component tools the image may have left out. Without this,
+          # a selected-and-otherwise-valid Xcode can still be missing actool and
+          # ibtool, which surfaces much later as "xcrun: unable to find utility"
+          # rather than as a setup problem.
+          sudo xcodebuild -runFirstLaunch
+
           xcodebuild -version
 
-          # Fail here, with a clear message, rather than deep inside actool.
+          # Assert the tools the build will actually reach for, so an incomplete
+          # toolchain fails here with a clear message rather than deep inside
+          # asset or storyboard compilation.
           xcrun --find actool
+          xcrun --find ibtool
 
       - name: Install MAUI workload
         run: dotnet workload install maui
