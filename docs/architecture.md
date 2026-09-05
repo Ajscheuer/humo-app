@@ -338,15 +338,17 @@ Settled 2026-08-30. Recorded so they are not silently relitigated.
 | 8 | **Photos ship in v1** — device-first, compressed, SAS-URL upload; **free = local only, Pro = synced** | Photos are the most engaging part of a cook log. Sync is the part that actually costs money, so that is the part that is paid. |
 | 9 | AI defaults to **Azure AI Foundry**, revisited at the AI slice | Keeps one cloud. Reversible server-side without an app release, so it is cheap to change on real pricing. |
 | 10 | Charting: **LiveChartsCore.SkiaSharpView.Maui 2.0.5**, behind `CookChartData` | Checked before adopting rather than after. 2.0.5 is stable, not one of the long beta line; the licence is **MIT** with no commercial tier, which matters here because FluentAssertions 8 had already been rejected over exactly that; and it ships `net10.0-android` and `net10.0-ios` assemblies, so neither target needs a fallback. The abstraction keeps series, units, ordering and markers in `Humo.Core` where they are unit-tested, leaving the package responsible only for pixels. |
+| 11 | Sign-in uses Entra's **hosted user flow**, not native SDK flows | Ships faster and inherits password reset, lockout and recovery. The cost is that it looks like a web page inside a native app, which is most noticeable on iOS where Sign in with Apple is expected to be native. Revisit once there are users; it is a change on one side of `IAuthService` only. |
+| 12 | Account scoping is enforced in the **repositories**, not in each service | Reads filter by the current account and writes stamp it, so no caller can forget and there is one place to test that a signed-in user never sees a guest's cooks. A service-by-service rule would be correct until the first new service. |
+| 13 | Signing in **does not claim** a guest's existing cooks | The merge flow needs its own decision (`product-spec.md` open question 5). Until then the guest's cooks stay under the anonymous account and reappear on sign-out. Recoverable; silently merging or silently discarding would not be. |
 
 ## Open questions
 
 1. **Azure SQL serverless minimum capacity and auto-pause delay** need checking
    against a realistic idle pattern before committing — the cost floor and the
    resume time are both configuration.
-2. **Entra External ID user flows vs. native SDK flows.** The hosted user flow is
-   fast to ship and looks like a web page inside a native app; native flows look
-   right and cost more work. Affects how the first-launch screen actually feels.
+2. ~~**Entra External ID user flows vs. native SDK flows.**~~ **Resolved: hosted
+   user flow. See Decision 11.**
 3. **Notification quick-response reliability is unverified.** iOS caps pending
    local notifications (64) and both platforms restrict background work.
    Handling "Added log" without launching the app needs platform-specific

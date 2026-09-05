@@ -126,6 +126,16 @@ public static class AppStrings
     public const string Event_Type = nameof(Event_Type);
     public const string Event_Note = nameof(Event_Note);
 
+    public const string SignIn_Title = nameof(SignIn_Title);
+    public const string SignIn_Apple = nameof(SignIn_Apple);
+    public const string SignIn_Google = nameof(SignIn_Google);
+    public const string SignIn_Email = nameof(SignIn_Email);
+    public const string SignIn_Guest = nameof(SignIn_Guest);
+    public const string SignIn_GuestExplanation = nameof(SignIn_GuestExplanation);
+    public const string SignIn_Offline = nameof(SignIn_Offline);
+    public const string SignIn_Failed = nameof(SignIn_Failed);
+    public const string SignIn_Unconfigured = nameof(SignIn_Unconfigured);
+
     public const string History_Title = nameof(History_Title);
     public const string History_Empty = nameof(History_Empty);
 

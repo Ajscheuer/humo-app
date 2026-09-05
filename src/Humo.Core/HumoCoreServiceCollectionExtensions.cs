@@ -1,4 +1,5 @@
 using Humo.Core.Data;
+using Humo.Core.Identity;
 using Humo.Core.Localization;
 using Humo.Core.Services;
 using Humo.Core.Settings;
@@ -22,6 +23,12 @@ public static class HumoCoreServiceCollectionExtensions
     public static IServiceCollection AddHumoCore(this IServiceCollection services)
     {
         services.AddSingleton<IClock, SystemClock>();
+
+        // One shared account context: sign-in changes what the whole app is
+        // looking at, and every repository must see that at once.
+        services.AddSingleton<IAccountContext, AccountContext>();
+        services.AddSingleton<IRecordOwnership, RecordOwnership>();
+        services.AddSingleton<IAccountService, AccountService>();
         services.AddSingleton<ILocalizer, Localizer>();
         services.AddSingleton<IUserSettings, UserSettings>();
 
@@ -48,6 +55,7 @@ public static class HumoCoreServiceCollectionExtensions
         services.AddTransient<EquipmentListViewModel>();
         services.AddTransient<EquipmentEditViewModel>();
         services.AddTransient<FuelSheetViewModel>();
+        services.AddTransient<SignInViewModel>();
         services.AddTransient<CookHistoryViewModel>();
         services.AddTransient<CookSummaryViewModel>();
 

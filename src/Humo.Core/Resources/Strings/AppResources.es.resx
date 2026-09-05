@@ -379,6 +379,33 @@
   <data name="Event_Note" xml:space="preserve">
     <value>Nota</value>
   </data>
+  <data name="SignIn_Title" xml:space="preserve">
+    <value>Bienvenido a Humo</value>
+  </data>
+  <data name="SignIn_Apple" xml:space="preserve">
+    <value>Iniciar sesión con Apple</value>
+  </data>
+  <data name="SignIn_Google" xml:space="preserve">
+    <value>Iniciar sesión con Google</value>
+  </data>
+  <data name="SignIn_Email" xml:space="preserve">
+    <value>Iniciar sesión con correo</value>
+  </data>
+  <data name="SignIn_Guest" xml:space="preserve">
+    <value>Seguir sin cuenta</value>
+  </data>
+  <data name="SignIn_GuestExplanation" xml:space="preserve">
+    <value>Empezá a registrar cocciones ya mismo. Después podés crear una cuenta para respaldarlas en todos tus dispositivos.</value>
+  </data>
+  <data name="SignIn_Offline" xml:space="preserve">
+    <value>No se pudo conectar con el servicio de inicio de sesión. Igual podés seguir sin cuenta.</value>
+  </data>
+  <data name="SignIn_Failed" xml:space="preserve">
+    <value>No se completó el inicio de sesión. Podés reintentar o seguir sin cuenta.</value>
+  </data>
+  <data name="SignIn_Unconfigured" xml:space="preserve">
+    <value>El inicio de sesión no está disponible en esta versión. Seguí sin cuenta.</value>
+  </data>
   <data name="History_Title" xml:space="preserve">
     <value>Historial</value>
   </data>

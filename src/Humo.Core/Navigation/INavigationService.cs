@@ -49,6 +49,9 @@ public static class AppRoutes
     /// <summary>Query-string key naming the cook that was on screen.</summary>
     public const string CookIdParameter = "cookId";
 
+    /// <summary>First launch: sign in, or continue as a guest.</summary>
+    public const string SignIn = "signin";
+
     /// <summary>The list of finished cooks.</summary>
     public const string History = "history";
 

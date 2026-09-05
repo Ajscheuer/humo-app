@@ -5,6 +5,7 @@ using Humo.Core;
 using Humo.Core.Data;
 using Humo.Core.Localization;
 using Humo.Core.Navigation;
+using Humo.Core.Identity;
 using Humo.Core.Settings;
 using LiveChartsCore.SkiaSharpView.Maui;
 using Microsoft.Extensions.Logging;
@@ -37,6 +38,7 @@ public static class MauiProgram
 
         ServiceHelper.Initialize(app.Services);
         ApplyStartupCulture(app.Services);
+        ResolveAccount(app.Services);
 
         return app;
     }
@@ -53,6 +55,7 @@ public static class MauiProgram
         Routing.RegisterRoute(AppRoutes.EditEquipment, typeof(EquipmentEditPage));
         Routing.RegisterRoute(AppRoutes.FuelSheet, typeof(FuelSheetPage));
         Routing.RegisterRoute(AppRoutes.CookSummary, typeof(CookSummaryPage));
+        Routing.RegisterRoute(AppRoutes.SignIn, typeof(SignInPage));
     }
 
     private static void RegisterServices(IServiceCollection services)
@@ -64,6 +67,12 @@ public static class MauiProgram
         services.AddSingleton<IDatabasePath, MauiDatabasePath>();
         services.AddSingleton<INavigationService, ShellNavigationService>();
 
+        // Tenant configuration. Absent in a checkout with no Entra tenant, which
+        // is a normal state: IAuthService reports it and the sign-in screen says
+        // so, while "continue without an account" keeps working.
+        services.AddSingleton(AuthConfiguration.Load());
+        services.AddSingleton<IAuthService, EntraAuthService>();
+
         // Everything else -- services, repositories, ViewModels -- comes from
         // Humo.Core, which registers the same graph a test builds.
         services.AddHumoCore();
@@ -71,15 +80,32 @@ public static class MauiProgram
 
     private static void RegisterViews(IServiceCollection services)
     {
+        services.AddSingleton<AppShell>();
         services.AddTransient<MainPage>();
         services.AddTransient<StartCookPage>();
         services.AddTransient<ActiveCookPage>();
         services.AddTransient<EquipmentListPage>();
         services.AddTransient<EquipmentEditPage>();
         services.AddTransient<FuelSheetPage>();
+        services.AddTransient<SignInPage>();
         services.AddTransient<CookHistoryPage>();
         services.AddTransient<CookSummaryPage>();
     }
+
+    /// <summary>
+    /// Establishes whose data this launch is looking at, before anything reads
+    /// the database.
+    /// <para>
+    /// Blocking on purpose. Every repository scopes its queries to the current
+    /// account, so a screen that loaded before this resolved would show an empty
+    /// app and then quietly write records under the wrong owner.
+    /// </para>
+    /// </summary>
+    private static void ResolveAccount(IServiceProvider services)
+        => services.GetRequiredService<IAccountService>()
+            .InitializeAsync()
+            .GetAwaiter()
+            .GetResult();
 
     /// <summary>
     /// Applies the culture resolution chain at startup: in-app override →

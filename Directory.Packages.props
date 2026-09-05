@@ -21,6 +21,11 @@
          already had to avoid), and it ships assemblies for net10.0-android and
          net10.0-ios, which are both of our targets. -->
     <PackageVersion Include="LiveChartsCore.SkiaSharpView.Maui" Version="2.0.5" />
+    <!-- Entra External ID sign-in. MSAL rather than a hand-written PKCE flow:
+         architecture.md Decision 2 chose a managed provider precisely so that
+         token exchange, refresh and the token cache are not security-sensitive
+         code one developer maintains alone. -->
+    <PackageVersion Include="Microsoft.Identity.Client" Version="4.88.0" />
   </ItemGroup>
 
   <ItemGroup Label="App and shared">

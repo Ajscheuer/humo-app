@@ -391,6 +391,33 @@
   <data name="Event_Note" xml:space="preserve">
     <value>Note</value>
   </data>
+  <data name="SignIn_Title" xml:space="preserve">
+    <value>Welcome to Humo</value>
+  </data>
+  <data name="SignIn_Apple" xml:space="preserve">
+    <value>Sign in with Apple</value>
+  </data>
+  <data name="SignIn_Google" xml:space="preserve">
+    <value>Sign in with Google</value>
+  </data>
+  <data name="SignIn_Email" xml:space="preserve">
+    <value>Sign in with email</value>
+  </data>
+  <data name="SignIn_Guest" xml:space="preserve">
+    <value>Continue without an account</value>
+  </data>
+  <data name="SignIn_GuestExplanation" xml:space="preserve">
+    <value>Log cooks straight away. You can add an account later to back them up across devices.</value>
+  </data>
+  <data name="SignIn_Offline" xml:space="preserve">
+    <value>Could not reach the sign-in service. You can still continue without an account.</value>
+  </data>
+  <data name="SignIn_Failed" xml:space="preserve">
+    <value>Sign-in did not complete. You can try again or continue without an account.</value>
+  </data>
+  <data name="SignIn_Unconfigured" xml:space="preserve">
+    <value>Sign-in is not available in this build. Continue without an account.</value>
+  </data>
   <data name="History_Title" xml:space="preserve">
     <value>History</value>
   </data>

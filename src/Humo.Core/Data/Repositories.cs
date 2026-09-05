@@ -1,4 +1,5 @@
 using Humo.Core.Data.Records;
+using Humo.Core.Identity;
 using Humo.Shared.Entities;
 
 namespace Humo.Core.Data;
@@ -90,14 +91,20 @@ public interface IPitTempEntryRepository
 internal sealed class EquipmentRepository : IEquipmentRepository
 {
     private readonly IConnectionSource _connections;
+    private readonly IAccountContext _account;
 
-    public EquipmentRepository(IConnectionSource connections) => _connections = connections;
+    public EquipmentRepository(IConnectionSource connections, IAccountContext account)
+    {
+        _connections = connections;
+        _account = account;
+    }
 
     public async Task<Equipment?> GetAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var db = await _connections.GetConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var accountId = _account.CurrentAccountId;
         var record = await db.Table<EquipmentRecord>()
-            .Where(r => r.Id == id && r.DeletedAt == null)
+            .Where(r => r.Id == id && r.AccountId == accountId && r.DeletedAt == null)
             .FirstOrDefaultAsync()
             .ConfigureAwait(false);
         return record?.ToEntity();
@@ -106,8 +113,9 @@ internal sealed class EquipmentRepository : IEquipmentRepository
     public async Task<IReadOnlyList<Equipment>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         var db = await _connections.GetConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var accountId = _account.CurrentAccountId;
         var records = await db.Table<EquipmentRecord>()
-            .Where(r => r.DeletedAt == null)
+            .Where(r => r.AccountId == accountId && r.DeletedAt == null)
             .OrderBy(r => r.CreatedAt)
             .ToListAsync()
             .ConfigureAwait(false);
@@ -117,6 +125,7 @@ internal sealed class EquipmentRepository : IEquipmentRepository
     public async Task SaveAsync(Equipment equipment, CancellationToken cancellationToken = default)
     {
         var db = await _connections.GetConnectionAsync(cancellationToken).ConfigureAwait(false);
+        equipment.AccountId = _account.CurrentAccountId;
         await db.InsertOrReplaceAsync(equipment.ToRecord()).ConfigureAwait(false);
     }
 }
@@ -124,14 +133,20 @@ internal sealed class EquipmentRepository : IEquipmentRepository
 internal sealed class CookRepository : ICookRepository
 {
     private readonly IConnectionSource _connections;
+    private readonly IAccountContext _account;
 
-    public CookRepository(IConnectionSource connections) => _connections = connections;
+    public CookRepository(IConnectionSource connections, IAccountContext account)
+    {
+        _connections = connections;
+        _account = account;
+    }
 
     public async Task<Cook?> GetAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var db = await _connections.GetConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var accountId = _account.CurrentAccountId;
         var record = await db.Table<CookRecord>()
-            .Where(r => r.Id == id && r.DeletedAt == null)
+            .Where(r => r.Id == id && r.AccountId == accountId && r.DeletedAt == null)
             .FirstOrDefaultAsync()
             .ConfigureAwait(false);
         return record?.ToEntity();
@@ -140,8 +155,9 @@ internal sealed class CookRepository : ICookRepository
     public async Task<IReadOnlyList<Cook>> GetUnfinishedAsync(CancellationToken cancellationToken = default)
     {
         var db = await _connections.GetConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var accountId = _account.CurrentAccountId;
         var records = await db.Table<CookRecord>()
-            .Where(r => r.FinishedAt == null && r.DeletedAt == null)
+            .Where(r => r.FinishedAt == null && r.AccountId == accountId && r.DeletedAt == null)
             .OrderByDescending(r => r.StartedAt)
             .ToListAsync()
             .ConfigureAwait(false);
@@ -151,8 +167,9 @@ internal sealed class CookRepository : ICookRepository
     public async Task<IReadOnlyList<Cook>> GetFinishedAsync(CancellationToken cancellationToken = default)
     {
         var db = await _connections.GetConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var accountId = _account.CurrentAccountId;
         var records = await db.Table<CookRecord>()
-            .Where(r => r.FinishedAt != null && r.DeletedAt == null)
+            .Where(r => r.FinishedAt != null && r.AccountId == accountId && r.DeletedAt == null)
             .OrderByDescending(r => r.StartedAt)
             .ToListAsync()
             .ConfigureAwait(false);
@@ -162,6 +179,7 @@ internal sealed class CookRepository : ICookRepository
     public async Task SaveAsync(Cook cook, CancellationToken cancellationToken = default)
     {
         var db = await _connections.GetConnectionAsync(cancellationToken).ConfigureAwait(false);
+        cook.AccountId = _account.CurrentAccountId;
         await db.InsertOrReplaceAsync(cook.ToRecord()).ConfigureAwait(false);
     }
 }
@@ -169,16 +187,22 @@ internal sealed class CookRepository : ICookRepository
 internal sealed class TempEntryRepository : ITempEntryRepository
 {
     private readonly IConnectionSource _connections;
+    private readonly IAccountContext _account;
 
-    public TempEntryRepository(IConnectionSource connections) => _connections = connections;
+    public TempEntryRepository(IConnectionSource connections, IAccountContext account)
+    {
+        _connections = connections;
+        _account = account;
+    }
 
     public async Task<IReadOnlyList<TempEntry>> GetForCookAsync(
         Guid cookId,
         CancellationToken cancellationToken = default)
     {
         var db = await _connections.GetConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var accountId = _account.CurrentAccountId;
         var records = await db.Table<TempEntryRecord>()
-            .Where(r => r.CookId == cookId && r.DeletedAt == null)
+            .Where(r => r.CookId == cookId && r.AccountId == accountId && r.DeletedAt == null)
             .OrderBy(r => r.RecordedAt)
             .ToListAsync()
             .ConfigureAwait(false);
@@ -188,6 +212,7 @@ internal sealed class TempEntryRepository : ITempEntryRepository
     public async Task SaveAsync(TempEntry entry, CancellationToken cancellationToken = default)
     {
         var db = await _connections.GetConnectionAsync(cancellationToken).ConfigureAwait(false);
+        entry.AccountId = _account.CurrentAccountId;
         await db.InsertOrReplaceAsync(entry.ToRecord()).ConfigureAwait(false);
     }
 }
@@ -195,8 +220,13 @@ internal sealed class TempEntryRepository : ITempEntryRepository
 internal sealed class PitTempEntryRepository : IPitTempEntryRepository
 {
     private readonly IConnectionSource _connections;
+    private readonly IAccountContext _account;
 
-    public PitTempEntryRepository(IConnectionSource connections) => _connections = connections;
+    public PitTempEntryRepository(IConnectionSource connections, IAccountContext account)
+    {
+        _connections = connections;
+        _account = account;
+    }
 
     public async Task<IReadOnlyList<PitTempEntry>> GetForEquipmentAsync(
         Guid equipmentId,
@@ -205,8 +235,10 @@ internal sealed class PitTempEntryRepository : IPitTempEntryRepository
         CancellationToken cancellationToken = default)
     {
         var db = await _connections.GetConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var accountId = _account.CurrentAccountId;
         var records = await db.Table<PitTempEntryRecord>()
             .Where(r => r.EquipmentId == equipmentId
+                        && r.AccountId == accountId
                         && r.DeletedAt == null
                         && r.RecordedAt >= from
                         && r.RecordedAt <= to)
@@ -219,6 +251,7 @@ internal sealed class PitTempEntryRepository : IPitTempEntryRepository
     public async Task SaveAsync(PitTempEntry entry, CancellationToken cancellationToken = default)
     {
         var db = await _connections.GetConnectionAsync(cancellationToken).ConfigureAwait(false);
+        entry.AccountId = _account.CurrentAccountId;
         await db.InsertOrReplaceAsync(entry.ToRecord()).ConfigureAwait(false);
     }
 }
@@ -226,16 +259,22 @@ internal sealed class PitTempEntryRepository : IPitTempEntryRepository
 internal sealed class FuelEventRepository : IFuelEventRepository
 {
     private readonly IConnectionSource _connections;
+    private readonly IAccountContext _account;
 
-    public FuelEventRepository(IConnectionSource connections) => _connections = connections;
+    public FuelEventRepository(IConnectionSource connections, IAccountContext account)
+    {
+        _connections = connections;
+        _account = account;
+    }
 
     public async Task<IReadOnlyList<FuelEvent>> GetForEquipmentAsync(
         Guid equipmentId,
         CancellationToken cancellationToken = default)
     {
         var db = await _connections.GetConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var accountId = _account.CurrentAccountId;
         var records = await db.Table<FuelEventRecord>()
-            .Where(r => r.EquipmentId == equipmentId && r.DeletedAt == null)
+            .Where(r => r.EquipmentId == equipmentId && r.AccountId == accountId && r.DeletedAt == null)
             .OrderBy(r => r.RecordedAt)
             .ToListAsync()
             .ConfigureAwait(false);
@@ -247,8 +286,9 @@ internal sealed class FuelEventRepository : IFuelEventRepository
         CancellationToken cancellationToken = default)
     {
         var db = await _connections.GetConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var accountId = _account.CurrentAccountId;
         var record = await db.Table<FuelEventRecord>()
-            .Where(r => r.EquipmentId == equipmentId && r.DeletedAt == null)
+            .Where(r => r.EquipmentId == equipmentId && r.AccountId == accountId && r.DeletedAt == null)
             .OrderByDescending(r => r.RecordedAt)
             .FirstOrDefaultAsync()
             .ConfigureAwait(false);
@@ -258,6 +298,7 @@ internal sealed class FuelEventRepository : IFuelEventRepository
     public async Task SaveAsync(FuelEvent fuelEvent, CancellationToken cancellationToken = default)
     {
         var db = await _connections.GetConnectionAsync(cancellationToken).ConfigureAwait(false);
+        fuelEvent.AccountId = _account.CurrentAccountId;
         await db.InsertOrReplaceAsync(fuelEvent.ToRecord()).ConfigureAwait(false);
     }
 }
@@ -265,16 +306,22 @@ internal sealed class FuelEventRepository : IFuelEventRepository
 internal sealed class EventRepository : IEventRepository
 {
     private readonly IConnectionSource _connections;
+    private readonly IAccountContext _account;
 
-    public EventRepository(IConnectionSource connections) => _connections = connections;
+    public EventRepository(IConnectionSource connections, IAccountContext account)
+    {
+        _connections = connections;
+        _account = account;
+    }
 
     public async Task<IReadOnlyList<Event>> GetForCookAsync(
         Guid cookId,
         CancellationToken cancellationToken = default)
     {
         var db = await _connections.GetConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var accountId = _account.CurrentAccountId;
         var records = await db.Table<EventRecord>()
-            .Where(r => r.CookId == cookId && r.DeletedAt == null)
+            .Where(r => r.CookId == cookId && r.AccountId == accountId && r.DeletedAt == null)
             .OrderBy(r => r.RecordedAt)
             .ToListAsync()
             .ConfigureAwait(false);
@@ -284,6 +331,7 @@ internal sealed class EventRepository : IEventRepository
     public async Task SaveAsync(Event cookEvent, CancellationToken cancellationToken = default)
     {
         var db = await _connections.GetConnectionAsync(cancellationToken).ConfigureAwait(false);
+        cookEvent.AccountId = _account.CurrentAccountId;
         await db.InsertOrReplaceAsync(cookEvent.ToRecord()).ConfigureAwait(false);
     }
 }
