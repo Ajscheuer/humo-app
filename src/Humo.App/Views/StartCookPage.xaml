@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:loc="clr-namespace:Humo.App.Localization"
+             xmlns:vm="clr-namespace:Humo.Core.ViewModels;assembly=Humo.Core"
+             x:Class="Humo.App.Views.StartCookPage"
+             x:DataType="vm:StartCookViewModel"
+             Title="{loc:Translate StartCook_Title}">
+
+    <ContentPage.Resources>
+        <loc:ResourceKeyConverter x:Key="ResourceKey" />
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <!-- Star- and auto-sized throughout: no fixed width sits around a label,
+             so Spanish is free to run ~25% longer than English. -->
+        <VerticalStackLayout Padding="24" Spacing="20">
+
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{loc:Translate StartCook_MeatType}"
+                       FontAttributes="Bold" />
+                <Picker ItemsSource="{Binding MeatTypes}"
+                        SelectedItem="{Binding SelectedMeatType}"
+                        ItemDisplayBinding="{Binding DisplayNameKey, x:DataType=vm:MeatTypeOption, Converter={StaticResource ResourceKey}}" />
+                <Entry Text="{Binding MeatTypeOther}"
+                       IsVisible="{Binding IsOtherMeatType}"
+                       Placeholder="{loc:Translate MeatType_Other}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8">
+                <!-- Weight is required because it feeds the fire model's thermal
+                     load, but it arrives pre-filled from the meat type so nobody
+                     is stopped at a blank box for not owning a scale. -->
+                <Label Text="{loc:Translate StartCook_Weight}"
+                       FontAttributes="Bold" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <Entry Grid.Column="0"
+                           Text="{Binding Weight}"
+                           Keyboard="Numeric" />
+                    <Label Grid.Column="1"
+                           Text="{Binding WeightUnitSymbol}"
+                           VerticalOptions="Center" />
+                </Grid>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{loc:Translate StartCook_TargetTemp}"
+                       FontAttributes="Bold" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <Entry Grid.Column="0"
+                           Text="{Binding TargetTemperature}"
+                           Keyboard="Numeric"
+                           Placeholder="{loc:Translate StartCook_Optional}" />
+                    <Label Grid.Column="1"
+                           Text="{Binding TemperatureUnitSymbol}"
+                           VerticalOptions="Center" />
+                </Grid>
+            </VerticalStackLayout>
+
+            <Button Text="{loc:Translate StartCook_Start}"
+                    Command="{Binding StartCookCommand}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -111,4 +111,94 @@
   <data name="Unit_Pounds_Short" xml:space="preserve">
     <value>lb</value>
   </data>
+  <data name="StartCook_Title" xml:space="preserve">
+    <value>Empezar una cocción</value>
+  </data>
+  <data name="StartCook_MeatType" xml:space="preserve">
+    <value>¿Qué vas a cocinar?</value>
+  </data>
+  <data name="StartCook_Weight" xml:space="preserve">
+    <value>Peso</value>
+  </data>
+  <data name="StartCook_TargetTemp" xml:space="preserve">
+    <value>Temperatura interna objetivo</value>
+  </data>
+  <data name="StartCook_Optional" xml:space="preserve">
+    <value>Opcional</value>
+  </data>
+  <data name="StartCook_Start" xml:space="preserve">
+    <value>Empezar</value>
+  </data>
+  <data name="ActiveCook_Elapsed" xml:space="preserve">
+    <value>Transcurrido</value>
+  </data>
+  <data name="ActiveCook_LastMeatTemp" xml:space="preserve">
+    <value>Carne</value>
+  </data>
+  <data name="ActiveCook_LastPitTemp" xml:space="preserve">
+    <value>Cámara</value>
+  </data>
+  <data name="ActiveCook_NoReadings" xml:space="preserve">
+    <value>Todavía sin registros</value>
+  </data>
+  <data name="ActiveCook_LogTemp" xml:space="preserve">
+    <value>Registrar temp.</value>
+  </data>
+  <data name="ActiveCook_Finish" xml:space="preserve">
+    <value>Terminar cocción</value>
+  </data>
+  <data name="ActiveCook_NoActiveCook" xml:space="preserve">
+    <value>Ninguna cocción en curso</value>
+  </data>
+  <data name="LogTemp_Title" xml:space="preserve">
+    <value>Registrar una temperatura</value>
+  </data>
+  <data name="LogTemp_MeatTemp" xml:space="preserve">
+    <value>Temperatura de la carne</value>
+  </data>
+  <data name="LogTemp_PitTemp" xml:space="preserve">
+    <value>Temperatura de la cámara</value>
+  </data>
+  <data name="LogTemp_RecordedAt" xml:space="preserve">
+    <value>Tomada a las</value>
+  </data>
+  <data name="LogTemp_Note" xml:space="preserve">
+    <value>Nota</value>
+  </data>
+  <data name="Cook_Finished" xml:space="preserve">
+    <value>Terminada</value>
+  </data>
+  <data name="Cook_Rating" xml:space="preserve">
+    <value>¿Cómo salió?</value>
+  </data>
+  <data name="MeatType_Brisket" xml:space="preserve">
+    <value>Brisket</value>
+  </data>
+  <data name="MeatType_PorkButt" xml:space="preserve">
+    <value>Paleta de cerdo</value>
+  </data>
+  <data name="MeatType_PorkRibs" xml:space="preserve">
+    <value>Costillar de cerdo</value>
+  </data>
+  <data name="MeatType_BeefRibs" xml:space="preserve">
+    <value>Costillar de res</value>
+  </data>
+  <data name="MeatType_Chicken" xml:space="preserve">
+    <value>Pollo</value>
+  </data>
+  <data name="MeatType_Turkey" xml:space="preserve">
+    <value>Pavo</value>
+  </data>
+  <data name="MeatType_PorkLoin" xml:space="preserve">
+    <value>Lomo de cerdo</value>
+  </data>
+  <data name="MeatType_Lamb" xml:space="preserve">
+    <value>Cordero</value>
+  </data>
+  <data name="MeatType_Sausage" xml:space="preserve">
+    <value>Chorizo</value>
+  </data>
+  <data name="MeatType_Other" xml:space="preserve">
+    <value>Otro</value>
+  </data>
 </root>

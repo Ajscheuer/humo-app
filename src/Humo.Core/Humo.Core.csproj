@@ -23,6 +23,10 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" />
+    <!-- Abstractions only. Humo.Core registers its own graph so the same
+         services can be composed in a test, but it does not depend on a
+         container implementation. -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="sqlite-net-pcl" />
     <PackageReference Include="SQLitePCLRaw.bundle_green" />
   </ItemGroup>

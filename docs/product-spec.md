@@ -360,6 +360,11 @@ Two standing rules came out of that review:
 | Ribs (pork) | `el costillar de cerdo` | |
 | Ribs (beef) | `el costillar` / `la tira de asado` | Cut differs; "tira de asado" is a cross-cut style. |
 | Chicken | `el pollo` | |
+| Turkey | `el pavo` | |
+| Pork loin | `el lomo de cerdo` | |
+| Lamb | `el cordero` | |
+| Sausage | `el chorizo` | Confirmed over *la salchicha*, which reads as a frankfurter. Names a specific seasoned sausage rather than the category, and is still the word a parrillero uses. |
+| Other (meat type) | `otro` | Picker option, followed by a free-text field. |
 | Fire check | `el control del fuego` | Notification title; needs to be short. |
 | Add a log | `agregar leña` | Notification quick-response; must be very short. |
 | Still fine | `todo bien` | Notification quick-response. |

@@ -1,9 +1,11 @@
 using System.Globalization;
 using Humo.App.Services;
 using Humo.App.Views;
+using Humo.Core;
+using Humo.Core.Data;
 using Humo.Core.Localization;
+using Humo.Core.Navigation;
 using Humo.Core.Settings;
-using Humo.Core.ViewModels;
 using Microsoft.Extensions.Logging;
 
 namespace Humo.App;
@@ -21,6 +23,7 @@ public static class MauiProgram
 
         RegisterServices(builder.Services);
         RegisterViews(builder.Services);
+        RegisterRoutes();
 
         var app = builder.Build();
 
@@ -30,20 +33,34 @@ public static class MauiProgram
         return app;
     }
 
+    /// <summary>
+    /// Routes that are navigated to but are not tabs. Registered here with the
+    /// rest of the app wiring rather than in a page constructor, which
+    /// CLAUDE.md keeps to <c>InitializeComponent()</c>. The tab routes come from
+    /// AppShell.xaml.
+    /// </summary>
+    private static void RegisterRoutes()
+        => Routing.RegisterRoute(AppRoutes.StartCook, typeof(StartCookPage));
+
     private static void RegisterServices(IServiceCollection services)
     {
         // Platform capabilities are registered here as implementations of
         // interfaces declared in Humo.Core, so nothing in Humo.Core ever
         // references MAUI.
         services.AddSingleton<IAppPreferences, MauiAppPreferences>();
-        services.AddSingleton<IUserSettings, UserSettings>();
-        services.AddSingleton<ILocalizer, Localizer>();
+        services.AddSingleton<IDatabasePath, MauiDatabasePath>();
+        services.AddSingleton<INavigationService, ShellNavigationService>();
+
+        // Everything else -- services, repositories, ViewModels -- comes from
+        // Humo.Core, which registers the same graph a test builds.
+        services.AddHumoCore();
     }
 
     private static void RegisterViews(IServiceCollection services)
     {
-        services.AddTransient<AppSettingsViewModel>();
         services.AddTransient<MainPage>();
+        services.AddTransient<StartCookPage>();
+        services.AddTransient<ActiveCookPage>();
     }
 
     /// <summary>
