@@ -14,6 +14,13 @@
          Required by central package management; see Directory.Build.props. -->
     <PackageVersion Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+    <!-- Charting, used only by Humo.App and only behind the CookChartData
+         abstraction in Humo.Core. Verified before adopting, per architecture.md
+         open question 4: 2.0.5 is stable rather than beta, the licence is MIT
+         with no commercial tier (unlike FluentAssertions 8, which this project
+         already had to avoid), and it ships assemblies for net10.0-android and
+         net10.0-ios, which are both of our targets. -->
+    <PackageVersion Include="LiveChartsCore.SkiaSharpView.Maui" Version="2.0.5" />
   </ItemGroup>
 
   <ItemGroup Label="App and shared">
@@ -46,8 +53,8 @@
   </ItemGroup>
 
   <!-- Deliberately not here yet, added by the slice that first needs them:
-       LiveCharts2 and the notification plugin (slice 3 / slice 8, MAUI-side),
-       RevenueCat (slice 6), EF Core + Azure SQL provider (slice 5), Azure.Storage.Blobs (photos).
+       the notification plugin (slice 8, MAUI-side), RevenueCat (slice 6),
+       EF Core + Azure SQL provider (slice 5), Azure.Storage.Blobs (photos).
 
        FluentAssertions is deliberately absent despite being named in the plan:
        version 8 requires a paid licence for commercial use. Tests use xUnit's

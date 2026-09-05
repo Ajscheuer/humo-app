@@ -213,9 +213,9 @@ public sealed partial class ActiveCookViewModel : ObservableObject
 
         await _cooks.LogEventAsync(
             new LogEventRequest { CookId = Cook.Id, Type = type },
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken);
 
-        await ReloadMilestonesAsync(cancellationToken).ConfigureAwait(false);
+        await ReloadMilestonesAsync(cancellationToken);
         NotifyStateChanged();
     }
 
@@ -228,7 +228,7 @@ public sealed partial class ActiveCookViewModel : ObservableObject
             return;
         }
 
-        var events = await _cooks.GetEventsAsync(Cook.Id, cancellationToken).ConfigureAwait(false);
+        var events = await _cooks.GetEventsAsync(Cook.Id, cancellationToken);
         foreach (var milestone in events)
         {
             Milestones.Add(new EventDisplay(
@@ -251,9 +251,9 @@ public sealed partial class ActiveCookViewModel : ObservableObject
     [RelayCommand]
     private async Task LoadAsync(CancellationToken cancellationToken)
     {
-        Cook = await _cooks.GetActiveCookAsync(cancellationToken).ConfigureAwait(false);
-        await ReloadEntriesAsync(cancellationToken).ConfigureAwait(false);
-        await ReloadMilestonesAsync(cancellationToken).ConfigureAwait(false);
+        Cook = await _cooks.GetActiveCookAsync(cancellationToken);
+        await ReloadEntriesAsync(cancellationToken);
+        await ReloadMilestonesAsync(cancellationToken);
         NotifyStateChanged();
     }
 
@@ -281,10 +281,10 @@ public sealed partial class ActiveCookViewModel : ObservableObject
                 RecordedAt = ResolveRecordedAt(),
                 Note = string.IsNullOrWhiteSpace(NoteInput) ? null : NoteInput.Trim(),
             },
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken);
 
         ClearSheet();
-        await ReloadEntriesAsync(cancellationToken).ConfigureAwait(false);
+        await ReloadEntriesAsync(cancellationToken);
         NotifyStateChanged();
     }
 
@@ -343,8 +343,7 @@ public sealed partial class ActiveCookViewModel : ObservableObject
             throw new InvalidOperationException("There is no cook in progress to finish.");
         }
 
-        Cook = await _cooks.FinishCookAsync(Cook.Id, cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
+        Cook = await _cooks.FinishCookAsync(Cook.Id, cancellationToken: cancellationToken);
         NotifyStateChanged();
     }
 
@@ -358,9 +357,7 @@ public sealed partial class ActiveCookViewModel : ObservableObject
             return;
         }
 
-        var entries = await _cooks.GetTemperaturesAsync(Cook.Id, cancellationToken)
-            .ConfigureAwait(false);
-
+        var entries = await _cooks.GetTemperaturesAsync(Cook.Id, cancellationToken);
         var unit = _settings.TemperatureUnit;
         foreach (var entry in entries)
         {

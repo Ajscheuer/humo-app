@@ -40,6 +40,7 @@ public static class HumoCoreServiceCollectionExtensions
         services.AddSingleton<ICookService, CookService>();
         services.AddSingleton<IEquipmentService, EquipmentService>();
         services.AddSingleton<IFuelService, FuelService>();
+        services.AddSingleton<ICookSummaryService, CookSummaryService>();
 
         services.AddTransient<AppSettingsViewModel>();
         services.AddTransient<StartCookViewModel>();
@@ -47,6 +48,8 @@ public static class HumoCoreServiceCollectionExtensions
         services.AddTransient<EquipmentListViewModel>();
         services.AddTransient<EquipmentEditViewModel>();
         services.AddTransient<FuelSheetViewModel>();
+        services.AddTransient<CookHistoryViewModel>();
+        services.AddTransient<CookSummaryViewModel>();
 
         return services;
     }

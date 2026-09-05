@@ -379,6 +379,62 @@
   <data name="Event_Note" xml:space="preserve">
     <value>Nota</value>
   </data>
+  <data name="History_Title" xml:space="preserve">
+    <value>Historial</value>
+  </data>
+  <data name="History_Empty" xml:space="preserve">
+    <value>Todavía no hay cocciones terminadas</value>
+  </data>
+  <data name="Summary_Title" xml:space="preserve">
+    <value>Resumen de la cocción</value>
+  </data>
+  <data name="Summary_Duration" xml:space="preserve">
+    <value>Tiempo total</value>
+  </data>
+  <data name="Summary_TimePerKg" xml:space="preserve">
+    <value>Tiempo por kilo</value>
+  </data>
+  <data name="Summary_TimePerLb" xml:space="preserve">
+    <value>Tiempo por libra</value>
+  </data>
+  <data name="Summary_EstimatedShort" xml:space="preserve">
+    <value>Estimado</value>
+    <comment>Badge on a history row. The full sentence is Summary_Estimated.</comment>
+  </data>
+  <data name="Summary_PeakMeatTemp" xml:space="preserve">
+    <value>Temperatura máxima de la carne</value>
+  </data>
+  <data name="Summary_PeakPitTemp" xml:space="preserve">
+    <value>Temperatura máxima del ahumador</value>
+  </data>
+  <data name="Summary_Readings" xml:space="preserve">
+    <value>Mediciones</value>
+  </data>
+  <data name="Summary_FuelLoads" xml:space="preserve">
+    <value>Cargas de leña</value>
+  </data>
+  <data name="Summary_Estimated" xml:space="preserve">
+    <value>Esta cocción se cerró automáticamente, así que la hora de fin es estimada.</value>
+  </data>
+  <data name="Summary_NotFound" xml:space="preserve">
+    <value>Esa cocción ya no existe.</value>
+  </data>
+  <data name="Summary_Unknown" xml:space="preserve">
+    <value>—</value>
+    <comment>Same em dash in both languages: a typographic placeholder, not a word.</comment>
+  </data>
+  <data name="Summary_RigDeleted" xml:space="preserve">
+    <value>Equipo eliminado</value>
+  </data>
+  <data name="Chart_MeatSeries" xml:space="preserve">
+    <value>Carne</value>
+  </data>
+  <data name="Chart_PitSeries" xml:space="preserve">
+    <value>Ahumador</value>
+  </data>
+  <data name="Chart_NoReadings" xml:space="preserve">
+    <value>No se registraron mediciones en esta cocción</value>
+  </data>
   <data name="EventType_Wrapped" xml:space="preserve">
     <value>Envuelto</value>
   </data>

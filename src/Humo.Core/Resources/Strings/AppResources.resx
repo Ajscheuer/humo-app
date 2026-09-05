@@ -391,6 +391,62 @@
   <data name="Event_Note" xml:space="preserve">
     <value>Note</value>
   </data>
+  <data name="History_Title" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="History_Empty" xml:space="preserve">
+    <value>No finished cooks yet</value>
+  </data>
+  <data name="Summary_Title" xml:space="preserve">
+    <value>Cook summary</value>
+  </data>
+  <data name="Summary_Duration" xml:space="preserve">
+    <value>Total time</value>
+  </data>
+  <data name="Summary_TimePerKg" xml:space="preserve">
+    <value>Time per kilo</value>
+  </data>
+  <data name="Summary_TimePerLb" xml:space="preserve">
+    <value>Time per pound</value>
+  </data>
+  <data name="Summary_EstimatedShort" xml:space="preserve">
+    <value>Estimated</value>
+    <comment>Badge on a history row. The full sentence is Summary_Estimated.</comment>
+  </data>
+  <data name="Summary_PeakMeatTemp" xml:space="preserve">
+    <value>Highest meat temp</value>
+  </data>
+  <data name="Summary_PeakPitTemp" xml:space="preserve">
+    <value>Highest pit temp</value>
+  </data>
+  <data name="Summary_Readings" xml:space="preserve">
+    <value>Readings</value>
+  </data>
+  <data name="Summary_FuelLoads" xml:space="preserve">
+    <value>Fuel loads</value>
+  </data>
+  <data name="Summary_Estimated" xml:space="preserve">
+    <value>This cook was closed automatically, so its end time is estimated.</value>
+  </data>
+  <data name="Summary_NotFound" xml:space="preserve">
+    <value>That cook no longer exists.</value>
+  </data>
+  <data name="Summary_Unknown" xml:space="preserve">
+    <value>—</value>
+    <comment>Placeholder for a statistic that cannot be computed. An em dash, not a word.</comment>
+  </data>
+  <data name="Summary_RigDeleted" xml:space="preserve">
+    <value>Rig deleted</value>
+  </data>
+  <data name="Chart_MeatSeries" xml:space="preserve">
+    <value>Meat</value>
+  </data>
+  <data name="Chart_PitSeries" xml:space="preserve">
+    <value>Pit</value>
+  </data>
+  <data name="Chart_NoReadings" xml:space="preserve">
+    <value>No readings were logged for this cook</value>
+  </data>
   <data name="EventType_Wrapped" xml:space="preserve">
     <value>Wrapped</value>
   </data>

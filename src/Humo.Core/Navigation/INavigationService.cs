@@ -49,6 +49,16 @@ public static class AppRoutes
     /// <summary>Query-string key naming the cook that was on screen.</summary>
     public const string CookIdParameter = "cookId";
 
+    /// <summary>The list of finished cooks.</summary>
+    public const string History = "history";
+
+    /// <summary>One finished cook's chart and statistics. Pushed from the history list.</summary>
+    public const string CookSummary = "summary";
+
+    /// <summary>The summary screen for one cook.</summary>
+    public static string CookSummaryFor(Guid cookId)
+        => $"{CookSummary}?{CookIdParameter}={cookId}";
+
     /// <summary>
     /// The fuel sheet for a rig, optionally noting the cook on screen. The cook
     /// is display-only: fuel belongs to the fire, so the sheet works with no cook

@@ -122,7 +122,7 @@ public sealed partial class EquipmentEditViewModel : ObservableObject
             return;
         }
 
-        var rig = await _equipment.GetAsync(id, cancellationToken).ConfigureAwait(false);
+        var rig = await _equipment.GetAsync(id, cancellationToken);
         if (rig is null)
         {
             // Deleted on another device between the list loading and this tap.
@@ -165,7 +165,7 @@ public sealed partial class EquipmentEditViewModel : ObservableObject
                     CookChamberVolumeL = CookChamberVolumeL,
                     Notes = Notes,
                 },
-                cancellationToken).ConfigureAwait(false);
+                cancellationToken);
         }
         catch (ArgumentException)
         {
@@ -188,6 +188,6 @@ public sealed partial class EquipmentEditViewModel : ObservableObject
             return;
         }
 
-        await _navigation.GoBackAsync(cancellationToken).ConfigureAwait(false);
+        await _navigation.GoBackAsync(cancellationToken);
     }
 }

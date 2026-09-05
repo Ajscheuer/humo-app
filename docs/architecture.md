@@ -337,6 +337,7 @@ Settled 2026-08-30. Recorded so they are not silently relitigated.
 | 7 | Account deletion: **immediate soft-delete, hard purge at 30 days**, including blobs | Covers mistaps and support windows without leaving "deleted" data alive indefinitely. |
 | 8 | **Photos ship in v1** — device-first, compressed, SAS-URL upload; **free = local only, Pro = synced** | Photos are the most engaging part of a cook log. Sync is the part that actually costs money, so that is the part that is paid. |
 | 9 | AI defaults to **Azure AI Foundry**, revisited at the AI slice | Keeps one cloud. Reversible server-side without an app release, so it is cheap to change on real pricing. |
+| 10 | Charting: **LiveChartsCore.SkiaSharpView.Maui 2.0.5**, behind `CookChartData` | Checked before adopting rather than after. 2.0.5 is stable, not one of the long beta line; the licence is **MIT** with no commercial tier, which matters here because FluentAssertions 8 had already been rejected over exactly that; and it ships `net10.0-android` and `net10.0-ios` assemblies, so neither target needs a fallback. The abstraction keeps series, units, ordering and markers in `Humo.Core` where they are unit-tested, leaving the package responsible only for pixels. |
 
 ## Open questions
 
@@ -352,8 +353,13 @@ Settled 2026-08-30. Recorded so they are not silently relitigated.
    verification — **spike this before the fire model slice**, not during it. If
    background responses cannot reliably write data, the whole interaction design
    changes.
-4. **LiveCharts2 on MAUI net10.0** — version, licensing, and iOS/Android
-   rendering behaviour need verification before the charts slice.
+4. ~~**LiveCharts2 on MAUI net10.0** — version, licensing, and iOS/Android
+   rendering behaviour need verification before the charts slice.~~
+   **Resolved at the charts slice; see Decision 10.** Version and licensing check
+   out. Rendering on a real device is the one part still unverified, and it is
+   now a manual-verification item rather than an adoption risk: the charting
+   package is confined to `Humo.App` behind `CookChartData`, so replacing it
+   would be a view change.
 5. **Photo upload retry and storage cost are unmodelled.** SAS URLs and a
    separate upload queue are specified, but not the retry policy, the per-account
    storage ceiling, or what happens when a Pro subscription lapses with photos

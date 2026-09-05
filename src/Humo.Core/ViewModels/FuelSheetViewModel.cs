@@ -158,9 +158,7 @@ public sealed partial class FuelSheetViewModel : ObservableObject
         _equipmentId = context.EquipmentId;
         _cookId = context.CookId;
 
-        var defaults = await _fuel.GetDefaultsAsync(_equipmentId, cancellationToken)
-            .ConfigureAwait(false);
-
+        var defaults = await _fuel.GetDefaultsAsync(_equipmentId, cancellationToken);
         // FirstOrDefault, not First: a value stored by a newer version of the app
         // and pulled down by sync has no option in this build's list, and a
         // picker that throws is worse than one showing the fallback.
@@ -211,13 +209,13 @@ public sealed partial class FuelSheetViewModel : ObservableObject
                     ? UnitConversion.ToKilograms(weight, _settings.WeightUnit)
                     : null,
             },
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken);
 
         // Dismiss. The sheet committing while staying on screen looks like
         // nothing happened, and the cook taps again -- writing a second
         // FuelEvent that never went on the fire and corrupting the very cadence
         // the fire model learns from. Leaving is the feedback.
-        await _navigation.GoBackAsync(cancellationToken).ConfigureAwait(false);
+        await _navigation.GoBackAsync(cancellationToken);
     }
 }
 

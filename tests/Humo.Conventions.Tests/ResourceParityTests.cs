@@ -47,6 +47,10 @@ public class ResourceParityTests
         // unit symbol rather than a word.
         AppStrings.FuelForm_Pellets,
         AppStrings.Unit_Litres_Short,
+
+        // An em dash standing in for a statistic that could not be computed.
+        // Typography, not language.
+        AppStrings.Summary_Unknown,
     ];
 
     [Fact]

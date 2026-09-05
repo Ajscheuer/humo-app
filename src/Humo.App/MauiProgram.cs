@@ -6,6 +6,7 @@ using Humo.Core.Data;
 using Humo.Core.Localization;
 using Humo.Core.Navigation;
 using Humo.Core.Settings;
+using LiveChartsCore.SkiaSharpView.Maui;
 using Microsoft.Extensions.Logging;
 
 namespace Humo.App;
@@ -15,7 +16,14 @@ public static class MauiProgram
     public static MauiApp CreateMauiApp()
     {
         var builder = MauiApp.CreateBuilder();
-        builder.UseMauiApp<App>();
+        builder
+            .UseMauiApp<App>()
+
+            // Registers the chart handlers (and SkiaSharp underneath them).
+            // Without this the CartesianChart on the cook summary has no handler
+            // and the page fails at runtime -- a device-only failure that
+            // compiles perfectly well, which is why it is called out here.
+            .UseLiveCharts();
 
 #if DEBUG
         builder.Logging.AddDebug();
@@ -44,6 +52,7 @@ public static class MauiProgram
         Routing.RegisterRoute(AppRoutes.StartCook, typeof(StartCookPage));
         Routing.RegisterRoute(AppRoutes.EditEquipment, typeof(EquipmentEditPage));
         Routing.RegisterRoute(AppRoutes.FuelSheet, typeof(FuelSheetPage));
+        Routing.RegisterRoute(AppRoutes.CookSummary, typeof(CookSummaryPage));
     }
 
     private static void RegisterServices(IServiceCollection services)
@@ -68,6 +77,8 @@ public static class MauiProgram
         services.AddTransient<EquipmentListPage>();
         services.AddTransient<EquipmentEditPage>();
         services.AddTransient<FuelSheetPage>();
+        services.AddTransient<CookHistoryPage>();
+        services.AddTransient<CookSummaryPage>();
     }
 
     /// <summary>

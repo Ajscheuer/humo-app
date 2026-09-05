@@ -1,5 +1,6 @@
 using Humo.Core.Data;
 using Humo.Core.Services;
+using Humo.Core.Settings;
 
 namespace Humo.Core.Tests.Support;
 
@@ -56,6 +57,14 @@ internal sealed class TestDatabase : IDatabasePath, IAsyncDisposable
     public IEquipmentService EquipmentService { get; }
 
     public IFuelService FuelService { get; }
+
+    /// <summary>
+    /// Reads a cook back after it is over. Needs the user's settings for unit
+    /// conversion, so the test supplies them.
+    /// </summary>
+    public ICookSummaryService SummaryServiceWith(IUserSettings settings)
+        => new CookSummaryService(
+            Cooks, TempEntries, PitTempEntries, FuelEvents, Events, Equipment, settings);
 
     public async ValueTask DisposeAsync()
     {

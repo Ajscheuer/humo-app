@@ -20,6 +20,16 @@ public interface ICookRepository
     /// <summary>Cooks with no end time, newest first.</summary>
     Task<IReadOnlyList<Cook>> GetUnfinishedAsync(CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Finished cooks, newest first. The history list.
+    /// <para>
+    /// No limit here on purpose. The free tier caps history, but that cap is a
+    /// server-side policy value rather than a client constant, so it is applied
+    /// where entitlements are known — not baked into the query.
+    /// </para>
+    /// </summary>
+    Task<IReadOnlyList<Cook>> GetFinishedAsync(CancellationToken cancellationToken = default);
+
     Task SaveAsync(Cook cook, CancellationToken cancellationToken = default);
 }
 
@@ -132,6 +142,17 @@ internal sealed class CookRepository : ICookRepository
         var db = await _connections.GetConnectionAsync(cancellationToken).ConfigureAwait(false);
         var records = await db.Table<CookRecord>()
             .Where(r => r.FinishedAt == null && r.DeletedAt == null)
+            .OrderByDescending(r => r.StartedAt)
+            .ToListAsync()
+            .ConfigureAwait(false);
+        return records.Select(r => r.ToEntity()).ToList();
+    }
+
+    public async Task<IReadOnlyList<Cook>> GetFinishedAsync(CancellationToken cancellationToken = default)
+    {
+        var db = await _connections.GetConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var records = await db.Table<CookRecord>()
+            .Where(r => r.FinishedAt != null && r.DeletedAt == null)
             .OrderByDescending(r => r.StartedAt)
             .ToListAsync()
             .ConfigureAwait(false);

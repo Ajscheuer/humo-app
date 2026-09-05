@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:charts="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
+             xmlns:conv="clr-namespace:Humo.App.Converters"
+             xmlns:loc="clr-namespace:Humo.App.Localization"
+             xmlns:vm="clr-namespace:Humo.Core.ViewModels;assembly=Humo.Core"
+             x:Class="Humo.App.Views.CookSummaryPage"
+             x:DataType="vm:CookSummaryViewModel"
+             Title="{Binding Title}">
+
+    <ContentPage.Resources>
+        <conv:HasTextConverter x:Key="HasText" />
+        <conv:InvertedBoolConverter x:Key="Not" />
+        <conv:CookChartSeriesConverter x:Key="ChartSeries" />
+        <conv:CookChartAxesConverter x:Key="ChartAxes" />
+        <conv:CookChartValueAxesConverter x:Key="ChartValueAxes" />
+        <conv:CookChartMarkersConverter x:Key="ChartMarkers" />
+        <loc:ResourceKeyConverter x:Key="ResourceKey" />
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="20">
+
+            <Label Text="{Binding ErrorMessage}"
+                   IsVisible="{Binding ErrorMessage, Converter={StaticResource HasText}}" />
+
+            <VerticalStackLayout Spacing="20" IsVisible="{Binding HasSummary}">
+
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="{Binding MeatTypeKey, Converter={StaticResource ResourceKey}}"
+                           FontSize="24"
+                           FontAttributes="Bold" />
+                    <Label Text="{Binding EquipmentName}" FontSize="14" />
+                </VerticalStackLayout>
+
+                <!-- An inferred end time is stated, never implied. -->
+                <Label Text="{loc:Translate Summary_Estimated}"
+                       FontSize="13"
+                       IsVisible="{Binding IsEstimated}" />
+
+                <!-- The chart. Series and axes come from CookChartData, already
+                     in the user's unit and already ordered. -->
+                <VerticalStackLayout Spacing="8" IsVisible="{Binding HasChart}">
+                    <charts:CartesianChart
+                        HeightRequest="260"
+                        Series="{Binding Chart, Converter={StaticResource ChartSeries}}"
+                        XAxes="{Binding Chart, Converter={StaticResource ChartAxes}}"
+                        YAxes="{Binding Chart, Converter={StaticResource ChartValueAxes}}"
+                        Sections="{Binding Chart, Converter={StaticResource ChartMarkers}}" />
+                </VerticalStackLayout>
+
+                <Label Text="{loc:Translate Chart_NoReadings}"
+                       IsVisible="{Binding HasChart, Converter={StaticResource Not}}" />
+
+                <!-- Two columns of statistics. Auto-sized so Spanish labels,
+                     which run longer, are free to wrap rather than clip. -->
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto"
+                      ColumnSpacing="16" RowSpacing="16">
+
+                    <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="2">
+                        <Label Text="{loc:Translate Summary_Duration}" FontSize="13" />
+                        <Label Text="{Binding DurationDisplay}" FontSize="22" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Row="0" Grid.Column="1" Spacing="2">
+                        <Label Text="{Binding TimePerWeightLabelKey, Converter={StaticResource ResourceKey}}"
+                               FontSize="13" />
+                        <Label Text="{Binding TimePerWeightDisplay}" FontSize="22" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Row="1" Grid.Column="0" Spacing="2">
+                        <Label Text="{loc:Translate Summary_PeakMeatTemp}" FontSize="13" />
+                        <Label Text="{Binding PeakMeatTempDisplay}" FontSize="22" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="2">
+                        <Label Text="{loc:Translate Summary_PeakPitTemp}" FontSize="13" />
+                        <Label Text="{Binding PeakPitTempDisplay}" FontSize="22" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Row="2" Grid.Column="0" Spacing="2">
+                        <Label Text="{loc:Translate Summary_Readings}" FontSize="13" />
+                        <Label Text="{Binding ReadingCountDisplay}" FontSize="22" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Row="2" Grid.Column="1" Spacing="2">
+                        <Label Text="{loc:Translate Summary_FuelLoads}" FontSize="13" />
+                        <Label Text="{Binding FuelLoadCountDisplay}" FontSize="22" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+
+                </Grid>
+
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
