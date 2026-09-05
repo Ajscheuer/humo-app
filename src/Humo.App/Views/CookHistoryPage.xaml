@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:behaviors="clr-namespace:Humo.App.Behaviors"
+             xmlns:conv="clr-namespace:Humo.App.Converters"
+             xmlns:loc="clr-namespace:Humo.App.Localization"
+             xmlns:vm="clr-namespace:Humo.Core.ViewModels;assembly=Humo.Core"
+             x:Class="Humo.App.Views.CookHistoryPage"
+             x:DataType="vm:CookHistoryViewModel"
+             Title="{loc:Translate History_Title}">
+
+    <ContentPage.Behaviors>
+        <behaviors:AppearingCommandBehavior Command="{Binding LoadCommand}" />
+    </ContentPage.Behaviors>
+
+    <ContentPage.Resources>
+        <conv:InvertedBoolConverter x:Key="Not" />
+        <loc:ResourceKeyConverter x:Key="ResourceKey" />
+    </ContentPage.Resources>
+
+    <Grid Padding="24">
+
+        <Label Text="{loc:Translate History_Empty}"
+               IsVisible="{Binding HasItems, Converter={StaticResource Not}}"
+               VerticalOptions="Start" />
+
+        <CollectionView ItemsSource="{Binding Items}"
+                        IsVisible="{Binding HasItems}"
+                        SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:CookHistoryItem">
+                    <!-- The whole row is the target. Tapping a cook to read it
+                         back should not require finding a chevron. -->
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Padding="0,12">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Path=OpenCommand, Source={RelativeSource AncestorType={x:Type vm:CookHistoryViewModel}}, x:DataType=vm:CookHistoryViewModel}"
+                                CommandParameter="{Binding .}" />
+                        </Grid.GestureRecognizers>
+
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="{Binding MeatTypeKey, Converter={StaticResource ResourceKey}}"
+                                   FontAttributes="Bold" />
+                            <Label Text="{Binding StartedAtLocal, StringFormat='{0:d}'}"
+                                   FontSize="13" />
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Grid.Column="1" Spacing="2" HorizontalOptions="End">
+                            <Label Text="{Binding DurationDisplay}"
+                                   FontSize="18"
+                                   HorizontalTextAlignment="End" />
+                            <!-- An auto-finished cook's end time was inferred.
+                                 A one-word badge here; the full sentence is on
+                                 the summary page, where there is room for it. -->
+                            <Label Text="{loc:Translate Summary_EstimatedShort}"
+                                   FontSize="11"
+                                   HorizontalTextAlignment="End"
+                                   IsVisible="{Binding IsEstimated}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
+
+</ContentPage>

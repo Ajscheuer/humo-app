@@ -1,3 +1,5 @@
+using Humo.App.Services;
+
 namespace Humo.App;
 
 public partial class App : Application
@@ -7,6 +9,8 @@ public partial class App : Application
         InitializeComponent();
     }
 
+    // Resolved rather than constructed: AppShell needs IAccountService to decide
+    // whether this launch shows the sign-in screen.
     protected override Window CreateWindow(IActivationState? activationState)
-        => new(new AppShell());
+        => new(ServiceHelper.GetRequiredService<AppShell>());
 }

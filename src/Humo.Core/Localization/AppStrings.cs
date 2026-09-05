@@ -126,6 +126,37 @@ public static class AppStrings
     public const string Event_Type = nameof(Event_Type);
     public const string Event_Note = nameof(Event_Note);
 
+    public const string SignIn_Title = nameof(SignIn_Title);
+    public const string SignIn_Apple = nameof(SignIn_Apple);
+    public const string SignIn_Google = nameof(SignIn_Google);
+    public const string SignIn_Email = nameof(SignIn_Email);
+    public const string SignIn_Guest = nameof(SignIn_Guest);
+    public const string SignIn_GuestExplanation = nameof(SignIn_GuestExplanation);
+    public const string SignIn_Offline = nameof(SignIn_Offline);
+    public const string SignIn_Failed = nameof(SignIn_Failed);
+    public const string SignIn_Unconfigured = nameof(SignIn_Unconfigured);
+
+    public const string History_Title = nameof(History_Title);
+    public const string History_Empty = nameof(History_Empty);
+
+    public const string Summary_Title = nameof(Summary_Title);
+    public const string Summary_Duration = nameof(Summary_Duration);
+    public const string Summary_TimePerKg = nameof(Summary_TimePerKg);
+    public const string Summary_TimePerLb = nameof(Summary_TimePerLb);
+    public const string Summary_EstimatedShort = nameof(Summary_EstimatedShort);
+    public const string Summary_PeakMeatTemp = nameof(Summary_PeakMeatTemp);
+    public const string Summary_PeakPitTemp = nameof(Summary_PeakPitTemp);
+    public const string Summary_Readings = nameof(Summary_Readings);
+    public const string Summary_FuelLoads = nameof(Summary_FuelLoads);
+    public const string Summary_Estimated = nameof(Summary_Estimated);
+    public const string Summary_NotFound = nameof(Summary_NotFound);
+    public const string Summary_Unknown = nameof(Summary_Unknown);
+    public const string Summary_RigDeleted = nameof(Summary_RigDeleted);
+
+    public const string Chart_MeatSeries = nameof(Chart_MeatSeries);
+    public const string Chart_PitSeries = nameof(Chart_PitSeries);
+    public const string Chart_NoReadings = nameof(Chart_NoReadings);
+
     public const string EventType_Wrapped = nameof(EventType_Wrapped);
     public const string EventType_Spritzed = nameof(EventType_Spritzed);
     public const string EventType_Rested = nameof(EventType_Rested);

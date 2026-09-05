@@ -12,6 +12,34 @@ namespace Humo.Conventions.Tests;
 public class ProjectBoundaryTests
 {
     [Fact]
+    public void No_ViewModel_uses_ConfigureAwait_false()
+    {
+        // ViewModels mutate bound ObservableCollections and observable
+        // properties. Resuming off the UI thread to do that throws on iOS and
+        // Android -- a crash that no test on this machine can see, because there
+        // is no UI thread here to leave. Commands start on the UI thread, so
+        // awaiting without ConfigureAwait resumes there.
+        //
+        // Services and repositories still use it; nothing below the ViewModel
+        // touches the UI.
+        var offending = Directory
+            .EnumerateFiles(
+                RepositoryPaths.Source("Humo.Core", "ViewModels"),
+                "*.cs",
+                SearchOption.AllDirectories)
+            .Where(path => File.ReadAllText(path).Contains(
+                "ConfigureAwait(false)", StringComparison.Ordinal))
+            .Select(Path.GetFileName)
+            .Order()
+            .ToList();
+
+        Assert.True(
+            offending.Count == 0,
+            $"These ViewModels use ConfigureAwait(false): {string.Join(", ", offending)}. "
+            + "Remove it -- see the MVVM rules in CLAUDE.md.");
+    }
+
+    [Fact]
     public void Humo_Core_does_not_reference_MAUI()
     {
         // This is what keeps every ViewModel and service unit-testable with no

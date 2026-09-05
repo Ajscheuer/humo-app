@@ -36,6 +36,8 @@ public class ServiceRegistrationTests
     [InlineData(typeof(EquipmentListViewModel))]
     [InlineData(typeof(EquipmentEditViewModel))]
     [InlineData(typeof(FuelSheetViewModel))]
+    [InlineData(typeof(CookHistoryViewModel))]
+    [InlineData(typeof(CookSummaryViewModel))]
     public void Every_view_model_can_be_resolved(Type viewModelType)
     {
         using var provider = BuildAppContainer();
@@ -51,6 +53,7 @@ public class ServiceRegistrationTests
         Assert.NotNull(provider.GetRequiredService<ICookService>());
         Assert.NotNull(provider.GetRequiredService<IEquipmentService>());
         Assert.NotNull(provider.GetRequiredService<IFuelService>());
+        Assert.NotNull(provider.GetRequiredService<ICookSummaryService>());
         Assert.NotNull(provider.GetRequiredService<IEquipmentRepository>());
         Assert.NotNull(provider.GetRequiredService<ICookRepository>());
         Assert.NotNull(provider.GetRequiredService<ITempEntryRepository>());
