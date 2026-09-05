@@ -1,4 +1,5 @@
 using Humo.Core.Localization;
+using Humo.Core.Navigation;
 using Humo.Core.Services;
 using Humo.Core.Settings;
 using Humo.Core.Tests.Support;
@@ -20,8 +21,10 @@ public class FuelSheetViewModelTests : IAsyncLifetime
 
     public Task DisposeAsync() => _db.DisposeAsync().AsTask();
 
+    private readonly INavigationService _navigation = Substitute.For<INavigationService>();
+
     private FuelSheetViewModel CreateViewModel()
-        => new(_db.FuelService, _settings, _localizer);
+        => new(_db.FuelService, _settings, _localizer, _navigation);
 
     private Task<Equipment> ARigAsync() => _db.Service.GetOrCreateDefaultEquipmentAsync();
 
@@ -270,8 +273,84 @@ public class FuelSheetViewModelTests : IAsyncLifetime
     {
         var vm = CreateViewModel();
 
+        Assert.False(vm.CanLogSize);
+        Assert.False(vm.LogSizeCommand.CanExecute(SizeClass.Medium));
+
         await Assert.ThrowsAsync<InvalidOperationException>(
             () => vm.LogSizeCommand.ExecuteAsync(SizeClass.Medium));
+    }
+
+    [Fact]
+    public async Task The_sheet_closes_once_the_load_is_logged()
+    {
+        var rig = await ARigAsync();
+        var vm = await OpenedForAsync(rig.Id);
+
+        await vm.LogSizeCommand.ExecuteAsync(SizeClass.Medium);
+
+        // A sheet that commits and stays put looks like nothing happened. The
+        // cook taps again, and the second FuelEvent never went on the fire --
+        // corrupting the very cadence the fire model learns from.
+        await _navigation.Received(1).GoBackAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public async Task A_count_below_one_disables_the_size_buttons(int count)
+    {
+        var rig = await ARigAsync();
+        var vm = await OpenedForAsync(rig.Id);
+
+        vm.Count = count;
+
+        // The service rejects these outright. Without the guard the rejection
+        // surfaces as an unhandled exception on the app's most-tapped button.
+        Assert.False(vm.CanLogSize);
+        Assert.False(vm.LogSizeCommand.CanExecute(SizeClass.Medium));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-2.5)]
+    [InlineData(double.NaN)]
+    public async Task A_weight_that_is_present_but_nonsense_disables_the_size_buttons(double weight)
+    {
+        var rig = await ARigAsync();
+        var vm = await OpenedForAsync(rig.Id);
+
+        vm.Weight = weight;
+        Assert.False(vm.CanLogSize);
+
+        // Absent is fine -- weight is never on the fast path.
+        vm.Weight = null;
+        Assert.True(vm.CanLogSize);
+    }
+
+    [Fact]
+    public async Task A_wood_type_this_build_does_not_know_falls_back_instead_of_throwing()
+    {
+        var rig = await ARigAsync();
+
+        // What a record written by a newer version of the app looks like after
+        // it syncs down: a stored enum value with no option in this build.
+        await _db.FuelEvents.SaveAsync(new FuelEvent
+        {
+            EquipmentId = rig.Id,
+            RecordedAt = _db.Clock.UtcNow,
+            WoodType = (WoodType)777,
+            Form = (FuelForm)888,
+            SizeClass = SizeClass.Medium,
+            Count = 1,
+            CreatedAt = _db.Clock.UtcNow,
+            UpdatedAt = _db.Clock.UtcNow,
+        });
+
+        var vm = await OpenedForAsync(rig.Id);
+
+        // A picker that throws is worse than one showing the fallback.
+        Assert.Equal(vm.WoodTypes[0], vm.SelectedWoodType);
+        Assert.Equal(vm.FuelForms[0], vm.SelectedForm);
     }
 
     [Fact]

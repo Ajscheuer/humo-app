@@ -133,8 +133,15 @@ public sealed partial class EquipmentEditViewModel : ObservableObject
         }
 
         Name = rig.Name;
-        SelectedType = EquipmentTypes.First(o => o.Value == rig.Type);
-        SelectedInsulation = InsulationLevels.First(o => o.Value == rig.Insulation);
+
+        // FirstOrDefault, not First: a rig stored by a newer version of the app
+        // may carry a type this build has no option for, and a form that throws
+        // is worse than one showing the fallback. EnumDisplay.KeyFor guards the
+        // same way.
+        SelectedType = EquipmentTypes.FirstOrDefault(o => o.Value == rig.Type)
+                       ?? EquipmentTypes[0];
+        SelectedInsulation = InsulationLevels.FirstOrDefault(o => o.Value == rig.Insulation)
+                             ?? InsulationLevels[0];
         FireboxVolumeL = rig.FireboxVolumeL;
         CookChamberVolumeL = rig.CookChamberVolumeL;
         Notes = rig.Notes;
@@ -165,7 +172,19 @@ public sealed partial class EquipmentEditViewModel : ObservableObject
             // A name of nothing but spaces passes CanSave's IsNullOrWhiteSpace
             // check only if it changes underneath us; the service is the one
             // authority on what a valid rig is, so its refusal is what shows.
+            // ArgumentOutOfRangeException for a volume lands here too, which is
+            // why CanSave screens volumes rather than leaving them to this catch.
             ErrorMessage = _localizer[AppStrings.Equipment_NameRequired];
+            return;
+        }
+        catch (InvalidOperationException)
+        {
+            // The rig was deleted between this form loading and Save being
+            // tapped. LoadAsync already degrades to "add" for this race; without
+            // the matching catch here the save path crashed on it instead.
+            ErrorMessage = _localizer[AppStrings.Equipment_Gone];
+            _editingId = null;
+            OnPropertyChanged(nameof(Title));
             return;
         }
 

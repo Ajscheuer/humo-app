@@ -92,15 +92,18 @@ public sealed class FuelService : IFuelService
 
     private readonly IFuelEventRepository _fuelEvents;
     private readonly IEquipmentRepository _equipment;
+    private readonly ICookRepository _cooks;
     private readonly IClock _clock;
 
     public FuelService(
         IFuelEventRepository fuelEvents,
         IEquipmentRepository equipment,
+        ICookRepository cooks,
         IClock clock)
     {
         _fuelEvents = fuelEvents;
         _equipment = equipment;
+        _cooks = cooks;
         _clock = clock;
     }
 
@@ -180,7 +183,41 @@ public sealed class FuelService : IFuelService
         };
 
         await _fuelEvents.SaveAsync(fuelEvent, cancellationToken).ConfigureAwait(false);
+        await TouchCooksOnTheFireAsync(fuelEvent, now, cancellationToken).ConfigureAwait(false);
+
         return fuelEvent;
+    }
+
+    /// <summary>
+    /// Marks every unfinished cook on this rig as active.
+    /// <para>
+    /// Feeding the fire is tending every cook above it, so this follows the same
+    /// rig-scoping as the event itself rather than crediting only the cook that
+    /// happened to be on screen. Without it, a cook who logs nothing but fuel
+    /// overnight is dropped from thermal load at 24 hours and auto-finished at
+    /// 72 while they are standing at the smoker putting wood on.
+    /// </para>
+    /// </summary>
+    private async Task TouchCooksOnTheFireAsync(
+        FuelEvent fuelEvent,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        var unfinished = await _cooks.GetUnfinishedAsync(cancellationToken).ConfigureAwait(false);
+
+        foreach (var cook in unfinished.Where(c => c.EquipmentId == fuelEvent.EquipmentId))
+        {
+            // Activity is when the wood went on, not when it was typed -- and a
+            // back-dated catch-up entry must not drag activity backwards.
+            if (fuelEvent.RecordedAt <= cook.LastActivityAt)
+            {
+                continue;
+            }
+
+            cook.LastActivityAt = fuelEvent.RecordedAt;
+            cook.UpdatedAt = now;
+            await _cooks.SaveAsync(cook, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     public Task<IReadOnlyList<FuelEvent>> GetForEquipmentAsync(

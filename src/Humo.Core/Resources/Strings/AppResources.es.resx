@@ -243,6 +243,12 @@
   <data name="Equipment_InUse" xml:space="preserve">
     <value>Hay una cocción en curso en este equipo. Terminala primero.</value>
   </data>
+  <data name="Equipment_Gone" xml:space="preserve">
+    <value>Este equipo fue eliminado. Al guardar se va a agregar de nuevo.</value>
+  </data>
+  <data name="StartCook_Equipment" xml:space="preserve">
+    <value>Equipo</value>
+  </data>
   <data name="EquipmentType_Offset" xml:space="preserve">
     <value>Offset</value>
     <comment>Kept in English per the glossary: 'offset' is the term in Spanish too.</comment>

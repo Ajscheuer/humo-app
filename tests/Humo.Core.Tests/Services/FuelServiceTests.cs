@@ -259,6 +259,126 @@ public class FuelServiceTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Feeding_the_fire_counts_as_activity_on_the_cook()
+    {
+        var rig = await ARigAsync();
+        var cook = await _db.Service.StartCookAsync(new StartCookRequest
+        {
+            MeatType = MeatType.Brisket,
+            WeightKg = 6,
+            EquipmentId = rig.Id,
+        });
+
+        _db.Clock.Advance(TimeSpan.FromHours(10));
+        await Service.LogFuelAsync(ASplit(rig.Id) with { CookId = cook.Id });
+
+        // Otherwise a cook who logs nothing but fuel overnight is dropped from
+        // thermal load at 24 hours and auto-finished at 72 -- while they are
+        // standing at the smoker putting wood on.
+        var stored = await _db.Cooks.GetAsync(cook.Id);
+        Assert.Equal(_db.Clock.UtcNow, stored!.LastActivityAt);
+    }
+
+    [Fact]
+    public async Task Feeding_the_fire_counts_for_every_cook_on_that_rig()
+    {
+        var rig = await ARigAsync();
+        var brisket = await _db.Service.StartCookAsync(new StartCookRequest
+        {
+            MeatType = MeatType.Brisket,
+            WeightKg = 6,
+            EquipmentId = rig.Id,
+        });
+        var ribs = await _db.Service.StartCookAsync(new StartCookRequest
+        {
+            MeatType = MeatType.PorkRibs,
+            WeightKg = 1.5,
+            EquipmentId = rig.Id,
+        });
+
+        _db.Clock.Advance(TimeSpan.FromHours(10));
+
+        // Logged with the brisket on screen, but one fire warms both.
+        await Service.LogFuelAsync(ASplit(rig.Id) with { CookId = brisket.Id });
+
+        // Crediting only the cook that happened to be on screen would
+        // auto-finish the ribs beside it.
+        Assert.Equal(_db.Clock.UtcNow, (await _db.Cooks.GetAsync(brisket.Id))!.LastActivityAt);
+        Assert.Equal(_db.Clock.UtcNow, (await _db.Cooks.GetAsync(ribs.Id))!.LastActivityAt);
+    }
+
+    [Fact]
+    public async Task Feeding_one_fire_does_not_revive_a_cook_on_another_rig()
+    {
+        var offset = await _db.EquipmentService.SaveAsync(new SaveEquipmentRequest
+        {
+            Name = "Offset",
+            Type = EquipmentType.Offset,
+        });
+        var kamado = await _db.EquipmentService.SaveAsync(new SaveEquipmentRequest
+        {
+            Name = "Kamado",
+            Type = EquipmentType.Kamado,
+        });
+
+        var onKamado = await _db.Service.StartCookAsync(new StartCookRequest
+        {
+            MeatType = MeatType.Chicken,
+            WeightKg = 1.8,
+            EquipmentId = kamado.Id,
+        });
+        var activityAtStart = onKamado.LastActivityAt;
+
+        _db.Clock.Advance(TimeSpan.FromHours(10));
+        await Service.LogFuelAsync(ASplit(offset.Id));
+
+        Assert.Equal(activityAtStart, (await _db.Cooks.GetAsync(onKamado.Id))!.LastActivityAt);
+    }
+
+    [Fact]
+    public async Task A_back_dated_load_does_not_drag_activity_backwards()
+    {
+        var rig = await ARigAsync();
+        var cook = await _db.Service.StartCookAsync(new StartCookRequest
+        {
+            MeatType = MeatType.Brisket,
+            WeightKg = 6,
+            EquipmentId = rig.Id,
+        });
+
+        _db.Clock.Advance(TimeSpan.FromHours(10));
+        await Service.LogFuelAsync(ASplit(rig.Id));
+        var activityAfterLoad = (await _db.Cooks.GetAsync(cook.Id))!.LastActivityAt;
+
+        await Service.LogFuelAsync(ASplit(rig.Id) with
+        {
+            RecordedAt = _db.Clock.UtcNow - TimeSpan.FromHours(4),
+        });
+
+        Assert.Equal(activityAfterLoad, (await _db.Cooks.GetAsync(cook.Id))!.LastActivityAt);
+    }
+
+    [Fact]
+    public async Task A_finished_cook_is_not_revived_by_fuel_on_its_old_rig()
+    {
+        var rig = await ARigAsync();
+        var cook = await _db.Service.StartCookAsync(new StartCookRequest
+        {
+            MeatType = MeatType.Brisket,
+            WeightKg = 6,
+            EquipmentId = rig.Id,
+        });
+        await _db.Service.FinishCookAsync(cook.Id);
+        var activityAtFinish = (await _db.Cooks.GetAsync(cook.Id))!.LastActivityAt;
+
+        // Getting the fire going again for the next cook.
+        _db.Clock.Advance(TimeSpan.FromHours(2));
+        await Service.LogFuelAsync(ASplit(rig.Id));
+
+        Assert.Equal(activityAtFinish, (await _db.Cooks.GetAsync(cook.Id))!.LastActivityAt);
+    }
+
+    [Fact]
     public async Task Every_field_round_trips_through_storage()
     {
         var rig = await ARigAsync();

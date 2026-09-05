@@ -252,6 +252,43 @@ public class EquipmentViewModelTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Saving_a_rig_deleted_underneath_explains_itself_rather_than_crashing()
+    {
+        var rig = await ARigAsync();
+
+        var vm = CreateEdit();
+        await vm.LoadCommand.ExecuteAsync(rig.Id);
+
+        // Deleted between this form loading and Save being tapped.
+        await _db.EquipmentService.DeleteAsync(rig.Id);
+        vm.Name = "Brazos (rebuilt)";
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        // LoadAsync already degrades to "add" for this race; the save path used
+        // to crash on it instead.
+        Assert.Equal(_localizer[AppStrings.Equipment_Gone], vm.ErrorMessage);
+        Assert.Empty(await _db.EquipmentService.GetAllAsync());
+        await _navigation.DidNotReceive().GoBackAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task A_rig_type_this_build_does_not_know_falls_back_instead_of_throwing()
+    {
+        // What a rig written by a newer version of the app looks like after it
+        // syncs down: stored enum values with no option in this build.
+        var rig = await ARigAsync();
+        rig.Type = (EquipmentType)777;
+        rig.Insulation = (InsulationLevel)888;
+        await _db.Equipment.SaveAsync(rig);
+
+        var vm = CreateEdit();
+        await vm.LoadCommand.ExecuteAsync(rig.Id);
+
+        Assert.Equal(vm.EquipmentTypes[0], vm.SelectedType);
+        Assert.Equal(vm.InsulationLevels[0], vm.SelectedInsulation);
+    }
+
+    [Fact]
     public async Task Every_type_and_insulation_level_is_offered_with_a_key_that_resolves()
     {
         var vm = CreateEdit();
