@@ -261,6 +261,12 @@
   <data name="Equipment_InUse" xml:space="preserve">
     <value>There is a cook running on this rig. Finish it first.</value>
   </data>
+  <data name="Equipment_Gone" xml:space="preserve">
+    <value>This rig was deleted. Saving will add it again as a new one.</value>
+  </data>
+  <data name="StartCook_Equipment" xml:space="preserve">
+    <value>Rig</value>
+  </data>
   <data name="EquipmentType_Offset" xml:space="preserve">
     <value>Offset</value>
   </data>

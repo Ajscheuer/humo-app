@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Humo.Core.Localization;
+using Humo.Core.Navigation;
 using Humo.Core.Services;
 using Humo.Core.Settings;
 using Humo.Shared.Enums;
@@ -33,15 +34,21 @@ public sealed partial class FuelSheetViewModel : ObservableObject
     private readonly IFuelService _fuel;
     private readonly IUserSettings _settings;
     private readonly ILocalizer _localizer;
+    private readonly INavigationService _navigation;
 
     private Guid _equipmentId;
     private Guid? _cookId;
 
-    public FuelSheetViewModel(IFuelService fuel, IUserSettings settings, ILocalizer localizer)
+    public FuelSheetViewModel(
+        IFuelService fuel,
+        IUserSettings settings,
+        ILocalizer localizer,
+        INavigationService navigation)
     {
         _fuel = fuel;
         _settings = settings;
         _localizer = localizer;
+        _navigation = navigation;
 
         WoodTypes = EnumDisplay.WoodTypesInDisplayOrder
             .Select(t => new WoodTypeOption(t, EnumDisplay.KeyFor(t)))
@@ -101,6 +108,30 @@ public sealed partial class FuelSheetViewModel : ObservableObject
 
     public bool IsOtherWoodType => SelectedWoodType.Value == WoodType.Other;
 
+    /// <summary>
+    /// Whether the sheet holds something the service will accept.
+    /// <para>
+    /// The optional fields are the ones that can be wrong: an entry box makes
+    /// "0" and "-1" reachable in Count, and the service rejects both. Without
+    /// this guard the rejection surfaces as an unhandled exception on the UI
+    /// thread — a crash on the app's most-tapped button.
+    /// </para>
+    /// </summary>
+    public bool CanLogSize
+        => _equipmentId != Guid.Empty
+           && Count >= 1
+           && (Weight is null || (double.IsFinite(Weight.Value) && Weight.Value > 0));
+
+    partial void OnCountChanged(int value) => RefreshCanLog();
+
+    partial void OnWeightChanged(double? value) => RefreshCanLog();
+
+    private void RefreshCanLog()
+    {
+        OnPropertyChanged(nameof(CanLogSize));
+        LogSizeCommand.NotifyCanExecuteChanged();
+    }
+
     partial void OnSelectedWoodTypeChanged(WoodTypeOption value)
     {
         if (value.Value != WoodType.Other)
@@ -130,9 +161,14 @@ public sealed partial class FuelSheetViewModel : ObservableObject
         var defaults = await _fuel.GetDefaultsAsync(_equipmentId, cancellationToken)
             .ConfigureAwait(false);
 
-        SelectedWoodType = WoodTypes.First(o => o.Value == defaults.WoodType);
+        // FirstOrDefault, not First: a value stored by a newer version of the app
+        // and pulled down by sync has no option in this build's list, and a
+        // picker that throws is worse than one showing the fallback.
+        // EnumDisplay.KeyFor guards the same way.
+        SelectedWoodType = WoodTypes.FirstOrDefault(o => o.Value == defaults.WoodType)
+                           ?? WoodTypes[0];
         WoodTypeOther = defaults.WoodTypeOther;
-        SelectedForm = FuelForms.First(o => o.Value == defaults.Form);
+        SelectedForm = FuelForms.FirstOrDefault(o => o.Value == defaults.Form) ?? FuelForms[0];
         PrefilledFromLastLoad = defaults.FromPreviousEvent;
 
         // Deliberately reset rather than carried forward. Size is the judgement
@@ -150,7 +186,7 @@ public sealed partial class FuelSheetViewModel : ObservableObject
     /// a cook who stops logging fuel because logging fuel is annoying.
     /// </para>
     /// </summary>
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanLogSize))]
     private async Task LogSizeAsync(SizeClass sizeClass, CancellationToken cancellationToken)
     {
         if (_equipmentId == Guid.Empty)
@@ -176,6 +212,12 @@ public sealed partial class FuelSheetViewModel : ObservableObject
                     : null,
             },
             cancellationToken).ConfigureAwait(false);
+
+        // Dismiss. The sheet committing while staying on screen looks like
+        // nothing happened, and the cook taps again -- writing a second
+        // FuelEvent that never went on the fire and corrupting the very cadence
+        // the fire model learns from. Leaving is the feedback.
+        await _navigation.GoBackAsync(cancellationToken).ConfigureAwait(false);
     }
 }
 

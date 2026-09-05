@@ -25,7 +25,7 @@
                  answer is forced, and a one-entry picker is a tap that buys
                  nothing. -->
             <VerticalStackLayout Spacing="8" IsVisible="{Binding HasEquipmentChoice}">
-                <Label Text="{loc:Translate Equipment_Type}"
+                <Label Text="{loc:Translate StartCook_Equipment}"
                        FontAttributes="Bold" />
                 <Picker ItemsSource="{Binding Equipment}"
                         SelectedItem="{Binding SelectedEquipment}"

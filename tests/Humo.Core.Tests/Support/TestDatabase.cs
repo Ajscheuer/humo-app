@@ -31,7 +31,7 @@ internal sealed class TestDatabase : IDatabasePath, IAsyncDisposable
 
         Service = new CookService(Equipment, Cooks, TempEntries, PitTempEntries, Events, Clock);
         EquipmentService = new EquipmentService(Equipment, Cooks, Clock);
-        FuelService = new FuelService(FuelEvents, Equipment, Clock);
+        FuelService = new FuelService(FuelEvents, Equipment, Cooks, Clock);
     }
 
     public string DatabaseFilePath { get; }

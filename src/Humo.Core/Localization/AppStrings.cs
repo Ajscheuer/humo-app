@@ -75,6 +75,8 @@ public static class AppStrings
     public const string Equipment_None = nameof(Equipment_None);
     public const string Equipment_NameRequired = nameof(Equipment_NameRequired);
     public const string Equipment_InUse = nameof(Equipment_InUse);
+    public const string Equipment_Gone = nameof(Equipment_Gone);
+    public const string StartCook_Equipment = nameof(StartCook_Equipment);
 
     public const string EquipmentType_Offset = nameof(EquipmentType_Offset);
     public const string EquipmentType_Kettle = nameof(EquipmentType_Kettle);
