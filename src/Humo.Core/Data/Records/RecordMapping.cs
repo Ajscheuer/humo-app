@@ -148,4 +148,70 @@ internal static class RecordMapping
         Note = p.Note,
         Source = p.Source,
     };
+
+    public static FuelEvent ToEntity(this FuelEventRecord r) => new()
+    {
+        Id = r.Id,
+        AccountId = r.AccountId,
+        CreatedAt = r.CreatedAt,
+        UpdatedAt = r.UpdatedAt,
+        DeletedAt = r.DeletedAt,
+        EquipmentId = r.EquipmentId,
+        CookId = r.CookId,
+        RecordedAt = r.RecordedAt,
+        WoodType = r.WoodType,
+        WoodTypeOther = r.WoodTypeOther,
+        Form = r.Form,
+        SizeClass = r.SizeClass,
+        Count = r.Count,
+        WeightKg = r.WeightKg,
+        ViaNotification = r.ViaNotification,
+    };
+
+    public static FuelEventRecord ToRecord(this FuelEvent f, DateTimeOffset? syncedAt = null) => new()
+    {
+        Id = f.Id,
+        AccountId = f.AccountId,
+        CreatedAt = f.CreatedAt,
+        UpdatedAt = f.UpdatedAt,
+        DeletedAt = f.DeletedAt,
+        SyncedAt = syncedAt,
+        EquipmentId = f.EquipmentId,
+        CookId = f.CookId,
+        RecordedAt = f.RecordedAt,
+        WoodType = f.WoodType,
+        WoodTypeOther = f.WoodTypeOther,
+        Form = f.Form,
+        SizeClass = f.SizeClass,
+        Count = f.Count,
+        WeightKg = f.WeightKg,
+        ViaNotification = f.ViaNotification,
+    };
+
+    public static Event ToEntity(this EventRecord r) => new()
+    {
+        Id = r.Id,
+        AccountId = r.AccountId,
+        CreatedAt = r.CreatedAt,
+        UpdatedAt = r.UpdatedAt,
+        DeletedAt = r.DeletedAt,
+        CookId = r.CookId,
+        RecordedAt = r.RecordedAt,
+        Type = r.Type,
+        Note = r.Note,
+    };
+
+    public static EventRecord ToRecord(this Event e, DateTimeOffset? syncedAt = null) => new()
+    {
+        Id = e.Id,
+        AccountId = e.AccountId,
+        CreatedAt = e.CreatedAt,
+        UpdatedAt = e.UpdatedAt,
+        DeletedAt = e.DeletedAt,
+        SyncedAt = syncedAt,
+        CookId = e.CookId,
+        RecordedAt = e.RecordedAt,
+        Type = e.Type,
+        Note = e.Note,
+    };
 }

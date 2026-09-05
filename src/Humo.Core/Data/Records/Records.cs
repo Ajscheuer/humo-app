@@ -96,3 +96,48 @@ internal sealed class PitTempEntryRecord
     public string? Note { get; set; }
     public TempSource Source { get; set; }
 }
+
+[Table("fuel_events")]
+internal sealed class FuelEventRecord
+{
+    [PrimaryKey] public Guid Id { get; set; }
+    public Guid AccountId { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset? DeletedAt { get; set; }
+    public DateTimeOffset? SyncedAt { get; set; }
+
+    // Scoped to the rig for the same reason pit temperatures are: one fire. The
+    // index is (EquipmentId, RecordedAt) because every read is "the fuel history
+    // for this rig, in order" -- pre-filling the sheet, and the fire model's
+    // cadence learning.
+    [Indexed(Name = "ix_fuel_equipment_time", Order = 1)] public Guid EquipmentId { get; set; }
+    [Indexed(Name = "ix_fuel_equipment_time", Order = 2)] public DateTimeOffset RecordedAt { get; set; }
+
+    public Guid? CookId { get; set; }
+    public WoodType WoodType { get; set; }
+    public string? WoodTypeOther { get; set; }
+    public FuelForm Form { get; set; }
+    public SizeClass SizeClass { get; set; }
+    public int Count { get; set; }
+    public double? WeightKg { get; set; }
+    public bool ViaNotification { get; set; }
+}
+
+[Table("events")]
+internal sealed class EventRecord
+{
+    [PrimaryKey] public Guid Id { get; set; }
+    public Guid AccountId { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset? DeletedAt { get; set; }
+    public DateTimeOffset? SyncedAt { get; set; }
+
+    // Per cook, unlike fuel: a milestone applies to one piece of meat.
+    [Indexed(Name = "ix_event_cook_time", Order = 1)] public Guid CookId { get; set; }
+    [Indexed(Name = "ix_event_cook_time", Order = 2)] public DateTimeOffset RecordedAt { get; set; }
+
+    public EventType Type { get; set; }
+    public string? Note { get; set; }
+}

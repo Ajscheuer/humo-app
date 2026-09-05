@@ -1,5 +1,6 @@
 using Humo.Core.Localization;
 using Humo.Core.Navigation;
+using Humo.Core.Services;
 using Humo.Core.Settings;
 using Humo.Core.Tests.Support;
 using Humo.Core.ViewModels;
@@ -21,7 +22,18 @@ public class StartCookViewModelTests : IAsyncLifetime
     public Task DisposeAsync() => _db.DisposeAsync().AsTask();
 
     private StartCookViewModel CreateViewModel()
-        => new(_db.Service, _settings, _localizer, _navigation);
+        => new(_db.Service, _db.EquipmentService, _settings, _localizer, _navigation);
+
+    /// <summary>
+    /// The form as the user actually meets it: loaded, with a rig selected. A
+    /// cook cannot start without one, so anything that starts a cook needs this.
+    /// </summary>
+    private async Task<StartCookViewModel> CreateLoadedViewModelAsync()
+    {
+        var vm = CreateViewModel();
+        await vm.LoadCommand.ExecuteAsync(null);
+        return vm;
+    }
 
     [Fact]
     public void Every_meat_type_is_offered_with_a_key_that_resolves()
@@ -40,10 +52,10 @@ public class StartCookViewModelTests : IAsyncLifetime
     }
 
     [Fact]
-    public void Weight_is_pre_filled_from_the_meat_type()
+    public async Task Weight_is_pre_filled_from_the_meat_type()
     {
         _settings.WeightUnit.Returns(WeightUnit.Kilograms);
-        var vm = CreateViewModel();
+        var vm = await CreateLoadedViewModelAsync();
 
         // Required, but never a blocker: the field arrives with a sensible number
         // so a cook who did not weigh the meat is not stopped at a blank box.
@@ -100,9 +112,11 @@ public class StartCookViewModelTests : IAsyncLifetime
     [InlineData(0)]
     [InlineData(-1)]
     [InlineData(double.NaN)]
-    public void A_cook_cannot_be_started_without_a_sensible_weight(double weight)
+    public async Task A_cook_cannot_be_started_without_a_sensible_weight(double weight)
     {
-        var vm = CreateViewModel();
+        // Loaded, so a rig is selected and the weight is the only thing wrong.
+        // Against an unloaded form this would pass with the weight guard deleted.
+        var vm = await CreateLoadedViewModelAsync();
         vm.Weight = weight;
 
         Assert.False(vm.CanStart);
@@ -110,10 +124,81 @@ public class StartCookViewModelTests : IAsyncLifetime
     }
 
     [Fact]
+    public void A_cook_cannot_be_started_before_a_rig_is_loaded()
+    {
+        var vm = CreateViewModel();
+
+        // Every cook is attached to a rig, because the fire model learns per rig.
+        Assert.Null(vm.SelectedEquipment);
+        Assert.False(vm.CanStart);
+    }
+
+    [Fact]
+    public async Task The_first_cook_creates_the_implicit_rig()
+    {
+        var vm = await CreateLoadedViewModelAsync();
+
+        // A user who has never opened the equipment screen must still be able to
+        // start a cook; the form mints the default rig rather than dead-ending
+        // on "add equipment first".
+        var rig = Assert.Single(vm.Equipment);
+        Assert.Equal(rig, vm.SelectedEquipment);
+        Assert.False(vm.HasEquipmentChoice);
+    }
+
+    [Fact]
+    public async Task A_second_rig_turns_the_picker_on()
+    {
+        await _db.EquipmentService.SaveAsync(new SaveEquipmentRequest
+        {
+            Name = "Kamado",
+            Type = EquipmentType.Kamado,
+        });
+        await _db.EquipmentService.SaveAsync(new SaveEquipmentRequest
+        {
+            Name = "Old Country Brazos",
+            Type = EquipmentType.Offset,
+        });
+
+        var vm = await CreateLoadedViewModelAsync();
+
+        // With one rig the answer is forced and the picker is a tap that buys
+        // nothing; with two it is a real choice.
+        Assert.Equal(2, vm.Equipment.Count);
+        Assert.True(vm.HasEquipmentChoice);
+    }
+
+    [Fact]
+    public async Task The_cook_is_attached_to_the_rig_that_was_chosen()
+    {
+        await _db.EquipmentService.SaveAsync(new SaveEquipmentRequest
+        {
+            Name = "Kettle",
+            Type = EquipmentType.Kettle,
+        });
+        var kamado = await _db.EquipmentService.SaveAsync(new SaveEquipmentRequest
+        {
+            Name = "Kamado",
+            Type = EquipmentType.Kamado,
+        });
+
+        var vm = await CreateLoadedViewModelAsync();
+        vm.SelectedEquipment = vm.Equipment.First(e => e.Id == kamado.Id);
+
+        await vm.StartCookCommand.ExecuteAsync(null);
+
+        // And the pit type is snapshotted from the rig actually picked, not from
+        // whichever one happened to be first in the list.
+        var cook = (await _db.Service.GetActiveCookAsync())!;
+        Assert.Equal(kamado.Id, cook.EquipmentId);
+        Assert.Equal(EquipmentType.Kamado, cook.PitType);
+    }
+
+    [Fact]
     public async Task Weight_entered_in_pounds_is_stored_in_kilograms()
     {
         _settings.WeightUnit.Returns(WeightUnit.Pounds);
-        var vm = CreateViewModel();
+        var vm = await CreateLoadedViewModelAsync();
         vm.Weight = 15;
 
         await vm.StartCookCommand.ExecuteAsync(null);
@@ -128,7 +213,7 @@ public class StartCookViewModelTests : IAsyncLifetime
     public async Task A_target_temperature_entered_in_Fahrenheit_is_stored_in_Celsius()
     {
         _settings.TemperatureUnit.Returns(TemperatureUnit.Fahrenheit);
-        var vm = CreateViewModel();
+        var vm = await CreateLoadedViewModelAsync();
         vm.TargetTemperature = 203;
 
         await vm.StartCookCommand.ExecuteAsync(null);
@@ -140,7 +225,7 @@ public class StartCookViewModelTests : IAsyncLifetime
     [Fact]
     public async Task A_blank_target_temperature_stays_blank()
     {
-        var vm = CreateViewModel();
+        var vm = await CreateLoadedViewModelAsync();
         vm.TargetTemperature = null;
 
         await vm.StartCookCommand.ExecuteAsync(null);
@@ -152,7 +237,7 @@ public class StartCookViewModelTests : IAsyncLifetime
     [Fact]
     public async Task Starting_a_cook_takes_the_user_to_the_cook_screen()
     {
-        var vm = CreateViewModel();
+        var vm = await CreateLoadedViewModelAsync();
 
         await vm.StartCookCommand.ExecuteAsync(null);
 
@@ -164,7 +249,7 @@ public class StartCookViewModelTests : IAsyncLifetime
     [Fact]
     public async Task Free_text_that_is_only_whitespace_is_not_stored()
     {
-        var vm = CreateViewModel();
+        var vm = await CreateLoadedViewModelAsync();
         vm.SelectedMeatType = vm.MeatTypes.First(o => o.Value == MeatType.Other);
         vm.MeatTypeOther = "   ";
 
@@ -177,7 +262,7 @@ public class StartCookViewModelTests : IAsyncLifetime
     [Fact]
     public async Task Free_text_is_trimmed_before_it_is_stored()
     {
-        var vm = CreateViewModel();
+        var vm = await CreateLoadedViewModelAsync();
         vm.SelectedMeatType = vm.MeatTypes.First(o => o.Value == MeatType.Other);
         vm.MeatTypeOther = "  Goat  ";
 
@@ -192,12 +277,12 @@ public class StartCookViewModelTests : IAsyncLifetime
     [Fact]
     public async Task The_cook_records_the_pit_it_was_run_on()
     {
-        var vm = CreateViewModel();
+        var vm = await CreateLoadedViewModelAsync();
 
         await vm.StartCookCommand.ExecuteAsync(null);
 
-        // Slice 1 has no equipment management, so the first cook creates the
-        // implicit rig rather than starting with no pit type at all.
+        // A cook always records what it was run on. The pit type is a snapshot,
+        // so editing or deleting the rig later cannot rewrite history.
         var cook = (await _db.Service.GetActiveCookAsync())!;
         Assert.NotEqual(Guid.Empty, cook.EquipmentId);
         Assert.Equal(EquipmentType.Offset, cook.PitType);

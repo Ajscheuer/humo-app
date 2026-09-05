@@ -201,4 +201,188 @@
   <data name="MeatType_Other" xml:space="preserve">
     <value>Otro</value>
   </data>
+  <data name="Unit_Litres_Short" xml:space="preserve">
+    <value>L</value>
+  </data>
+  <data name="Equipment_Title" xml:space="preserve">
+    <value>Mis equipos</value>
+  </data>
+  <data name="Equipment_Add" xml:space="preserve">
+    <value>Agregar equipo</value>
+  </data>
+  <data name="Equipment_Edit" xml:space="preserve">
+    <value>Editar equipo</value>
+  </data>
+  <data name="Equipment_Delete" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="Equipment_Name" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="Equipment_Type" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+  <data name="Equipment_Insulation" xml:space="preserve">
+    <value>Aislación</value>
+  </data>
+  <data name="Equipment_FireboxVolume" xml:space="preserve">
+    <value>Volumen del hogar</value>
+  </data>
+  <data name="Equipment_CookChamberVolume" xml:space="preserve">
+    <value>Volumen de la cámara</value>
+  </data>
+  <data name="Equipment_Notes" xml:space="preserve">
+    <value>Notas</value>
+  </data>
+  <data name="Equipment_None" xml:space="preserve">
+    <value>Todavía no hay equipos</value>
+  </data>
+  <data name="Equipment_NameRequired" xml:space="preserve">
+    <value>Ponele un nombre al equipo</value>
+  </data>
+  <data name="Equipment_InUse" xml:space="preserve">
+    <value>Hay una cocción en curso en este equipo. Terminala primero.</value>
+  </data>
+  <data name="EquipmentType_Offset" xml:space="preserve">
+    <value>Offset</value>
+    <comment>Kept in English per the glossary: 'offset' is the term in Spanish too.</comment>
+  </data>
+  <data name="EquipmentType_Kettle" xml:space="preserve">
+    <value>Parrilla esférica</value>
+  </data>
+  <data name="EquipmentType_Kamado" xml:space="preserve">
+    <value>Kamado</value>
+    <comment>A Japanese loanword, unchanged in both languages.</comment>
+  </data>
+  <data name="EquipmentType_Wsm" xml:space="preserve">
+    <value>Ahumador vertical</value>
+  </data>
+  <data name="EquipmentType_Pellet" xml:space="preserve">
+    <value>Parrilla de pellets</value>
+  </data>
+  <data name="EquipmentType_Parrilla" xml:space="preserve">
+    <value>Parrilla</value>
+    <comment>The Spanish word is the English one here; the rig has no other name.</comment>
+  </data>
+  <data name="Insulation_None" xml:space="preserve">
+    <value>Ninguna</value>
+  </data>
+  <data name="Insulation_Light" xml:space="preserve">
+    <value>Ligera</value>
+  </data>
+  <data name="Insulation_Heavy" xml:space="preserve">
+    <value>Gruesa</value>
+  </data>
+  <data name="Fuel_Add" xml:space="preserve">
+    <value>Agregar leña</value>
+  </data>
+  <data name="Fuel_Title" xml:space="preserve">
+    <value>Combustible</value>
+  </data>
+  <data name="Fuel_WoodType" xml:space="preserve">
+    <value>Leña</value>
+  </data>
+  <data name="Fuel_Form" xml:space="preserve">
+    <value>Formato</value>
+  </data>
+  <data name="Fuel_SizeClass" xml:space="preserve">
+    <value>Tamaño</value>
+  </data>
+  <data name="Fuel_Count" xml:space="preserve">
+    <value>Cuántos</value>
+  </data>
+  <data name="Fuel_Weight" xml:space="preserve">
+    <value>Peso</value>
+  </data>
+  <data name="Fuel_LastAdded" xml:space="preserve">
+    <value>Última carga</value>
+  </data>
+  <data name="Fuel_NeverFed" xml:space="preserve">
+    <value>Todavía no cargaste leña</value>
+  </data>
+  <data name="Fuel_MoreOptions" xml:space="preserve">
+    <value>Cambiar leña o formato</value>
+  </data>
+  <data name="WoodType_Oak" xml:space="preserve">
+    <value>Roble</value>
+  </data>
+  <data name="WoodType_PostOak" xml:space="preserve">
+    <value>Roble post oak</value>
+    <comment>A Texan species with no Spanish common name; the English name is kept alongside 'roble'.</comment>
+  </data>
+  <data name="WoodType_Hickory" xml:space="preserve">
+    <value>Nogal americano</value>
+  </data>
+  <data name="WoodType_Mesquite" xml:space="preserve">
+    <value>Algarrobo</value>
+  </data>
+  <data name="WoodType_Pecan" xml:space="preserve">
+    <value>Pecán</value>
+  </data>
+  <data name="WoodType_Apple" xml:space="preserve">
+    <value>Manzano</value>
+  </data>
+  <data name="WoodType_Cherry" xml:space="preserve">
+    <value>Cerezo</value>
+  </data>
+  <data name="WoodType_Maple" xml:space="preserve">
+    <value>Arce</value>
+  </data>
+  <data name="WoodType_Quebracho" xml:space="preserve">
+    <value>Quebracho</value>
+    <comment>Same word in both languages; it is a South American species.</comment>
+  </data>
+  <data name="WoodType_Espinillo" xml:space="preserve">
+    <value>Espinillo</value>
+    <comment>Same word in both languages; it is a South American species.</comment>
+  </data>
+  <data name="WoodType_Other" xml:space="preserve">
+    <value>Otra</value>
+  </data>
+  <data name="FuelForm_Split" xml:space="preserve">
+    <value>Leño partido</value>
+  </data>
+  <data name="FuelForm_Chunk" xml:space="preserve">
+    <value>Trozo</value>
+  </data>
+  <data name="FuelForm_Charcoal" xml:space="preserve">
+    <value>Carbón</value>
+  </data>
+  <data name="FuelForm_Pellets" xml:space="preserve">
+    <value>Pellets</value>
+    <comment>Loanword in general use in Spanish; no translated equivalent.</comment>
+  </data>
+  <data name="SizeClass_Small" xml:space="preserve">
+    <value>Chico</value>
+  </data>
+  <data name="SizeClass_Medium" xml:space="preserve">
+    <value>Mediano</value>
+  </data>
+  <data name="SizeClass_Large" xml:space="preserve">
+    <value>Grande</value>
+  </data>
+  <data name="Event_Log" xml:space="preserve">
+    <value>Registrar hito</value>
+  </data>
+  <data name="Event_Title" xml:space="preserve">
+    <value>Qué pasó</value>
+  </data>
+  <data name="Event_Type" xml:space="preserve">
+    <value>Hito</value>
+  </data>
+  <data name="Event_Note" xml:space="preserve">
+    <value>Nota</value>
+  </data>
+  <data name="EventType_Wrapped" xml:space="preserve">
+    <value>Envuelto</value>
+  </data>
+  <data name="EventType_Spritzed" xml:space="preserve">
+    <value>Rociado</value>
+  </data>
+  <data name="EventType_Rested" xml:space="preserve">
+    <value>Reposado</value>
+  </data>
+  <data name="EventType_Other" xml:space="preserve">
+    <value>Otro</value>
+  </data>
 </root>

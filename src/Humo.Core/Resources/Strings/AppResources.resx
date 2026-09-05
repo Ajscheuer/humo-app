@@ -214,9 +214,187 @@
   </data>
   <data name="MeatType_Sausage" xml:space="preserve">
     <value>Sausage</value>
-    <comment>TODO: confirm - 'chorizo' is the asado default; 'salchicha' is generic.</comment>
+    <comment>Spanish is 'chorizo', confirmed over the generic 'salchicha'.</comment>
   </data>
   <data name="MeatType_Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="Unit_Litres_Short" xml:space="preserve">
+    <value>L</value>
+  </data>
+  <data name="Equipment_Title" xml:space="preserve">
+    <value>My rigs</value>
+  </data>
+  <data name="Equipment_Add" xml:space="preserve">
+    <value>Add a rig</value>
+  </data>
+  <data name="Equipment_Edit" xml:space="preserve">
+    <value>Edit rig</value>
+  </data>
+  <data name="Equipment_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Equipment_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Equipment_Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Equipment_Insulation" xml:space="preserve">
+    <value>Insulation</value>
+  </data>
+  <data name="Equipment_FireboxVolume" xml:space="preserve">
+    <value>Firebox volume</value>
+  </data>
+  <data name="Equipment_CookChamberVolume" xml:space="preserve">
+    <value>Cook chamber volume</value>
+  </data>
+  <data name="Equipment_Notes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="Equipment_None" xml:space="preserve">
+    <value>No rigs yet</value>
+  </data>
+  <data name="Equipment_NameRequired" xml:space="preserve">
+    <value>Give the rig a name</value>
+  </data>
+  <data name="Equipment_InUse" xml:space="preserve">
+    <value>There is a cook running on this rig. Finish it first.</value>
+  </data>
+  <data name="EquipmentType_Offset" xml:space="preserve">
+    <value>Offset</value>
+  </data>
+  <data name="EquipmentType_Kettle" xml:space="preserve">
+    <value>Kettle</value>
+  </data>
+  <data name="EquipmentType_Kamado" xml:space="preserve">
+    <value>Kamado</value>
+  </data>
+  <data name="EquipmentType_Wsm" xml:space="preserve">
+    <value>Bullet smoker</value>
+    <comment>WSM is a Weber product name; the generic description travels better.</comment>
+  </data>
+  <data name="EquipmentType_Pellet" xml:space="preserve">
+    <value>Pellet grill</value>
+  </data>
+  <data name="EquipmentType_Parrilla" xml:space="preserve">
+    <value>Parrilla</value>
+  </data>
+  <data name="Insulation_None" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="Insulation_Light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="Insulation_Heavy" xml:space="preserve">
+    <value>Heavy</value>
+  </data>
+  <data name="Fuel_Add" xml:space="preserve">
+    <value>Add fuel</value>
+  </data>
+  <data name="Fuel_Title" xml:space="preserve">
+    <value>Fuel</value>
+  </data>
+  <data name="Fuel_WoodType" xml:space="preserve">
+    <value>Wood</value>
+  </data>
+  <data name="Fuel_Form" xml:space="preserve">
+    <value>Form</value>
+  </data>
+  <data name="Fuel_SizeClass" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="Fuel_Count" xml:space="preserve">
+    <value>How many</value>
+  </data>
+  <data name="Fuel_Weight" xml:space="preserve">
+    <value>Weight</value>
+  </data>
+  <data name="Fuel_LastAdded" xml:space="preserve">
+    <value>Last fuel</value>
+  </data>
+  <data name="Fuel_NeverFed" xml:space="preserve">
+    <value>No fuel logged yet</value>
+  </data>
+  <data name="Fuel_MoreOptions" xml:space="preserve">
+    <value>Change wood or form</value>
+  </data>
+  <data name="WoodType_Oak" xml:space="preserve">
+    <value>Oak</value>
+  </data>
+  <data name="WoodType_PostOak" xml:space="preserve">
+    <value>Post oak</value>
+  </data>
+  <data name="WoodType_Hickory" xml:space="preserve">
+    <value>Hickory</value>
+  </data>
+  <data name="WoodType_Mesquite" xml:space="preserve">
+    <value>Mesquite</value>
+  </data>
+  <data name="WoodType_Pecan" xml:space="preserve">
+    <value>Pecan</value>
+  </data>
+  <data name="WoodType_Apple" xml:space="preserve">
+    <value>Apple</value>
+  </data>
+  <data name="WoodType_Cherry" xml:space="preserve">
+    <value>Cherry</value>
+  </data>
+  <data name="WoodType_Maple" xml:space="preserve">
+    <value>Maple</value>
+  </data>
+  <data name="WoodType_Quebracho" xml:space="preserve">
+    <value>Quebracho</value>
+  </data>
+  <data name="WoodType_Espinillo" xml:space="preserve">
+    <value>Espinillo</value>
+  </data>
+  <data name="WoodType_Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="FuelForm_Split" xml:space="preserve">
+    <value>Split</value>
+  </data>
+  <data name="FuelForm_Chunk" xml:space="preserve">
+    <value>Chunk</value>
+  </data>
+  <data name="FuelForm_Charcoal" xml:space="preserve">
+    <value>Charcoal</value>
+  </data>
+  <data name="FuelForm_Pellets" xml:space="preserve">
+    <value>Pellets</value>
+  </data>
+  <data name="SizeClass_Small" xml:space="preserve">
+    <value>Small</value>
+  </data>
+  <data name="SizeClass_Medium" xml:space="preserve">
+    <value>Medium</value>
+  </data>
+  <data name="SizeClass_Large" xml:space="preserve">
+    <value>Large</value>
+  </data>
+  <data name="Event_Log" xml:space="preserve">
+    <value>Log event</value>
+  </data>
+  <data name="Event_Title" xml:space="preserve">
+    <value>What happened</value>
+  </data>
+  <data name="Event_Type" xml:space="preserve">
+    <value>Milestone</value>
+  </data>
+  <data name="Event_Note" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="EventType_Wrapped" xml:space="preserve">
+    <value>Wrapped</value>
+  </data>
+  <data name="EventType_Spritzed" xml:space="preserve">
+    <value>Spritzed</value>
+  </data>
+  <data name="EventType_Rested" xml:space="preserve">
+    <value>Rested</value>
+  </data>
+  <data name="EventType_Other" xml:space="preserve">
     <value>Other</value>
   </data>
 </root>

@@ -32,6 +32,21 @@ public class ResourceParityTests
         // anatomical word, not what a parrillero calls the cut. See the glossary
         // in docs/product-spec.md §7.1.
         AppStrings.MeatType_Brisket,
+
+        // "Offset" is the word in Spanish too, per the glossary. "Parrilla" and
+        // "kamado" are the rigs' only names in either language.
+        AppStrings.EquipmentType_Offset,
+        AppStrings.EquipmentType_Kamado,
+        AppStrings.EquipmentType_Parrilla,
+
+        // South American species: the Spanish name is the only name.
+        AppStrings.WoodType_Quebracho,
+        AppStrings.WoodType_Espinillo,
+
+        // A loanword in general Spanish use, and the litre symbol, which is a
+        // unit symbol rather than a word.
+        AppStrings.FuelForm_Pellets,
+        AppStrings.Unit_Litres_Short,
     ];
 
     [Fact]

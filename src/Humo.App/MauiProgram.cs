@@ -40,7 +40,11 @@ public static class MauiProgram
     /// AppShell.xaml.
     /// </summary>
     private static void RegisterRoutes()
-        => Routing.RegisterRoute(AppRoutes.StartCook, typeof(StartCookPage));
+    {
+        Routing.RegisterRoute(AppRoutes.StartCook, typeof(StartCookPage));
+        Routing.RegisterRoute(AppRoutes.EditEquipment, typeof(EquipmentEditPage));
+        Routing.RegisterRoute(AppRoutes.FuelSheet, typeof(FuelSheetPage));
+    }
 
     private static void RegisterServices(IServiceCollection services)
     {
@@ -61,6 +65,9 @@ public static class MauiProgram
         services.AddTransient<MainPage>();
         services.AddTransient<StartCookPage>();
         services.AddTransient<ActiveCookPage>();
+        services.AddTransient<EquipmentListPage>();
+        services.AddTransient<EquipmentEditPage>();
+        services.AddTransient<FuelSheetPage>();
     }
 
     /// <summary>

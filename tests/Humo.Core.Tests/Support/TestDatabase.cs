@@ -26,8 +26,12 @@ internal sealed class TestDatabase : IDatabasePath, IAsyncDisposable
         Cooks = new CookRepository(_database);
         TempEntries = new TempEntryRepository(_database);
         PitTempEntries = new PitTempEntryRepository(_database);
+        FuelEvents = new FuelEventRepository(_database);
+        Events = new EventRepository(_database);
 
-        Service = new CookService(Equipment, Cooks, TempEntries, PitTempEntries, Clock);
+        Service = new CookService(Equipment, Cooks, TempEntries, PitTempEntries, Events, Clock);
+        EquipmentService = new EquipmentService(Equipment, Cooks, Clock);
+        FuelService = new FuelService(FuelEvents, Equipment, Clock);
     }
 
     public string DatabaseFilePath { get; }
@@ -42,8 +46,16 @@ internal sealed class TestDatabase : IDatabasePath, IAsyncDisposable
 
     public IPitTempEntryRepository PitTempEntries { get; }
 
+    public IFuelEventRepository FuelEvents { get; }
+
+    public IEventRepository Events { get; }
+
     /// <summary>A CookService wired to this database and this clock.</summary>
     public ICookService Service { get; }
+
+    public IEquipmentService EquipmentService { get; }
+
+    public IFuelService FuelService { get; }
 
     public async ValueTask DisposeAsync()
     {

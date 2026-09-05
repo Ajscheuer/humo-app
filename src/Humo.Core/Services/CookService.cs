@@ -68,6 +68,27 @@ public interface ICookService
         int? rating = null,
         string? notes = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Records a milestone — wrapped, spritzed, rested. Per cook, unlike fuel:
+    /// wrapping one brisket says nothing about the ribs beside it.
+    /// </summary>
+    Task<Event> LogEventAsync(LogEventRequest request, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<Event>> GetEventsAsync(Guid cookId, CancellationToken cancellationToken = default);
+}
+
+/// <summary>One milestone during a cook.</summary>
+public sealed record LogEventRequest
+{
+    public required Guid CookId { get; init; }
+
+    public required EventType Type { get; init; }
+
+    /// <summary>Null means now. Editable for the same reason a reading's is.</summary>
+    public DateTimeOffset? RecordedAt { get; init; }
+
+    public string? Note { get; init; }
 }
 
 /// <summary>One temperature reading, as taken at the smoker.</summary>
@@ -107,6 +128,7 @@ public sealed class CookService : ICookService
     private readonly ICookRepository _cooks;
     private readonly ITempEntryRepository _tempEntries;
     private readonly IPitTempEntryRepository _pitTempEntries;
+    private readonly IEventRepository _events;
     private readonly IClock _clock;
 
     public CookService(
@@ -114,12 +136,14 @@ public sealed class CookService : ICookService
         ICookRepository cooks,
         ITempEntryRepository tempEntries,
         IPitTempEntryRepository pitTempEntries,
+        IEventRepository events,
         IClock clock)
     {
         _equipment = equipment;
         _cooks = cooks;
         _tempEntries = tempEntries;
         _pitTempEntries = pitTempEntries;
+        _events = events;
         _clock = clock;
     }
 
@@ -260,17 +284,7 @@ public sealed class CookService : ICookService
             await _pitTempEntries.SaveAsync(pitEntry, cancellationToken).ConfigureAwait(false);
         }
 
-        // Activity is when the reading was taken, not when it was typed. A cook
-        // catching up on three readings at once should not look more recently
-        // active than the last one actually is -- but a back-dated entry must not
-        // drag activity backwards either.
-        if (recordedAt > cook.LastActivityAt)
-        {
-            cook.LastActivityAt = recordedAt;
-        }
-
-        cook.UpdatedAt = now;
-        await _cooks.SaveAsync(cook, cancellationToken).ConfigureAwait(false);
+        await TouchActivityAsync(cook, recordedAt, now, cancellationToken).ConfigureAwait(false);
 
         return entry;
     }
@@ -318,5 +332,74 @@ public sealed class CookService : ICookService
 
         await _cooks.SaveAsync(cook, cancellationToken).ConfigureAwait(false);
         return cook;
+    }
+
+    public async Task<Event> LogEventAsync(
+        LogEventRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var cook = await _cooks.GetAsync(request.CookId, cancellationToken).ConfigureAwait(false)
+                   ?? throw new InvalidOperationException($"No cook with id {request.CookId}.");
+
+        if (cook.IsFinished)
+        {
+            throw new InvalidOperationException(
+                "Cannot log a milestone against a finished cook. Reopening a finished cook is a "
+                + "deliberate action, not something a stray tap should do.");
+        }
+
+        var now = _clock.UtcNow;
+        var recordedAt = request.RecordedAt ?? now;
+
+        var cookEvent = new Event
+        {
+            CookId = cook.Id,
+            RecordedAt = recordedAt,
+            Type = request.Type,
+            Note = string.IsNullOrWhiteSpace(request.Note) ? null : request.Note.Trim(),
+            CreatedAt = now,
+            UpdatedAt = now,
+        };
+
+        await _events.SaveAsync(cookEvent, cancellationToken).ConfigureAwait(false);
+
+        // Wrapping a brisket is activity on the cook, exactly as a reading is --
+        // otherwise a cook logging only milestones for a few hours looks idle and
+        // gets prompted, or eventually auto-finished, while the user is standing
+        // at the smoker.
+        await TouchActivityAsync(cook, recordedAt, now, cancellationToken).ConfigureAwait(false);
+
+        return cookEvent;
+    }
+
+    public Task<IReadOnlyList<Event>> GetEventsAsync(
+        Guid cookId,
+        CancellationToken cancellationToken = default)
+        => _events.GetForCookAsync(cookId, cancellationToken);
+
+    /// <summary>
+    /// Marks the cook as active as of <paramref name="recordedAt"/>.
+    /// <para>
+    /// Activity is when the thing happened, not when it was typed. A cook
+    /// catching up on three readings at once should not look more recently active
+    /// than the last one actually is — but a back-dated entry must not drag
+    /// activity backwards either.
+    /// </para>
+    /// </summary>
+    private async Task TouchActivityAsync(
+        Cook cook,
+        DateTimeOffset recordedAt,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        if (recordedAt > cook.LastActivityAt)
+        {
+            cook.LastActivityAt = recordedAt;
+        }
+
+        cook.UpdatedAt = now;
+        await _cooks.SaveAsync(cook, cancellationToken).ConfigureAwait(false);
     }
 }

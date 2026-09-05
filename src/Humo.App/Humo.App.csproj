@@ -19,6 +19,14 @@
     <SingleProject>true</SingleProject>
     <EnableDefaultCssItems>false</EnableDefaultCssItems>
 
+    <!-- Compile bindings that set Source, not just the ones bound to the page's
+         own BindingContext. A binding inside a DataTemplate reaching back to the
+         page's ViewModel (a command on a list row) needs Source, and without
+         this it falls back to reflection: no build-time checking, so a renamed
+         command becomes a button that silently does nothing on the device rather
+         than an error here. Every such binding carries an x:DataType. -->
+    <MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
+
     <ApplicationTitle>Humo</ApplicationTitle>
     <ApplicationId>com.humoapp.humo</ApplicationId>
     <ApplicationDisplayVersion>0.1</ApplicationDisplayVersion>
