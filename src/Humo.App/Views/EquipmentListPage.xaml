@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:behaviors="clr-namespace:Humo.App.Behaviors"
+             xmlns:conv="clr-namespace:Humo.App.Converters"
+             xmlns:loc="clr-namespace:Humo.App.Localization"
+             xmlns:vm="clr-namespace:Humo.Core.ViewModels;assembly=Humo.Core"
+             x:Class="Humo.App.Views.EquipmentListPage"
+             x:DataType="vm:EquipmentListViewModel"
+             Title="{loc:Translate Equipment_Title}">
+
+    <ContentPage.Behaviors>
+        <behaviors:AppearingCommandBehavior Command="{Binding LoadCommand}" />
+    </ContentPage.Behaviors>
+
+    <ContentPage.Resources>
+        <conv:InvertedBoolConverter x:Key="Not" />
+        <conv:HasTextConverter x:Key="HasText" />
+        <loc:ResourceKeyConverter x:Key="ResourceKey" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*,Auto" Padding="24" RowSpacing="16">
+
+        <Label Grid.Row="0"
+               Text="{Binding ErrorMessage}"
+               IsVisible="{Binding ErrorMessage, Converter={StaticResource HasText}}" />
+
+        <Label Grid.Row="1"
+               Text="{loc:Translate Equipment_None}"
+               IsVisible="{Binding HasItems, Converter={StaticResource Not}}"
+               VerticalOptions="Start" />
+
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding Items}"
+                        IsVisible="{Binding HasItems}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:EquipmentListItem">
+                    <!-- Auto-sized around the labels so Spanish can run longer. -->
+                    <Grid ColumnDefinitions="*,Auto,Auto"
+                          ColumnSpacing="12"
+                          Padding="0,10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="{Binding Name}" FontAttributes="Bold" />
+                            <Label Text="{Binding TypeKey, Converter={StaticResource ResourceKey}}"
+                                   FontSize="13" />
+                        </VerticalStackLayout>
+                        <Button Grid.Column="1"
+                                Text="{loc:Translate Equipment_Edit}"
+                                Command="{Binding Path=EditCommand, Source={RelativeSource AncestorType={x:Type vm:EquipmentListViewModel}}, x:DataType=vm:EquipmentListViewModel}"
+                                CommandParameter="{Binding .}" />
+                        <Button Grid.Column="2"
+                                Text="{loc:Translate Equipment_Delete}"
+                                Command="{Binding Path=DeleteCommand, Source={RelativeSource AncestorType={x:Type vm:EquipmentListViewModel}}, x:DataType=vm:EquipmentListViewModel}"
+                                CommandParameter="{Binding .}" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Button Grid.Row="2"
+                Text="{loc:Translate Equipment_Add}"
+                Command="{Binding AddCommand}" />
+
+    </Grid>
+
+</ContentPage>

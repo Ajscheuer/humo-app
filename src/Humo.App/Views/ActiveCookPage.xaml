@@ -20,6 +20,7 @@
 
     <ContentPage.Resources>
         <conv:InvertedBoolConverter x:Key="Not" />
+        <loc:ResourceKeyConverter x:Key="ResourceKey" />
     </ContentPage.Resources>
 
     <ScrollView>
@@ -104,6 +105,53 @@
 
                 <Button Text="{loc:Translate ActiveCook_LogTemp}"
                         Command="{Binding LogTemperatureCommand}" />
+            </VerticalStackLayout>
+
+            <!-- Fuel and milestones: the other two things a cook does at the
+                 smoker. Fuel is one tap from here into the size sheet; each
+                 milestone commits on its own tap. -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding HasActiveCook}">
+                <Button Text="{loc:Translate Fuel_Add}"
+                        HeightRequest="64"
+                        Command="{Binding AddFuelCommand}" />
+
+                <Label Text="{loc:Translate Event_Title}" FontAttributes="Bold" />
+                <FlexLayout BindableLayout.ItemsSource="{Binding EventTypes}"
+                            Direction="Row"
+                            Wrap="Wrap"
+                            JustifyContent="SpaceBetween">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:EventTypeOption">
+                            <Button Text="{Binding DisplayNameKey, Converter={StaticResource ResourceKey}}"
+                                    Margin="2"
+                                    FlexLayout.Basis="48%"
+                                    Command="{Binding Path=LogMilestoneCommand, Source={RelativeSource AncestorType={x:Type vm:ActiveCookViewModel}}, x:DataType=vm:ActiveCookViewModel}"
+                                    CommandParameter="{Binding Value}" />
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+
+            <!-- Milestones logged so far, alongside the readings. -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding HasMilestones}">
+                <CollectionView ItemsSource="{Binding Milestones}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:EventDisplay">
+                            <Grid ColumnDefinitions="Auto,Auto,*"
+                                  ColumnSpacing="12"
+                                  Padding="0,6">
+                                <Label Grid.Column="0"
+                                       Text="{Binding RecordedAtLocal, StringFormat='{0:t}'}" />
+                                <Label Grid.Column="1"
+                                       Text="{Binding TypeKey, Converter={StaticResource ResourceKey}}"
+                                       FontAttributes="Bold" />
+                                <Label Grid.Column="2"
+                                       Text="{Binding Note}"
+                                       LineBreakMode="TailTruncation" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
             </VerticalStackLayout>
 
             <!-- The story of the cook so far, oldest first. -->

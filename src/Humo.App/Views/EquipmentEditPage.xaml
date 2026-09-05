@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:conv="clr-namespace:Humo.App.Converters"
+             xmlns:loc="clr-namespace:Humo.App.Localization"
+             xmlns:vm="clr-namespace:Humo.Core.ViewModels;assembly=Humo.Core"
+             x:Class="Humo.App.Views.EquipmentEditPage"
+             x:DataType="vm:EquipmentEditViewModel"
+             Title="{Binding Title}">
+
+    <ContentPage.Resources>
+        <conv:HasTextConverter x:Key="HasText" />
+        <loc:ResourceKeyConverter x:Key="ResourceKey" />
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="20">
+
+            <Label Text="{Binding ErrorMessage}"
+                   IsVisible="{Binding ErrorMessage, Converter={StaticResource HasText}}" />
+
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{loc:Translate Equipment_Name}" FontAttributes="Bold" />
+                <Entry Text="{Binding Name}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{loc:Translate Equipment_Type}" FontAttributes="Bold" />
+                <Picker ItemsSource="{Binding EquipmentTypes}"
+                        SelectedItem="{Binding SelectedType}"
+                        ItemDisplayBinding="{Binding DisplayNameKey, x:DataType=vm:EquipmentTypeOption, Converter={StaticResource ResourceKey}}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{loc:Translate Equipment_Insulation}" FontAttributes="Bold" />
+                <Picker ItemsSource="{Binding InsulationLevels}"
+                        SelectedItem="{Binding SelectedInsulation}"
+                        ItemDisplayBinding="{Binding DisplayNameKey, x:DataType=vm:InsulationOption, Converter={StaticResource ResourceKey}}" />
+            </VerticalStackLayout>
+
+            <!-- Volumes are litres on screen and litres in storage; Humo has no
+                 second unit for them, so nothing is converted here. -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{loc:Translate Equipment_FireboxVolume}" FontAttributes="Bold" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <Entry Grid.Column="0"
+                           Text="{Binding FireboxVolumeL}"
+                           Keyboard="Numeric"
+                           Placeholder="{loc:Translate StartCook_Optional}" />
+                    <Label Grid.Column="1"
+                           Text="{Binding VolumeUnitSymbol}"
+                           VerticalOptions="Center" />
+                </Grid>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{loc:Translate Equipment_CookChamberVolume}" FontAttributes="Bold" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <Entry Grid.Column="0"
+                           Text="{Binding CookChamberVolumeL}"
+                           Keyboard="Numeric"
+                           Placeholder="{loc:Translate StartCook_Optional}" />
+                    <Label Grid.Column="1"
+                           Text="{Binding VolumeUnitSymbol}"
+                           VerticalOptions="Center" />
+                </Grid>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{loc:Translate Equipment_Notes}" FontAttributes="Bold" />
+                <Entry Text="{Binding Notes}"
+                       Placeholder="{loc:Translate StartCook_Optional}" />
+            </VerticalStackLayout>
+
+            <Button Text="{loc:Translate Common_Save}"
+                    Command="{Binding SaveCommand}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

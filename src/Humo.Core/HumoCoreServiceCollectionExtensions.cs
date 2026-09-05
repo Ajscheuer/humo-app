@@ -34,12 +34,19 @@ public static class HumoCoreServiceCollectionExtensions
         services.AddSingleton<ICookRepository, CookRepository>();
         services.AddSingleton<ITempEntryRepository, TempEntryRepository>();
         services.AddSingleton<IPitTempEntryRepository, PitTempEntryRepository>();
+        services.AddSingleton<IFuelEventRepository, FuelEventRepository>();
+        services.AddSingleton<IEventRepository, EventRepository>();
 
         services.AddSingleton<ICookService, CookService>();
+        services.AddSingleton<IEquipmentService, EquipmentService>();
+        services.AddSingleton<IFuelService, FuelService>();
 
         services.AddTransient<AppSettingsViewModel>();
         services.AddTransient<StartCookViewModel>();
         services.AddTransient<ActiveCookViewModel>();
+        services.AddTransient<EquipmentListViewModel>();
+        services.AddTransient<EquipmentEditViewModel>();
+        services.AddTransient<FuelSheetViewModel>();
 
         return services;
     }

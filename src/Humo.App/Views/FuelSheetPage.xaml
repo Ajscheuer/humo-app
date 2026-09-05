@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:conv="clr-namespace:Humo.App.Converters"
+             xmlns:loc="clr-namespace:Humo.App.Localization"
+             xmlns:vm="clr-namespace:Humo.Core.ViewModels;assembly=Humo.Core"
+             x:Class="Humo.App.Views.FuelSheetPage"
+             x:DataType="vm:FuelSheetViewModel"
+             Title="{Binding Title}">
+
+    <!-- Tap 2 of the two-tap path. The three size buttons are the first thing
+         on the page and the only thing required; everything below them is for
+         the rare load that differs from the last one. -->
+
+    <ContentPage.Resources>
+        <loc:ResourceKeyConverter x:Key="ResourceKey" />
+        <conv:InvertedBoolConverter x:Key="Not" />
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="24">
+
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{loc:Translate Fuel_SizeClass}"
+                       FontAttributes="Bold"
+                       FontSize="20" />
+
+                <!-- Driven from the ViewModel's ordered list rather than three
+                     hardcoded buttons, so the order the tests pin is the order
+                     that ships. Their positions are muscle memory in the dark.
+                     Basis 33% keeps the targets large and evenly split at any
+                     width. -->
+                <FlexLayout BindableLayout.ItemsSource="{Binding SizeClasses}"
+                            Direction="Row"
+                            JustifyContent="SpaceBetween">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:SizeClassOption">
+                            <Button Text="{Binding DisplayNameKey, Converter={StaticResource ResourceKey}}"
+                                    HeightRequest="72"
+                                    Margin="2"
+                                    FlexLayout.Basis="32%"
+                                    Command="{Binding Path=LogSizeCommand, Source={RelativeSource AncestorType={x:Type vm:FuelSheetViewModel}}, x:DataType=vm:FuelSheetViewModel}"
+                                    CommandParameter="{Binding Value}" />
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+
+            <Label Text="{loc:Translate Fuel_NeverFed}"
+                   IsVisible="{Binding PrefilledFromLastLoad, Converter={StaticResource Not}}" />
+
+            <!-- Below the fold: changing what is on the fire, and the optional
+                 detail. Never on the fast path. -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{loc:Translate Fuel_MoreOptions}" FontAttributes="Bold" />
+
+                <Label Text="{loc:Translate Fuel_WoodType}" />
+                <Picker ItemsSource="{Binding WoodTypes}"
+                        SelectedItem="{Binding SelectedWoodType}"
+                        ItemDisplayBinding="{Binding DisplayNameKey, x:DataType=vm:WoodTypeOption, Converter={StaticResource ResourceKey}}" />
+                <Entry Text="{Binding WoodTypeOther}"
+                       IsVisible="{Binding IsOtherWoodType}"
+                       Placeholder="{loc:Translate WoodType_Other}" />
+
+                <Label Text="{loc:Translate Fuel_Form}" />
+                <Picker ItemsSource="{Binding FuelForms}"
+                        SelectedItem="{Binding SelectedForm}"
+                        ItemDisplayBinding="{Binding DisplayNameKey, x:DataType=vm:FuelFormOption, Converter={StaticResource ResourceKey}}" />
+            </VerticalStackLayout>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                    <Label Text="{loc:Translate Fuel_Count}" />
+                    <Entry Text="{Binding Count}" Keyboard="Numeric" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                    <Label Text="{loc:Translate Fuel_Weight}" />
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <Entry Grid.Column="0"
+                               Text="{Binding Weight}"
+                               Keyboard="Numeric"
+                               Placeholder="{loc:Translate StartCook_Optional}" />
+                        <Label Grid.Column="1"
+                               Text="{Binding WeightUnitSymbol}"
+                               VerticalOptions="Center" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Grid>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

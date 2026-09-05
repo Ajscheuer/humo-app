@@ -7,6 +7,7 @@ using Humo.Core.Services;
 using Humo.Core.Settings;
 using Humo.Core.Time;
 using Humo.Shared.Entities;
+using Humo.Shared.Enums;
 using Humo.Shared.Units;
 
 namespace Humo.Core.ViewModels;
@@ -26,6 +27,16 @@ public sealed record TempEntryDisplay(
     DateTimeOffset RecordedAtLocal,
     double MeatTemp,
     string? Note);
+
+/// <summary>One milestone, ready to display. The type is a resource key, not text.</summary>
+public sealed record EventDisplay(
+    DateTimeOffset RecordedAt,
+    DateTimeOffset RecordedAtLocal,
+    string TypeKey,
+    string? Note);
+
+/// <summary>An enum value paired with the resource key that displays it.</summary>
+public sealed record EventTypeOption(EventType Value, string DisplayNameKey);
 
 /// <summary>
 /// The active cook screen — the app's centre of gravity.
@@ -157,6 +168,78 @@ public sealed partial class ActiveCookViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Opens the fuel sheet for the fire this cook is on.
+    /// <para>
+    /// Tap one of the two-tap path. It carries the rig, because fuel belongs to
+    /// the fire — with two cooks on one smoker the sheet still never has to ask
+    /// which cook this is for.
+    /// </para>
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(HasActiveCook))]
+    private Task AddFuelAsync(CancellationToken cancellationToken)
+    {
+        if (Cook is null)
+        {
+            throw new InvalidOperationException("There is no cook in progress to log fuel against.");
+        }
+
+        return _navigation.GoToAsync(
+            AppRoutes.FuelSheetFor(Cook.EquipmentId, Cook.Id), cancellationToken);
+    }
+
+    /// <summary>Milestones logged on this cook, oldest first.</summary>
+    public ObservableCollection<EventDisplay> Milestones { get; } = [];
+
+    /// <summary>The milestone buttons: wrapped, spritzed, rested, other.</summary>
+    public IReadOnlyList<EventTypeOption> EventTypes { get; } =
+        EnumDisplay.EventTypesInDisplayOrder
+            .Select(t => new EventTypeOption(t, EnumDisplay.KeyFor(t)))
+            .ToList();
+
+    public bool HasMilestones => Milestones.Count > 0;
+
+    /// <summary>
+    /// Records a milestone. One tap from the active cook screen, with the note
+    /// left for anyone who wants it — wrapping a brisket is a thing you do with
+    /// one hand while holding foil in the other.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(HasActiveCook))]
+    private async Task LogMilestoneAsync(EventType type, CancellationToken cancellationToken)
+    {
+        if (Cook is null)
+        {
+            throw new InvalidOperationException("There is no cook in progress to log against.");
+        }
+
+        await _cooks.LogEventAsync(
+            new LogEventRequest { CookId = Cook.Id, Type = type },
+            cancellationToken).ConfigureAwait(false);
+
+        await ReloadMilestonesAsync(cancellationToken).ConfigureAwait(false);
+        NotifyStateChanged();
+    }
+
+    private async Task ReloadMilestonesAsync(CancellationToken cancellationToken)
+    {
+        Milestones.Clear();
+
+        if (Cook is null)
+        {
+            return;
+        }
+
+        var events = await _cooks.GetEventsAsync(Cook.Id, cancellationToken).ConfigureAwait(false);
+        foreach (var milestone in events)
+        {
+            Milestones.Add(new EventDisplay(
+                milestone.RecordedAt,
+                TimeZoneInfo.ConvertTime(milestone.RecordedAt, _clock.LocalTimeZone),
+                EnumDisplay.KeyFor(milestone.Type),
+                milestone.Note));
+        }
+    }
+
+    /// <summary>
     /// Opens the start-a-cook form. Lives here because the empty state — no cook
     /// running — is this screen, and starting one is the only thing to do from it.
     /// </summary>
@@ -170,6 +253,7 @@ public sealed partial class ActiveCookViewModel : ObservableObject
     {
         Cook = await _cooks.GetActiveCookAsync(cancellationToken).ConfigureAwait(false);
         await ReloadEntriesAsync(cancellationToken).ConfigureAwait(false);
+        await ReloadMilestonesAsync(cancellationToken).ConfigureAwait(false);
         NotifyStateChanged();
     }
 
@@ -304,11 +388,14 @@ public sealed partial class ActiveCookViewModel : ObservableObject
         OnPropertyChanged(nameof(IsCookLoaded));
         OnPropertyChanged(nameof(CanLogTemperature));
         OnPropertyChanged(nameof(HasReadings));
+        OnPropertyChanged(nameof(HasMilestones));
         OnPropertyChanged(nameof(Elapsed));
         OnPropertyChanged(nameof(ElapsedDisplay));
         OnPropertyChanged(nameof(TemperatureUnitSymbol));
 
         LogTemperatureCommand.NotifyCanExecuteChanged();
+        LogMilestoneCommand.NotifyCanExecuteChanged();
+        AddFuelCommand.NotifyCanExecuteChanged();
         FinishCommand.NotifyCanExecuteChanged();
     }
 }

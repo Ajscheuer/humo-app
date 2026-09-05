@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:behaviors="clr-namespace:Humo.App.Behaviors"
              xmlns:loc="clr-namespace:Humo.App.Localization"
              xmlns:vm="clr-namespace:Humo.Core.ViewModels;assembly=Humo.Core"
              x:Class="Humo.App.Views.StartCookPage"
              x:DataType="vm:StartCookViewModel"
              Title="{loc:Translate StartCook_Title}">
+
+    <ContentPage.Behaviors>
+        <behaviors:AppearingCommandBehavior Command="{Binding LoadCommand}" />
+    </ContentPage.Behaviors>
 
     <ContentPage.Resources>
         <loc:ResourceKeyConverter x:Key="ResourceKey" />
@@ -15,6 +20,17 @@
         <!-- Star- and auto-sized throughout: no fixed width sits around a label,
              so Spanish is free to run ~25% longer than English. -->
         <VerticalStackLayout Padding="24" Spacing="20">
+
+            <!-- Only shown once there is more than one rig: with a single rig the
+                 answer is forced, and a one-entry picker is a tap that buys
+                 nothing. -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding HasEquipmentChoice}">
+                <Label Text="{loc:Translate Equipment_Type}"
+                       FontAttributes="Bold" />
+                <Picker ItemsSource="{Binding Equipment}"
+                        SelectedItem="{Binding SelectedEquipment}"
+                        ItemDisplayBinding="{Binding Name, x:DataType=vm:EquipmentListItem}" />
+            </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="8">
                 <Label Text="{loc:Translate StartCook_MeatType}"

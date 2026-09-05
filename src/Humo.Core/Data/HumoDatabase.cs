@@ -68,6 +68,8 @@ public sealed class HumoDatabase : IHumoDatabase, IConnectionSource, IAsyncDispo
             await connection.CreateTableAsync<CookRecord>().ConfigureAwait(false);
             await connection.CreateTableAsync<TempEntryRecord>().ConfigureAwait(false);
             await connection.CreateTableAsync<PitTempEntryRecord>().ConfigureAwait(false);
+            await connection.CreateTableAsync<FuelEventRecord>().ConfigureAwait(false);
+            await connection.CreateTableAsync<EventRecord>().ConfigureAwait(false);
 
             _connection = connection;
             return connection;

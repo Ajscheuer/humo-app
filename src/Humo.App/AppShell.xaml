@@ -11,6 +11,9 @@
         <ShellContent Title="{loc:Translate App_Name}"
                       ContentTemplate="{DataTemplate views:ActiveCookPage}"
                       Route="activecook" />
+        <ShellContent Title="{loc:Translate Equipment_Title}"
+                      ContentTemplate="{DataTemplate views:EquipmentListPage}"
+                      Route="equipment" />
         <ShellContent Title="{loc:Translate Settings_Title}"
                       ContentTemplate="{DataTemplate views:MainPage}"
                       Route="settings" />

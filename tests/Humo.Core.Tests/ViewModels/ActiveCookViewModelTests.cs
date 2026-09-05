@@ -414,6 +414,103 @@ public class ActiveCookViewModelTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task A_milestone_is_logged_with_one_tap()
+    {
+        var vm = await LoadedWithACookAsync();
+
+        // No sheet, no confirm: wrapping a brisket is done with one hand while
+        // holding foil in the other.
+        await vm.LogMilestoneCommand.ExecuteAsync(EventType.Wrapped);
+
+        Assert.True(vm.HasMilestones);
+        var milestone = Assert.Single(vm.Milestones);
+        Assert.Equal(EnumDisplay.KeyFor(EventType.Wrapped), milestone.TypeKey);
+    }
+
+    [Fact]
+    public async Task Milestones_are_listed_oldest_first_at_local_time()
+    {
+        var vm = await LoadedWithACookAsync();
+
+        foreach (var type in new[] { EventType.Spritzed, EventType.Wrapped })
+        {
+            _db.Clock.Advance(TimeSpan.FromHours(2));
+            await vm.LogMilestoneCommand.ExecuteAsync(type);
+        }
+
+        Assert.Equal(
+            [EnumDisplay.KeyFor(EventType.Spritzed), EnumDisplay.KeyFor(EventType.Wrapped)],
+            vm.Milestones.Select(m => m.TypeKey));
+
+        // Listing the stored UTC value would tell a cook they wrapped at the
+        // wrong hour, same as it would for a reading.
+        Assert.Equal(
+            TimeZoneInfo.ConvertTime(vm.Milestones[^1].RecordedAt, _db.Clock.LocalTimeZone),
+            vm.Milestones[^1].RecordedAtLocal);
+    }
+
+    [Fact]
+    public async Task Milestones_survive_a_reload()
+    {
+        await StartACookAsync();
+        var first = CreateViewModel();
+        await first.LoadCommand.ExecuteAsync(null);
+        await first.LogMilestoneCommand.ExecuteAsync(EventType.Wrapped);
+
+        // Closing the app mid-cook and reopening it is the normal case.
+        var reopened = CreateViewModel();
+        await reopened.LoadCommand.ExecuteAsync(null);
+
+        Assert.Single(reopened.Milestones);
+    }
+
+    [Fact]
+    public async Task A_finished_cook_can_no_longer_take_milestones()
+    {
+        var vm = await LoadedWithACookAsync();
+
+        await vm.FinishCommand.ExecuteAsync(null);
+
+        Assert.False(vm.LogMilestoneCommand.CanExecute(EventType.Rested));
+    }
+
+    [Fact]
+    public void Milestones_cannot_be_logged_with_no_cook_running()
+    {
+        var vm = CreateViewModel();
+
+        Assert.False(vm.LogMilestoneCommand.CanExecute(EventType.Wrapped));
+    }
+
+    [Fact]
+    public async Task Every_milestone_type_is_offered_with_a_key_that_resolves()
+    {
+        var vm = await LoadedWithACookAsync();
+
+        Assert.Equal(Enum.GetValues<EventType>().Length, vm.EventTypes.Count);
+
+        foreach (var option in vm.EventTypes)
+        {
+            Assert.NotEqual(option.DisplayNameKey, _localizer[option.DisplayNameKey]);
+        }
+    }
+
+    [Fact]
+    public async Task Logging_a_milestone_does_not_disturb_the_readings()
+    {
+        _settings.TemperatureUnit.Returns(TemperatureUnit.Celsius);
+        var vm = await LoadedWithACookAsync();
+        await LogAsync(vm, 68);
+
+        await vm.LogMilestoneCommand.ExecuteAsync(EventType.Wrapped);
+
+        // The two lists are independent; wrapping must not blank the temperatures
+        // the cook has been building up all night.
+        Assert.Equal(68, Assert.Single(vm.Entries).MeatTemp, precision: 5);
+        Assert.Equal(68, vm.LastMeatTemp!.Value, precision: 5);
+    }
+
+    [Fact]
     public void Finishing_without_a_cook_is_refused()
     {
         var vm = CreateViewModel();

@@ -74,3 +74,67 @@ public enum CookFinishReason
     Manual = 0,
     AutoFinished = 1,
 }
+
+/// <summary>
+/// What went on the fire. <see cref="Other"/> carries free text alongside it.
+/// <para>
+/// <see cref="Quebracho"/> and <see cref="Espinillo"/> are here from the start
+/// rather than waiting for the parrilla work: they are what an asado is actually
+/// burned over, and a Spanish-speaking cook meeting a wood list with no
+/// quebracho in it learns immediately that the app was not built for them.
+/// </para>
+/// </summary>
+public enum WoodType
+{
+    Oak = 0,
+    PostOak = 1,
+    Hickory = 2,
+    Mesquite = 3,
+    Pecan = 4,
+    Apple = 5,
+    Cherry = 6,
+    Maple = 7,
+    Quebracho = 8,
+    Espinillo = 9,
+    Other = 99,
+}
+
+/// <summary>
+/// The physical form of the fuel. Distinct from <see cref="WoodType"/>: oak
+/// arrives as a split or a chunk, and the two burn on entirely different
+/// timescales, which is the whole point for the fire model.
+/// </summary>
+public enum FuelForm
+{
+    Split = 0,
+    Chunk = 1,
+    Charcoal = 2,
+    Pellets = 3,
+}
+
+/// <summary>
+/// How much went on, as the only thing the fast path asks for.
+/// <para>
+/// A size class rather than a weight because it is the one judgement a cook can
+/// make in a second with a glove on. Weight is available on the same sheet for
+/// anyone who weighs their wood, and is never required.
+/// </para>
+/// </summary>
+public enum SizeClass
+{
+    Small = 0,
+    Medium = 1,
+    Large = 2,
+}
+
+/// <summary>
+/// Milestones during a cook. Per cook, not per rig: wrapping one brisket says
+/// nothing about the ribs beside it.
+/// </summary>
+public enum EventType
+{
+    Wrapped = 0,
+    Spritzed = 1,
+    Rested = 2,
+    Other = 99,
+}
