@@ -12,8 +12,20 @@ namespace Humo.Core.Data.Records;
 //
 // syncedAt lives here and only here: it is local bookkeeping and is never sent.
 
+/// <summary>
+/// The envelope every persisted record carries. Sync writes these fields
+/// generically; feature code never touches them.
+/// </summary>
+internal interface ISyncedRecord
+{
+    Guid Id { get; set; }
+    Guid AccountId { get; set; }
+    DateTimeOffset UpdatedAt { get; set; }
+    DateTimeOffset? SyncedAt { get; set; }
+}
+
 [Table("equipment")]
-internal sealed class EquipmentRecord
+internal sealed class EquipmentRecord : ISyncedRecord
 {
     [PrimaryKey] public Guid Id { get; set; }
     public Guid AccountId { get; set; }
@@ -31,7 +43,7 @@ internal sealed class EquipmentRecord
 }
 
 [Table("cooks")]
-internal sealed class CookRecord
+internal sealed class CookRecord : ISyncedRecord
 {
     [PrimaryKey] public Guid Id { get; set; }
     public Guid AccountId { get; set; }
@@ -56,7 +68,7 @@ internal sealed class CookRecord
 }
 
 [Table("temp_entries")]
-internal sealed class TempEntryRecord
+internal sealed class TempEntryRecord : ISyncedRecord
 {
     [PrimaryKey] public Guid Id { get; set; }
     public Guid AccountId { get; set; }
@@ -78,7 +90,7 @@ internal sealed class TempEntryRecord
 }
 
 [Table("pit_temp_entries")]
-internal sealed class PitTempEntryRecord
+internal sealed class PitTempEntryRecord : ISyncedRecord
 {
     [PrimaryKey] public Guid Id { get; set; }
     public Guid AccountId { get; set; }
@@ -98,7 +110,7 @@ internal sealed class PitTempEntryRecord
 }
 
 [Table("fuel_events")]
-internal sealed class FuelEventRecord
+internal sealed class FuelEventRecord : ISyncedRecord
 {
     [PrimaryKey] public Guid Id { get; set; }
     public Guid AccountId { get; set; }
@@ -125,7 +137,7 @@ internal sealed class FuelEventRecord
 }
 
 [Table("events")]
-internal sealed class EventRecord
+internal sealed class EventRecord : ISyncedRecord
 {
     [PrimaryKey] public Guid Id { get; set; }
     public Guid AccountId { get; set; }

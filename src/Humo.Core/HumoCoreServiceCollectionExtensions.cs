@@ -3,6 +3,7 @@ using Humo.Core.Identity;
 using Humo.Core.Localization;
 using Humo.Core.Services;
 using Humo.Core.Settings;
+using Humo.Core.Sync;
 using Humo.Core.Time;
 using Humo.Core.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,6 +44,15 @@ public static class HumoCoreServiceCollectionExtensions
         services.AddSingleton<IPitTempEntryRepository, PitTempEntryRepository>();
         services.AddSingleton<IFuelEventRepository, FuelEventRepository>();
         services.AddSingleton<IEventRepository, EventRepository>();
+
+        // Sync. The transport itself is registered by the app, which is where
+        // the API address and the HttpClient come from; everything above it is
+        // plain logic and belongs here.
+        services.AddSingleton<ISyncQueue, SyncQueue>();
+        services.AddSingleton<ISyncState, SyncState>();
+        services.AddSingleton<ISyncService, Sync.SyncService>();
+        services.AddSingleton<ISyncFailureLog, SyncFailureLog>();
+        services.AddSingleton<ISyncTrigger, SyncTrigger>();
 
         services.AddSingleton<ICookService, CookService>();
         services.AddSingleton<IEquipmentService, EquipmentService>();

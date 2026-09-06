@@ -153,6 +153,10 @@ public class RecordOwnershipTests : IAsyncLifetime
         var tablesWithAccounts = typeof(RecordOwnership).Assembly
             .GetTypes()
             .Where(t => t.Namespace == "Humo.Core.Data.Records")
+
+            // Classes only. The envelope interface the records share declares
+            // AccountId too, and it is not a table.
+            .Where(t => t.IsClass)
             .Where(t => t.GetProperty("AccountId") is not null)
             .Select(t => t.GetCustomAttributes(typeof(SQLite.TableAttribute), false)
                 .Cast<SQLite.TableAttribute>()

@@ -2,6 +2,7 @@ using Humo.Core.Data;
 using Humo.Core.Identity;
 using Humo.Core.Services;
 using Humo.Core.Settings;
+using Humo.Core.Sync;
 
 namespace Humo.Core.Tests.Support;
 
@@ -31,6 +32,7 @@ internal sealed class TestDatabase : IDatabasePath, IAsyncDisposable
         Account = new AccountContext();
         Account.SetCurrent(Guid.NewGuid(), isAnonymous: true);
         Ownership = new RecordOwnership(_database);
+        Queue = new SyncQueue(_database, Account);
 
         Equipment = new EquipmentRepository(_database, Account);
         Cooks = new CookRepository(_database, Account);
@@ -55,6 +57,9 @@ internal sealed class TestDatabase : IDatabasePath, IAsyncDisposable
     public AccountContext Account { get; }
 
     public IRecordOwnership Ownership { get; }
+
+    /// <summary>The outbound queue and inbound apply, over this same database.</summary>
+    public ISyncQueue Queue { get; }
 
     /// <summary>
     /// The connection itself, for the rare test that has to write a row shape the

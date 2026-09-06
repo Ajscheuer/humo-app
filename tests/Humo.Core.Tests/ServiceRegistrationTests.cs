@@ -3,6 +3,7 @@ using Humo.Core.Data;
 using Humo.Core.Navigation;
 using Humo.Core.Services;
 using Humo.Core.Settings;
+using Humo.Core.Sync;
 using Humo.Core.Tests.Support;
 using Humo.Core.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +27,7 @@ public class ServiceRegistrationTests
             .AddSingleton<IAppPreferences>(Substitute.For<IAppPreferences>())
             .AddSingleton<IDatabasePath>(new TestDatabasePath())
             .AddSingleton<INavigationService>(Substitute.For<INavigationService>())
+            .AddSingleton<ISyncClient>(Substitute.For<ISyncClient>())
             .AddHumoCore()
             .BuildServiceProvider(validateScopes: true);
 
@@ -60,6 +62,18 @@ public class ServiceRegistrationTests
         Assert.NotNull(provider.GetRequiredService<IPitTempEntryRepository>());
         Assert.NotNull(provider.GetRequiredService<IFuelEventRepository>());
         Assert.NotNull(provider.GetRequiredService<IEventRepository>());
+    }
+
+    [Fact]
+    public void The_sync_graph_resolves()
+    {
+        using var provider = BuildAppContainer();
+
+        // Sync runs in the background with nobody watching, so a missing
+        // registration here would surface as data quietly not leaving the phone.
+        Assert.NotNull(provider.GetRequiredService<ISyncService>());
+        Assert.NotNull(provider.GetRequiredService<ISyncQueue>());
+        Assert.NotNull(provider.GetRequiredService<ISyncState>());
     }
 
     [Fact]

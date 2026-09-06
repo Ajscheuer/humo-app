@@ -7,6 +7,7 @@ using Humo.Core.Localization;
 using Humo.Core.Navigation;
 using Humo.Core.Identity;
 using Humo.Core.Settings;
+using Humo.Core.Sync;
 using LiveChartsCore.SkiaSharpView.Maui;
 using Microsoft.Extensions.Logging;
 
@@ -70,8 +71,17 @@ public static class MauiProgram
         // Tenant configuration. Absent in a checkout with no Entra tenant, which
         // is a normal state: IAuthService reports it and the sign-in screen says
         // so, while "continue without an account" keeps working.
-        services.AddSingleton(AuthConfiguration.Load());
+        services.AddSingleton(AppConfiguration.LoadAuth());
         services.AddSingleton<IAuthService, EntraAuthService>();
+
+        // The sync transport. One long-lived HttpClient rather than one per
+        // call: a new handler per sync would leak sockets and redo the TLS
+        // handshake every time the app comes back from the background.
+        services.AddSingleton(AppConfiguration.LoadSync());
+        services.AddSingleton<ISyncClient>(sp => new HttpSyncClient(
+            new HttpClient(),
+            sp.GetRequiredService<IAuthService>(),
+            sp.GetRequiredService<SyncOptions>()));
 
         // Everything else -- services, repositories, ViewModels -- comes from
         // Humo.Core, which registers the same graph a test builds.
