@@ -1,3 +1,4 @@
+using Humo.Core.Analytics;
 using Humo.Core.Data;
 using Humo.Core.Entitlements;
 using Humo.Core.Identity;
@@ -80,6 +81,7 @@ public static class HumoCoreServiceCollectionExtensions
         services.AddTransient<CookHistoryViewModel>();
         services.AddTransient<CookSummaryViewModel>();
         services.AddTransient<PaywallViewModel>();
+        services.AddTransient<CookInsightsViewModel>();
 
         return services;
     }

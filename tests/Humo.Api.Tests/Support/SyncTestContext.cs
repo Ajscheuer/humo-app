@@ -1,3 +1,4 @@
+using Humo.Api.Analytics;
 using Humo.Api.Data;
 using Humo.Api.Sync;
 using Humo.Shared.Entities;
@@ -33,12 +34,15 @@ internal sealed class SyncTestContext : IAsyncDisposable
         Db.Database.EnsureCreated();
 
         Time = new FakeTimeProvider(now ?? new DateTimeOffset(2026, 3, 14, 6, 0, 0, TimeSpan.Zero));
-        Service = new SyncService(Db, Time);
+        Analytics = new AnalyticsService(Db, Time);
+        Service = new SyncService(Db, Time, Analytics);
     }
 
     public HumoDbContext Db { get; }
 
     public FakeTimeProvider Time { get; }
+
+    public IAnalyticsService Analytics { get; }
 
     public ISyncService Service { get; }
 

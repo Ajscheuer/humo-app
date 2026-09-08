@@ -1,4 +1,6 @@
+using Humo.Core.Analytics;
 using Humo.Core.Localization;
+using Humo.Core.Navigation;
 using Humo.Core.Services;
 using Humo.Core.Settings;
 using Humo.Core.Tests.Support;
@@ -21,7 +23,7 @@ public class CookSummaryViewModelTests : IAsyncLifetime
     public Task DisposeAsync() => _db.DisposeAsync().AsTask();
 
     private CookSummaryViewModel CreateViewModel()
-        => new(_db.SummaryServiceWith(_settings), _settings, _localizer);
+        => new(_db.SummaryServiceWith(_settings), _settings, _localizer, AnInsightsViewModel());
 
     private Task<Cook> ACookAsync(double weightKg = 6)
         => _db.Service.StartCookAsync(new StartCookRequest
@@ -278,4 +280,17 @@ public class CookSummaryViewModelTests : IAsyncLifetime
         Assert.Equal("212°F", vm.PeakMeatTempDisplay);
         Assert.Equal("08:00", vm.DurationDisplay);
     }
+    /// <summary>
+    /// A Pro panel that reports itself offline. This screen's own tests are
+    /// about the local summary; the panel has its own.
+    /// </summary>
+    private CookInsightsViewModel AnInsightsViewModel()
+    {
+        var client = Substitute.For<IAnalyticsClient>();
+        client.GetAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(AnalyticsFetch.Unavailable(AnalyticsUnavailable.Offline)));
+
+        return new CookInsightsViewModel(client, _localizer, Substitute.For<INavigationService>());
+    }
+
 }

@@ -1,3 +1,4 @@
+using Humo.Api.Analytics;
 using Humo.Api.Data;
 using Humo.Shared.Entities;
 using Humo.Shared.Sync;
@@ -24,11 +25,13 @@ public sealed class SyncService : ISyncService
 {
     private readonly HumoDbContext _db;
     private readonly TimeProvider _time;
+    private readonly IAnalyticsService _analytics;
 
-    public SyncService(HumoDbContext db, TimeProvider time)
+    public SyncService(HumoDbContext db, TimeProvider time, IAnalyticsService analytics)
     {
         _db = db;
         _time = time;
+        _analytics = analytics;
     }
 
     public async Task<SyncPushResponse> PushAsync(
@@ -157,6 +160,14 @@ public sealed class SyncService : ISyncService
         await SaveSequenceAsync(accountId, sequence, cancellationToken);
 
         await _db.SaveChangesAsync(cancellationToken);
+
+        // Analytics are computed at sync (product-spec.md 6), after the batch is
+        // saved so everything this cook's numbers are drawn from is already in
+        // the database. What the batch touched is the analytics service's
+        // question to answer, not this one's: readings belong to a cook and
+        // fuel belongs to a rig, and either can arrive in a later batch than the
+        // cook they change.
+        await _analytics.RecomputeForPushAsync(accountId, request, cancellationToken);
 
         // Deliberately no cursor here. A push does not move the device forward
         // in the stream: the records it just wrote are skipped on pull because

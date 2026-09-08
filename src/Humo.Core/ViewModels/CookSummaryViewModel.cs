@@ -26,12 +26,22 @@ public sealed partial class CookSummaryViewModel : ObservableObject
     public CookSummaryViewModel(
         ICookSummaryService summaries,
         IUserSettings settings,
-        ILocalizer localizer)
+        ILocalizer localizer,
+        CookInsightsViewModel insights)
     {
         _summaries = summaries;
         _settings = settings;
         _localizer = localizer;
+        Insights = insights;
     }
+
+    /// <summary>
+    /// The Pro panel below the statistics. A child ViewModel rather than more
+    /// properties here: everything on this screen except that panel is local,
+    /// free and works offline, and keeping the server-backed part separate is
+    /// what stops the two sets of failure modes tangling.
+    /// </summary>
+    public CookInsightsViewModel Insights { get; }
 
     [ObservableProperty]
     private CookSummary? _summary;
@@ -129,6 +139,17 @@ public sealed partial class CookSummaryViewModel : ObservableObject
         ErrorMessage = Summary is null ? _localizer[AppStrings.Summary_NotFound] : null;
 
         NotifyStateChanged();
+
+        if (Summary is null)
+        {
+            return;
+        }
+
+        // After the summary is set, deliberately. Everything above is local and
+        // renders immediately; this one goes to the network, and awaiting it
+        // first would leave a free user offline staring at a blank screen for
+        // the length of the request timeout.
+        await Insights.LoadCommand.ExecuteAsync(cookId);
     }
 
     private void NotifyStateChanged()

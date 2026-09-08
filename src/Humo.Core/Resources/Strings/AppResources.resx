@@ -543,4 +543,43 @@
   <data name="Settings_Upgrade" xml:space="preserve">
     <value>Upgrade to Pro</value>
   </data>
+  <data name="Analytics_Title" xml:space="preserve">
+    <value>Insights</value>
+  </data>
+  <data name="Analytics_Stall" xml:space="preserve">
+    <value>Stall</value>
+  </data>
+  <data name="Analytics_PitStability" xml:space="preserve">
+    <value>Fire steadiness</value>
+  </data>
+  <data name="Analytics_FuelEfficiency" xml:space="preserve">
+    <value>Fuel use</value>
+  </data>
+  <data name="Analytics_NeedsPro" xml:space="preserve">
+    <value>Insights compare each cook against your own past cooks. Humo Pro turns them on.</value>
+  </data>
+  <data name="Analytics_Offline" xml:space="preserve">
+    <value>Insights are computed on the server, so they need a connection. Your cook is safe on this phone.</value>
+  </data>
+  <data name="Analytics_NotComputed" xml:space="preserve">
+    <value>This cook has not reached the server yet. Insights appear once it syncs.</value>
+  </data>
+  <data name="Analytics_BaselineBuilding" xml:space="preserve">
+    <value>{0} more cooks like this one and Humo can tell you what is unusual for you.</value>
+  </data>
+  <data name="Analytics_BaselineBuildingOne" xml:space="preserve">
+    <value>One more cook like this one and Humo can tell you what is unusual for you.</value>
+  </data>
+  <data name="Analytics_NothingUnusual" xml:space="preserve">
+    <value>Nothing unusual for you in this cook.</value>
+  </data>
+  <data name="Analytics_UnusuallyHigh" xml:space="preserve">
+    <value>Higher than your usual</value>
+  </data>
+  <data name="Analytics_UnusuallyLow" xml:space="preserve">
+    <value>Lower than your usual</value>
+  </data>
+  <data name="Analytics_NoStall" xml:space="preserve">
+    <value>No stall detected</value>
+  </data>
 </root>

@@ -7,6 +7,7 @@ using Humo.Core.Localization;
 using Humo.Core.Navigation;
 using Humo.Core.Identity;
 using Humo.Core.Settings;
+using Humo.Core.Analytics;
 using Humo.Core.Entitlements;
 using Humo.Core.Sync;
 using LiveChartsCore.SkiaSharpView.Maui;
@@ -89,6 +90,11 @@ public static class MauiProgram
         // it is a small request that must not queue behind a sync batch pushing
         // a season of cooks.
         services.AddSingleton<IEntitlementClient>(sp => new HttpEntitlementClient(
+            new HttpClient(),
+            sp.GetRequiredService<IAuthService>(),
+            sp.GetRequiredService<SyncOptions>()));
+
+        services.AddSingleton<IAnalyticsClient>(sp => new HttpAnalyticsClient(
             new HttpClient(),
             sp.GetRequiredService<IAuthService>(),
             sp.GetRequiredService<SyncOptions>()));

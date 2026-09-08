@@ -1,5 +1,6 @@
 using Humo.Api.Auth;
 using Humo.Api.Data;
+using Humo.Api.Analytics;
 using Humo.Api.Entitlements;
 using Humo.Api.Sync;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -17,6 +18,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<IAccountResolver, ClaimsAccountResolver>();
 builder.Services.AddScoped<ISyncService, SyncService>();
 builder.Services.AddScoped<IEntitlementService, EntitlementService>();
+builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 
 // The tier numbers and the store's shared secret. Bound from configuration so
 // the free history limit is a setting rather than a release, per
@@ -56,6 +58,7 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
 app.MapSyncEndpoints();
 app.MapEntitlementEndpoints();
+app.MapAnalyticsEndpoints();
 
 app.Run();
 

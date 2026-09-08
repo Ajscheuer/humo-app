@@ -2,6 +2,7 @@ using Humo.Core;
 using Humo.Core.Data;
 using Humo.Core.Navigation;
 using Humo.Core.Services;
+using Humo.Core.Analytics;
 using Humo.Core.Entitlements;
 using Humo.Core.Settings;
 using Humo.Core.Sync;
@@ -30,6 +31,7 @@ public class ServiceRegistrationTests
             .AddSingleton<INavigationService>(Substitute.For<INavigationService>())
             .AddSingleton<ISyncClient>(Substitute.For<ISyncClient>())
             .AddSingleton<IEntitlementClient>(Substitute.For<IEntitlementClient>())
+            .AddSingleton<IAnalyticsClient>(Substitute.For<IAnalyticsClient>())
             .AddHumoCore()
             .BuildServiceProvider(validateScopes: true);
 
@@ -43,6 +45,7 @@ public class ServiceRegistrationTests
     [InlineData(typeof(CookHistoryViewModel))]
     [InlineData(typeof(CookSummaryViewModel))]
     [InlineData(typeof(PaywallViewModel))]
+    [InlineData(typeof(CookInsightsViewModel))]
     public void Every_view_model_can_be_resolved(Type viewModelType)
     {
         using var provider = BuildAppContainer();

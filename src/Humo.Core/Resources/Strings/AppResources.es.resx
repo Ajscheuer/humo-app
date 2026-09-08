@@ -531,4 +531,43 @@
   <data name="Settings_Upgrade" xml:space="preserve">
     <value>Pasar a Pro</value>
   </data>
+  <data name="Analytics_Title" xml:space="preserve">
+    <value>Análisis</value>
+  </data>
+  <data name="Analytics_Stall" xml:space="preserve">
+    <value>Meseta</value>
+  </data>
+  <data name="Analytics_PitStability" xml:space="preserve">
+    <value>Estabilidad del fuego</value>
+  </data>
+  <data name="Analytics_FuelEfficiency" xml:space="preserve">
+    <value>Consumo de leña</value>
+  </data>
+  <data name="Analytics_NeedsPro" xml:space="preserve">
+    <value>Los análisis comparan cada cocción con tus cocciones anteriores. Humo Pro los activa.</value>
+  </data>
+  <data name="Analytics_Offline" xml:space="preserve">
+    <value>Los análisis se calculan en el servidor, así que necesitan conexión. Tu cocción está a salvo en este teléfono.</value>
+  </data>
+  <data name="Analytics_NotComputed" xml:space="preserve">
+    <value>Esta cocción todavía no llegó al servidor. Los análisis aparecen cuando se sincronice.</value>
+  </data>
+  <data name="Analytics_BaselineBuilding" xml:space="preserve">
+    <value>{0} cocciones más como esta y Humo puede decirte qué es inusual para vos.</value>
+  </data>
+  <data name="Analytics_BaselineBuildingOne" xml:space="preserve">
+    <value>Una cocción más como esta y Humo puede decirte qué es inusual para vos.</value>
+  </data>
+  <data name="Analytics_NothingUnusual" xml:space="preserve">
+    <value>Nada inusual para vos en esta cocción.</value>
+  </data>
+  <data name="Analytics_UnusuallyHigh" xml:space="preserve">
+    <value>Más alto que lo habitual</value>
+  </data>
+  <data name="Analytics_UnusuallyLow" xml:space="preserve">
+    <value>Más bajo que lo habitual</value>
+  </data>
+  <data name="Analytics_NoStall" xml:space="preserve">
+    <value>No se detectó meseta</value>
+  </data>
 </root>

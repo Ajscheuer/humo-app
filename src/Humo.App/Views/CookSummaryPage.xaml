@@ -91,6 +91,47 @@
 
                 </Grid>
 
+                <!-- The Pro panel. Bound to a child ViewModel so its four empty
+                     states stay separate from the summary above, which is local
+                     and works offline for everyone. -->
+                <VerticalStackLayout Spacing="12" BindingContext="{Binding Insights}">
+                    <Label Text="{Binding Title, x:DataType=vm:CookInsightsViewModel}"
+                           FontAttributes="Bold" />
+
+                    <ActivityIndicator IsRunning="{Binding IsBusy, x:DataType=vm:CookInsightsViewModel}"
+                                       IsVisible="{Binding IsBusy, x:DataType=vm:CookInsightsViewModel}" />
+
+                    <Label Text="{Binding Message, x:DataType=vm:CookInsightsViewModel}"
+                           LineBreakMode="WordWrap"
+                           IsVisible="{Binding Message, x:DataType=vm:CookInsightsViewModel, Converter={StaticResource HasText}}" />
+
+                    <Button Text="{loc:Translate Settings_Upgrade}"
+                            Command="{Binding UpgradeCommand, x:DataType=vm:CookInsightsViewModel}"
+                            IsVisible="{Binding CanUpgrade, x:DataType=vm:CookInsightsViewModel}" />
+
+                    <VerticalStackLayout Spacing="8"
+                                         BindableLayout.ItemsSource="{Binding Items, x:DataType=vm:CookInsightsViewModel}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:InsightItem">
+                                <!-- No fixed widths: the Spanish strings here run
+                                     about a quarter longer. -->
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                        <Label Text="{Binding MetricLabel}" FontAttributes="Bold" />
+                                        <Label Text="{Binding DirectionLabel}"
+                                               FontSize="13"
+                                               LineBreakMode="WordWrap" />
+                                    </VerticalStackLayout>
+                                    <Label Grid.Column="1"
+                                           Text="{Binding Detail}"
+                                           FontSize="13"
+                                           VerticalOptions="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
             </VerticalStackLayout>
 
         </VerticalStackLayout>

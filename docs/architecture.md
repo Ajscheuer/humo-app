@@ -349,9 +349,20 @@ Settled 2026-08-30. Recorded so they are not silently relitigated.
 | 18 | The store event is interpreted from **entitlement ids plus expiry**, never from the event type | Expiry is re-checked on every read, so a cancellation (which keeps access to the end of the period) and an expiry (which does not) both come out right without this code enumerating a store's event vocabulary — a list that grows without asking. It also means a lapsed subscription stops being Pro at the moment it lapses, with no scheduled job. |
 | 19 | The client is **identified to the store before any purchase**, and treats unknown as Free | The store's webhook names the buyer by the id the store knows. If that is the store's own anonymous id, the server cannot match the purchase to an account: money taken, nothing granted. And where the tier is unknown — a fresh install, a subscriber offline — nothing is locked and nothing is unlocked, because guessing either way is wrong in a way the user feels. |
 
+| 20 | Analytics recompute **for everything a pushed batch could have changed**, not just the cooks in it | A push is capped at 500 records, so a long cook's readings can arrive after the cook row itself; readings and fuel belong to the rig rather than the cook, so a later batch of either has to find the finished cooks whose window it falls in. Computing once from whatever had arrived by then would show a paying user numbers drawn from a fraction of their cook, and never correct them. The affected cooks and pairs are deduped, so one batch refreshes a baseline once rather than once per cook. |
+| 21 | `UserBaseline` is **stored and refreshed when a cook in the pair finishes**, not nightly | `data-model.md` §2 specifies storing it, and the sample size behind it is what lets the UI say "not enough cooks yet" honestly. Refreshing on finish rather than on a schedule is the same bounded work — one pair, not the whole account — and means the user who finishes their eighth brisket sees their baseline appear then rather than the next morning. No scheduler needed, so architecture.md open question 3 stays open rather than being answered by accident. |
+| 22 | On SQLite the API stores timestamps as **UTC ticks**; on SQL Server they stay `datetimeoffset` | SQLite has no date type, and EF's text storage for `DateTimeOffset` is not sortable across offsets, so the provider refuses to translate `>=` on one at all. Analytics reads pit readings for the window a cook occupied — the tests could not exercise a time range that Azure SQL handles natively, which is exactly the gap the SQLite-backed tests exist to close. Lossless because every instant Humo stores is UTC, and production keeps columns a human can read. |
+
 ## Open questions
 
-1. **Azure SQL serverless minimum capacity and auto-pause delay** need checking
+1. **The stall thresholds are a judgement call, not a derived number.** The spec
+   defines the stall as the longest interval where meat temp rises less than a
+   threshold rate within the plateau band, but names neither. The
+   implementation uses 60–80 °C and 1 °C/hour, with a 45-minute minimum, which
+   covers where brisket and pork shoulder actually plateau. They live in
+   `AnalyticsPolicy` as named constants for exactly this reason, and should be
+   checked against real logged cooks before they are trusted in a trend.
+2. **Azure SQL serverless minimum capacity and auto-pause delay** need checking
    against a realistic idle pattern before committing — the cost floor and the
    resume time are both configuration.
 2. ~~**Entra External ID user flows vs. native SDK flows.**~~ **Resolved: hosted

@@ -173,6 +173,20 @@ public static class AppStrings
     public const string Settings_TierPro = nameof(Settings_TierPro);
     public const string Settings_Upgrade = nameof(Settings_Upgrade);
 
+    public const string Analytics_Title = nameof(Analytics_Title);
+    public const string Analytics_Stall = nameof(Analytics_Stall);
+    public const string Analytics_PitStability = nameof(Analytics_PitStability);
+    public const string Analytics_FuelEfficiency = nameof(Analytics_FuelEfficiency);
+    public const string Analytics_NeedsPro = nameof(Analytics_NeedsPro);
+    public const string Analytics_Offline = nameof(Analytics_Offline);
+    public const string Analytics_NotComputed = nameof(Analytics_NotComputed);
+    public const string Analytics_BaselineBuilding = nameof(Analytics_BaselineBuilding);
+    public const string Analytics_BaselineBuildingOne = nameof(Analytics_BaselineBuildingOne);
+    public const string Analytics_NothingUnusual = nameof(Analytics_NothingUnusual);
+    public const string Analytics_UnusuallyHigh = nameof(Analytics_UnusuallyHigh);
+    public const string Analytics_UnusuallyLow = nameof(Analytics_UnusuallyLow);
+    public const string Analytics_NoStall = nameof(Analytics_NoStall);
+
     public const string Chart_MeatSeries = nameof(Chart_MeatSeries);
     public const string Chart_PitSeries = nameof(Chart_PitSeries);
     public const string Chart_NoReadings = nameof(Chart_NoReadings);
