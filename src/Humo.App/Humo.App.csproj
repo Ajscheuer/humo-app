@@ -58,6 +58,12 @@
          Microsoft.Maui not found". Versions come from Directory.Packages.props. -->
     <PackageReference Include="Microsoft.Maui.Controls" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
+    <!-- Charting lives only here. Humo.Core produces CookChartData (plain points
+         and markers, already in the user's unit) and this package turns it into
+         pixels, so swapping renderers later is a view change. -->
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.Maui" />
+    <!-- Sign-in lives only here, behind IAuthService. -->
+    <PackageReference Include="Microsoft.Identity.Client" />
   </ItemGroup>
 
   <ItemGroup>

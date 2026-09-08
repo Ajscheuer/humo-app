@@ -1,3 +1,11 @@
+using Humo.Api.Auth;
+using Humo.Api.Data;
+using Humo.Api.Analytics;
+using Humo.Api.Entitlements;
+using Humo.Api.Sync;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+
 // Humo API — ASP.NET Core Minimal API.
 //
 // Endpoints are registered per feature area in their own files as they arrive
@@ -6,12 +14,51 @@
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<IAccountResolver, ClaimsAccountResolver>();
+builder.Services.AddScoped<ISyncService, SyncService>();
+builder.Services.AddScoped<IEntitlementService, EntitlementService>();
+builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+
+// The tier numbers and the store's shared secret. Bound from configuration so
+// the free history limit is a setting rather than a release, per
+// product-spec.md 5.1.
+builder.Services
+    .AddOptions<EntitlementOptions>()
+    .Bind(builder.Configuration.GetSection(EntitlementOptions.SectionName));
+
+// Azure SQL. The connection string comes from configuration, which in App
+// Service means a managed-identity connection rather than a secret in a file.
+builder.Services.AddDbContext<HumoDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("HumoDatabase")));
+
+// Bearer tokens from Entra External ID. The authority is configuration because
+// it is per-tenant; a build with none configured still starts, and every
+// authorized endpoint simply refuses, which is the honest behaviour for an API
+// with no identity provider behind it.
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = builder.Configuration["Auth:Authority"];
+        options.Audience = builder.Configuration["Auth:Audience"];
+    });
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Liveness probe for App Service. Deliberately unauthenticated and free of any
 // database call, so it reports whether the process is up rather than whether
 // Azure SQL has finished resuming from auto-pause.
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+
+app.MapSyncEndpoints();
+app.MapEntitlementEndpoints();
+app.MapAnalyticsEndpoints();
 
 app.Run();
 

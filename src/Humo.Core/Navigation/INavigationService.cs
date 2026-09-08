@@ -43,11 +43,30 @@ public static class AppRoutes
     /// <summary>The fuel sheet. Pushed over the cook screen.</summary>
     public const string FuelSheet = "fuel";
 
+    /// <summary>
+    /// The upgrade offer. Pushed rather than absolute, so Back returns the user
+    /// to whatever they were doing when they met it.
+    /// </summary>
+    public const string Paywall = "paywall";
+
     /// <summary>Query-string key naming the rig being edited or fed.</summary>
     public const string EquipmentIdParameter = "equipmentId";
 
     /// <summary>Query-string key naming the cook that was on screen.</summary>
     public const string CookIdParameter = "cookId";
+
+    /// <summary>First launch: sign in, or continue as a guest.</summary>
+    public const string SignIn = "signin";
+
+    /// <summary>The list of finished cooks.</summary>
+    public const string History = "history";
+
+    /// <summary>One finished cook's chart and statistics. Pushed from the history list.</summary>
+    public const string CookSummary = "summary";
+
+    /// <summary>The summary screen for one cook.</summary>
+    public static string CookSummaryFor(Guid cookId)
+        => $"{CookSummary}?{CookIdParameter}={cookId}";
 
     /// <summary>
     /// The fuel sheet for a rig, optionally noting the cook on screen. The cook

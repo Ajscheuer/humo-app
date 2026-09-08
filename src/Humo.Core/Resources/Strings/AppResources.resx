@@ -391,6 +391,89 @@
   <data name="Event_Note" xml:space="preserve">
     <value>Note</value>
   </data>
+  <data name="SignIn_Title" xml:space="preserve">
+    <value>Welcome to Humo</value>
+  </data>
+  <data name="SignIn_Apple" xml:space="preserve">
+    <value>Sign in with Apple</value>
+  </data>
+  <data name="SignIn_Google" xml:space="preserve">
+    <value>Sign in with Google</value>
+  </data>
+  <data name="SignIn_Email" xml:space="preserve">
+    <value>Sign in with email</value>
+  </data>
+  <data name="SignIn_Guest" xml:space="preserve">
+    <value>Continue without an account</value>
+  </data>
+  <data name="SignIn_GuestExplanation" xml:space="preserve">
+    <value>Log cooks straight away. You can add an account later to back them up across devices.</value>
+  </data>
+  <data name="SignIn_Offline" xml:space="preserve">
+    <value>Could not reach the sign-in service. You can still continue without an account.</value>
+  </data>
+  <data name="SignIn_Failed" xml:space="preserve">
+    <value>Sign-in did not complete. You can try again or continue without an account.</value>
+  </data>
+  <data name="SignIn_Unconfigured" xml:space="preserve">
+    <value>Sign-in is not available in this build. Continue without an account.</value>
+  </data>
+  <data name="History_Title" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="History_Empty" xml:space="preserve">
+    <value>No finished cooks yet</value>
+  </data>
+  <data name="Summary_Title" xml:space="preserve">
+    <value>Cook summary</value>
+  </data>
+  <data name="Summary_Duration" xml:space="preserve">
+    <value>Total time</value>
+  </data>
+  <data name="Summary_TimePerKg" xml:space="preserve">
+    <value>Time per kilo</value>
+  </data>
+  <data name="Summary_TimePerLb" xml:space="preserve">
+    <value>Time per pound</value>
+  </data>
+  <data name="Summary_EstimatedShort" xml:space="preserve">
+    <value>Estimated</value>
+    <comment>Badge on a history row. The full sentence is Summary_Estimated.</comment>
+  </data>
+  <data name="Summary_PeakMeatTemp" xml:space="preserve">
+    <value>Highest meat temp</value>
+  </data>
+  <data name="Summary_PeakPitTemp" xml:space="preserve">
+    <value>Highest pit temp</value>
+  </data>
+  <data name="Summary_Readings" xml:space="preserve">
+    <value>Readings</value>
+  </data>
+  <data name="Summary_FuelLoads" xml:space="preserve">
+    <value>Fuel loads</value>
+  </data>
+  <data name="Summary_Estimated" xml:space="preserve">
+    <value>This cook was closed automatically, so its end time is estimated.</value>
+  </data>
+  <data name="Summary_NotFound" xml:space="preserve">
+    <value>That cook no longer exists.</value>
+  </data>
+  <data name="Summary_Unknown" xml:space="preserve">
+    <value>—</value>
+    <comment>Placeholder for a statistic that cannot be computed. An em dash, not a word.</comment>
+  </data>
+  <data name="Summary_RigDeleted" xml:space="preserve">
+    <value>Rig deleted</value>
+  </data>
+  <data name="Chart_MeatSeries" xml:space="preserve">
+    <value>Meat</value>
+  </data>
+  <data name="Chart_PitSeries" xml:space="preserve">
+    <value>Pit</value>
+  </data>
+  <data name="Chart_NoReadings" xml:space="preserve">
+    <value>No readings were logged for this cook</value>
+  </data>
   <data name="EventType_Wrapped" xml:space="preserve">
     <value>Wrapped</value>
   </data>
@@ -402,5 +485,101 @@
   </data>
   <data name="EventType_Other" xml:space="preserve">
     <value>Other</value>
+  </data>
+  <data name="Paywall_Title" xml:space="preserve">
+    <value>Humo Pro</value>
+  </data>
+  <data name="Paywall_Subtitle" xml:space="preserve">
+    <value>Your whole history, your own baselines, and a fire that learns how you cook.</value>
+  </data>
+  <data name="Paywall_BenefitHistory" xml:space="preserve">
+    <value>Every cook you have ever logged</value>
+  </data>
+  <data name="Paywall_BenefitAnalytics" xml:space="preserve">
+    <value>Trends and anomalies against your own cooks</value>
+  </data>
+  <data name="Paywall_BenefitFireModel" xml:space="preserve">
+    <value>Fuel reminders that learn your fire</value>
+  </data>
+  <data name="Paywall_BenefitPhotos" xml:space="preserve">
+    <value>Photos backed up and synced</value>
+  </data>
+  <data name="Paywall_Restore" xml:space="preserve">
+    <value>Restore purchases</value>
+  </data>
+  <data name="Paywall_Unconfigured" xml:space="preserve">
+    <value>Purchasing is not available in this build.</value>
+  </data>
+  <data name="Paywall_Offline" xml:space="preserve">
+    <value>The store could not be reached. Check your connection and try again.</value>
+  </data>
+  <data name="Paywall_Failed" xml:space="preserve">
+    <value>The purchase did not go through.</value>
+  </data>
+  <data name="Paywall_NothingToRestore" xml:space="preserve">
+    <value>No previous purchases were found for this store account.</value>
+  </data>
+  <data name="Paywall_NeedsAccount" xml:space="preserve">
+    <value>Subscribing needs an account, so your subscription follows you to a new phone.</value>
+  </data>
+  <data name="Paywall_Thanks" xml:space="preserve">
+    <value>You are on Humo Pro. Thank you.</value>
+  </data>
+  <data name="History_Locked" xml:space="preserve">
+    <value>Locked</value>
+  </data>
+  <data name="History_LockedExplanation" xml:space="preserve">
+    <value>Free keeps your most recent cooks. The rest are still here, and Pro opens them.</value>
+  </data>
+  <data name="Settings_Subscription" xml:space="preserve">
+    <value>Subscription</value>
+  </data>
+  <data name="Settings_TierFree" xml:space="preserve">
+    <value>Free</value>
+  </data>
+  <data name="Settings_TierPro" xml:space="preserve">
+    <value>Pro</value>
+  </data>
+  <data name="Settings_Upgrade" xml:space="preserve">
+    <value>Upgrade to Pro</value>
+  </data>
+  <data name="Analytics_Title" xml:space="preserve">
+    <value>Insights</value>
+  </data>
+  <data name="Analytics_Stall" xml:space="preserve">
+    <value>Stall</value>
+  </data>
+  <data name="Analytics_PitStability" xml:space="preserve">
+    <value>Fire steadiness</value>
+  </data>
+  <data name="Analytics_FuelEfficiency" xml:space="preserve">
+    <value>Fuel use</value>
+  </data>
+  <data name="Analytics_NeedsPro" xml:space="preserve">
+    <value>Insights compare each cook against your own past cooks. Humo Pro turns them on.</value>
+  </data>
+  <data name="Analytics_Offline" xml:space="preserve">
+    <value>Insights are computed on the server, so they need a connection. Your cook is safe on this phone.</value>
+  </data>
+  <data name="Analytics_NotComputed" xml:space="preserve">
+    <value>This cook has not reached the server yet. Insights appear once it syncs.</value>
+  </data>
+  <data name="Analytics_BaselineBuilding" xml:space="preserve">
+    <value>{0} more cooks like this one and Humo can tell you what is unusual for you.</value>
+  </data>
+  <data name="Analytics_BaselineBuildingOne" xml:space="preserve">
+    <value>One more cook like this one and Humo can tell you what is unusual for you.</value>
+  </data>
+  <data name="Analytics_NothingUnusual" xml:space="preserve">
+    <value>Nothing unusual for you in this cook.</value>
+  </data>
+  <data name="Analytics_UnusuallyHigh" xml:space="preserve">
+    <value>Higher than your usual</value>
+  </data>
+  <data name="Analytics_UnusuallyLow" xml:space="preserve">
+    <value>Lower than your usual</value>
+  </data>
+  <data name="Analytics_NoStall" xml:space="preserve">
+    <value>No stall detected</value>
   </data>
 </root>

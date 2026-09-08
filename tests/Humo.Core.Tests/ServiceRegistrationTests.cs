@@ -2,7 +2,10 @@ using Humo.Core;
 using Humo.Core.Data;
 using Humo.Core.Navigation;
 using Humo.Core.Services;
+using Humo.Core.Analytics;
+using Humo.Core.Entitlements;
 using Humo.Core.Settings;
+using Humo.Core.Sync;
 using Humo.Core.Tests.Support;
 using Humo.Core.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +29,9 @@ public class ServiceRegistrationTests
             .AddSingleton<IAppPreferences>(Substitute.For<IAppPreferences>())
             .AddSingleton<IDatabasePath>(new TestDatabasePath())
             .AddSingleton<INavigationService>(Substitute.For<INavigationService>())
+            .AddSingleton<ISyncClient>(Substitute.For<ISyncClient>())
+            .AddSingleton<IEntitlementClient>(Substitute.For<IEntitlementClient>())
+            .AddSingleton<IAnalyticsClient>(Substitute.For<IAnalyticsClient>())
             .AddHumoCore()
             .BuildServiceProvider(validateScopes: true);
 
@@ -36,6 +42,10 @@ public class ServiceRegistrationTests
     [InlineData(typeof(EquipmentListViewModel))]
     [InlineData(typeof(EquipmentEditViewModel))]
     [InlineData(typeof(FuelSheetViewModel))]
+    [InlineData(typeof(CookHistoryViewModel))]
+    [InlineData(typeof(CookSummaryViewModel))]
+    [InlineData(typeof(PaywallViewModel))]
+    [InlineData(typeof(CookInsightsViewModel))]
     public void Every_view_model_can_be_resolved(Type viewModelType)
     {
         using var provider = BuildAppContainer();
@@ -51,12 +61,37 @@ public class ServiceRegistrationTests
         Assert.NotNull(provider.GetRequiredService<ICookService>());
         Assert.NotNull(provider.GetRequiredService<IEquipmentService>());
         Assert.NotNull(provider.GetRequiredService<IFuelService>());
+        Assert.NotNull(provider.GetRequiredService<ICookSummaryService>());
         Assert.NotNull(provider.GetRequiredService<IEquipmentRepository>());
         Assert.NotNull(provider.GetRequiredService<ICookRepository>());
         Assert.NotNull(provider.GetRequiredService<ITempEntryRepository>());
         Assert.NotNull(provider.GetRequiredService<IPitTempEntryRepository>());
         Assert.NotNull(provider.GetRequiredService<IFuelEventRepository>());
         Assert.NotNull(provider.GetRequiredService<IEventRepository>());
+    }
+
+    [Fact]
+    public void The_sync_graph_resolves()
+    {
+        using var provider = BuildAppContainer();
+
+        // Sync runs in the background with nobody watching, so a missing
+        // registration here would surface as data quietly not leaving the phone.
+        Assert.NotNull(provider.GetRequiredService<ISyncService>());
+        Assert.NotNull(provider.GetRequiredService<ISyncQueue>());
+        Assert.NotNull(provider.GetRequiredService<ISyncState>());
+    }
+
+    [Fact]
+    public void The_entitlement_graph_resolves()
+    {
+        using var provider = BuildAppContainer();
+
+        Assert.NotNull(provider.GetRequiredService<IClientEntitlementService>());
+
+        // A build with no store still has to resolve one, or the paywall cannot
+        // even be constructed to say purchasing is unavailable.
+        Assert.NotNull(provider.GetRequiredService<IPurchaseService>());
     }
 
     [Fact]

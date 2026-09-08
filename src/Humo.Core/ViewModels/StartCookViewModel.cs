@@ -78,14 +78,13 @@ public sealed partial class StartCookViewModel : ObservableObject
     [RelayCommand]
     private async Task LoadAsync(CancellationToken cancellationToken)
     {
-        var rigs = await _equipment.GetAllAsync(cancellationToken).ConfigureAwait(false);
+        var rigs = await _equipment.GetAllAsync(cancellationToken);
 
         if (rigs.Count == 0)
         {
             // No rigs yet: the service mints the implicit one rather than sending
             // the user off to a form before they can cook anything.
-            var created = await _cooks.GetOrCreateDefaultEquipmentAsync(cancellationToken)
-                .ConfigureAwait(false);
+            var created = await _cooks.GetOrCreateDefaultEquipmentAsync(cancellationToken);
             rigs = [created];
         }
 
@@ -177,11 +176,11 @@ public sealed partial class StartCookViewModel : ObservableObject
             EquipmentId = SelectedEquipment?.Id,
         };
 
-        await _cooks.StartCookAsync(request, cancellationToken).ConfigureAwait(false);
+        await _cooks.StartCookAsync(request, cancellationToken);
 
         // The cook is on. The next thing the user wants is the cook screen, not
         // the form they just filled in.
-        await _navigation.GoToAsync(AppRoutes.ActiveCook, cancellationToken).ConfigureAwait(false);
+        await _navigation.GoToAsync(AppRoutes.ActiveCook, cancellationToken);
     }
 
     /// <summary>The meat type's typical weight, expressed in the user's unit.</summary>

@@ -14,11 +14,36 @@
          Required by central package management; see Directory.Build.props. -->
     <PackageVersion Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+    <!-- Charting, used only by Humo.App and only behind the CookChartData
+         abstraction in Humo.Core. Verified before adopting, per architecture.md
+         open question 4: 2.0.5 is stable rather than beta, the licence is MIT
+         with no commercial tier (unlike FluentAssertions 8, which this project
+         already had to avoid), and it ships assemblies for net10.0-android and
+         net10.0-ios, which are both of our targets. -->
+    <PackageVersion Include="LiveChartsCore.SkiaSharpView.Maui" Version="2.0.5" />
+    <!-- Entra External ID sign-in. MSAL rather than a hand-written PKCE flow:
+         architecture.md Decision 2 chose a managed provider precisely so that
+         token exchange, refresh and the token cache are not security-sensitive
+         code one developer maintains alone. -->
+    <PackageVersion Include="Microsoft.Identity.Client" Version="4.88.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="API">
+    <!-- Azure SQL in production; the tests run the same EF model on SQLite, which
+         exercises real SQL and real constraints rather than an in-memory
+         provider that would accept things the database will not. -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.11" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.11" />
+    <!-- JWT bearer validation for Entra-issued tokens. -->
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup Label="App and shared">
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+    <!-- Kept in step with the EF Core version below: EF Core 10.0.11 depends on
+         the 10.0.11 DI packages, and central package management turns a lower
+         pin here into a hard NU1109 downgrade error rather than a warning. -->
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.11" />
     <PackageVersion Include="sqlite-net-pcl" Version="1.9.172" />
     <!-- Two problems with what sqlite-net-pcl pulls in, both pinned forward here.
          Remove these once sqlite-net-pcl ships newer dependencies itself.
@@ -37,8 +62,9 @@
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
     <!-- The DI container itself. Humo.Core depends on the abstractions only; the
          tests build a real container to prove the app's registrations resolve. -->
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.11" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageVersion Include="NSubstitute" Version="5.3.0" />
     <PackageVersion Include="xunit" Version="2.9.2" />
@@ -46,8 +72,8 @@
   </ItemGroup>
 
   <!-- Deliberately not here yet, added by the slice that first needs them:
-       LiveCharts2 and the notification plugin (slice 3 / slice 8, MAUI-side),
-       RevenueCat (slice 6), EF Core + Azure SQL provider (slice 5), Azure.Storage.Blobs (photos).
+       the notification plugin (slice 8, MAUI-side), RevenueCat (slice 6),
+       EF Core + Azure SQL provider (slice 5), Azure.Storage.Blobs (photos).
 
        FluentAssertions is deliberately absent despite being named in the plan:
        version 8 requires a paid licence for commercial use. Tests use xUnit's

@@ -126,6 +126,71 @@ public static class AppStrings
     public const string Event_Type = nameof(Event_Type);
     public const string Event_Note = nameof(Event_Note);
 
+    public const string SignIn_Title = nameof(SignIn_Title);
+    public const string SignIn_Apple = nameof(SignIn_Apple);
+    public const string SignIn_Google = nameof(SignIn_Google);
+    public const string SignIn_Email = nameof(SignIn_Email);
+    public const string SignIn_Guest = nameof(SignIn_Guest);
+    public const string SignIn_GuestExplanation = nameof(SignIn_GuestExplanation);
+    public const string SignIn_Offline = nameof(SignIn_Offline);
+    public const string SignIn_Failed = nameof(SignIn_Failed);
+    public const string SignIn_Unconfigured = nameof(SignIn_Unconfigured);
+
+    public const string History_Title = nameof(History_Title);
+    public const string History_Empty = nameof(History_Empty);
+
+    public const string Summary_Title = nameof(Summary_Title);
+    public const string Summary_Duration = nameof(Summary_Duration);
+    public const string Summary_TimePerKg = nameof(Summary_TimePerKg);
+    public const string Summary_TimePerLb = nameof(Summary_TimePerLb);
+    public const string Summary_EstimatedShort = nameof(Summary_EstimatedShort);
+    public const string Summary_PeakMeatTemp = nameof(Summary_PeakMeatTemp);
+    public const string Summary_PeakPitTemp = nameof(Summary_PeakPitTemp);
+    public const string Summary_Readings = nameof(Summary_Readings);
+    public const string Summary_FuelLoads = nameof(Summary_FuelLoads);
+    public const string Summary_Estimated = nameof(Summary_Estimated);
+    public const string Summary_NotFound = nameof(Summary_NotFound);
+    public const string Summary_Unknown = nameof(Summary_Unknown);
+    public const string Summary_RigDeleted = nameof(Summary_RigDeleted);
+
+    public const string Paywall_Title = nameof(Paywall_Title);
+    public const string Paywall_Subtitle = nameof(Paywall_Subtitle);
+    public const string Paywall_BenefitHistory = nameof(Paywall_BenefitHistory);
+    public const string Paywall_BenefitAnalytics = nameof(Paywall_BenefitAnalytics);
+    public const string Paywall_BenefitFireModel = nameof(Paywall_BenefitFireModel);
+    public const string Paywall_BenefitPhotos = nameof(Paywall_BenefitPhotos);
+    public const string Paywall_Restore = nameof(Paywall_Restore);
+    public const string Paywall_Unconfigured = nameof(Paywall_Unconfigured);
+    public const string Paywall_Offline = nameof(Paywall_Offline);
+    public const string Paywall_Failed = nameof(Paywall_Failed);
+    public const string Paywall_NothingToRestore = nameof(Paywall_NothingToRestore);
+    public const string Paywall_NeedsAccount = nameof(Paywall_NeedsAccount);
+    public const string Paywall_Thanks = nameof(Paywall_Thanks);
+    public const string History_Locked = nameof(History_Locked);
+    public const string History_LockedExplanation = nameof(History_LockedExplanation);
+    public const string Settings_Subscription = nameof(Settings_Subscription);
+    public const string Settings_TierFree = nameof(Settings_TierFree);
+    public const string Settings_TierPro = nameof(Settings_TierPro);
+    public const string Settings_Upgrade = nameof(Settings_Upgrade);
+
+    public const string Analytics_Title = nameof(Analytics_Title);
+    public const string Analytics_Stall = nameof(Analytics_Stall);
+    public const string Analytics_PitStability = nameof(Analytics_PitStability);
+    public const string Analytics_FuelEfficiency = nameof(Analytics_FuelEfficiency);
+    public const string Analytics_NeedsPro = nameof(Analytics_NeedsPro);
+    public const string Analytics_Offline = nameof(Analytics_Offline);
+    public const string Analytics_NotComputed = nameof(Analytics_NotComputed);
+    public const string Analytics_BaselineBuilding = nameof(Analytics_BaselineBuilding);
+    public const string Analytics_BaselineBuildingOne = nameof(Analytics_BaselineBuildingOne);
+    public const string Analytics_NothingUnusual = nameof(Analytics_NothingUnusual);
+    public const string Analytics_UnusuallyHigh = nameof(Analytics_UnusuallyHigh);
+    public const string Analytics_UnusuallyLow = nameof(Analytics_UnusuallyLow);
+    public const string Analytics_NoStall = nameof(Analytics_NoStall);
+
+    public const string Chart_MeatSeries = nameof(Chart_MeatSeries);
+    public const string Chart_PitSeries = nameof(Chart_PitSeries);
+    public const string Chart_NoReadings = nameof(Chart_NoReadings);
+
     public const string EventType_Wrapped = nameof(EventType_Wrapped);
     public const string EventType_Spritzed = nameof(EventType_Spritzed);
     public const string EventType_Rested = nameof(EventType_Rested);

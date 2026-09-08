@@ -337,23 +337,49 @@ Settled 2026-08-30. Recorded so they are not silently relitigated.
 | 7 | Account deletion: **immediate soft-delete, hard purge at 30 days**, including blobs | Covers mistaps and support windows without leaving "deleted" data alive indefinitely. |
 | 8 | **Photos ship in v1** — device-first, compressed, SAS-URL upload; **free = local only, Pro = synced** | Photos are the most engaging part of a cook log. Sync is the part that actually costs money, so that is the part that is paid. |
 | 9 | AI defaults to **Azure AI Foundry**, revisited at the AI slice | Keeps one cloud. Reversible server-side without an app release, so it is cheap to change on real pricing. |
+| 10 | Charting: **LiveChartsCore.SkiaSharpView.Maui 2.0.5**, behind `CookChartData` | Checked before adopting rather than after. 2.0.5 is stable, not one of the long beta line; the licence is **MIT** with no commercial tier, which matters here because FluentAssertions 8 had already been rejected over exactly that; and it ships `net10.0-android` and `net10.0-ios` assemblies, so neither target needs a fallback. The abstraction keeps series, units, ordering and markers in `Humo.Core` where they are unit-tested, leaving the package responsible only for pixels. |
+| 11 | Sign-in uses Entra's **hosted user flow**, not native SDK flows | Ships faster and inherits password reset, lockout and recovery. The cost is that it looks like a web page inside a native app, which is most noticeable on iOS where Sign in with Apple is expected to be native. Revisit once there are users; it is a change on one side of `IAuthService` only. |
+| 12 | Account scoping is enforced in the **repositories**, not in each service | Reads filter by the current account and writes stamp it, so no caller can forget and there is one place to test that a signed-in user never sees a guest's cooks. A service-by-service rule would be correct until the first new service. |
+| 13 | Signing in **does not claim** a guest's existing cooks | The merge flow needs its own decision (`product-spec.md` open question 5). Until then the guest's cooks stay under the anonymous account and reappear on sign-out. Recoverable; silently merging or silently discarding would not be. |
+| 14 | Server rows are keyed **`(accountId, id)`**, not `id` alone | Record ids are minted on the device, so an id is only unique within the account that minted it. Keyed on the id alone, one account pushing an id another account already holds collides in the database rather than being isolated by the merge rules — a 500, and an id-probing oracle. Account scoping becomes structural instead of a filter every query has to remember. |
+| 15 | A push returns **no cursor**; each row records the **device that wrote it** | The tempting optimisation — advance the pushing device's cursor past its own batch so a pull does not hand its records back — silently steps over everything another device wrote *before* the push. That data is then never pulled, ever. Recording the writer lets a pull skip a device's own rows without touching the cursor, so the cursor keeps meaning exactly one thing: how far through the stream you are. |
+| 16 | Push and pull are both **capped and looped within one sync** | A device offline for a season has thousands of records queued. One request carrying all of them times out on a poor connection every time, leaving that device permanently unable to sync; one capped request per launch would take a month to catch up on a month away. Batches are capped at 500 and both directions loop until caught up, parents-first so a truncated batch never orphans a child. |
+
+| 17 | Entitlements are stored server-side and written **only by the store's webhook** | The app never asserts its own tier: it asks, caches the answer for offline UI, and every gated path re-checks on the server. A client that says it is Pro is making a claim, and the row is the record. |
+| 18 | The store event is interpreted from **entitlement ids plus expiry**, never from the event type | Expiry is re-checked on every read, so a cancellation (which keeps access to the end of the period) and an expiry (which does not) both come out right without this code enumerating a store's event vocabulary — a list that grows without asking. It also means a lapsed subscription stops being Pro at the moment it lapses, with no scheduled job. |
+| 19 | The client is **identified to the store before any purchase**, and treats unknown as Free | The store's webhook names the buyer by the id the store knows. If that is the store's own anonymous id, the server cannot match the purchase to an account: money taken, nothing granted. And where the tier is unknown — a fresh install, a subscriber offline — nothing is locked and nothing is unlocked, because guessing either way is wrong in a way the user feels. |
+
+| 20 | Analytics recompute **for everything a pushed batch could have changed**, not just the cooks in it | A push is capped at 500 records, so a long cook's readings can arrive after the cook row itself; readings and fuel belong to the rig rather than the cook, so a later batch of either has to find the finished cooks whose window it falls in. Computing once from whatever had arrived by then would show a paying user numbers drawn from a fraction of their cook, and never correct them. The affected cooks and pairs are deduped, so one batch refreshes a baseline once rather than once per cook. |
+| 21 | `UserBaseline` is **stored and refreshed when a cook in the pair finishes**, not nightly | `data-model.md` §2 specifies storing it, and the sample size behind it is what lets the UI say "not enough cooks yet" honestly. Refreshing on finish rather than on a schedule is the same bounded work — one pair, not the whole account — and means the user who finishes their eighth brisket sees their baseline appear then rather than the next morning. No scheduler needed, so architecture.md open question 3 stays open rather than being answered by accident. |
+| 22 | On SQLite the API stores timestamps as **UTC ticks**; on SQL Server they stay `datetimeoffset` | SQLite has no date type, and EF's text storage for `DateTimeOffset` is not sortable across offsets, so the provider refuses to translate `>=` on one at all. Analytics reads pit readings for the window a cook occupied — the tests could not exercise a time range that Azure SQL handles natively, which is exactly the gap the SQLite-backed tests exist to close. Lossless because every instant Humo stores is UTC, and production keeps columns a human can read. |
 
 ## Open questions
 
-1. **Azure SQL serverless minimum capacity and auto-pause delay** need checking
+1. **The stall thresholds are a judgement call, not a derived number.** The spec
+   defines the stall as the longest interval where meat temp rises less than a
+   threshold rate within the plateau band, but names neither. The
+   implementation uses 60–80 °C and 1 °C/hour, with a 45-minute minimum, which
+   covers where brisket and pork shoulder actually plateau. They live in
+   `AnalyticsPolicy` as named constants for exactly this reason, and should be
+   checked against real logged cooks before they are trusted in a trend.
+2. **Azure SQL serverless minimum capacity and auto-pause delay** need checking
    against a realistic idle pattern before committing — the cost floor and the
    resume time are both configuration.
-2. **Entra External ID user flows vs. native SDK flows.** The hosted user flow is
-   fast to ship and looks like a web page inside a native app; native flows look
-   right and cost more work. Affects how the first-launch screen actually feels.
+2. ~~**Entra External ID user flows vs. native SDK flows.**~~ **Resolved: hosted
+   user flow. See Decision 11.**
 3. **Notification quick-response reliability is unverified.** iOS caps pending
    local notifications (64) and both platforms restrict background work.
    Handling "Added log" without launching the app needs platform-specific
    verification — **spike this before the fire model slice**, not during it. If
    background responses cannot reliably write data, the whole interaction design
    changes.
-4. **LiveCharts2 on MAUI net10.0** — version, licensing, and iOS/Android
-   rendering behaviour need verification before the charts slice.
+4. ~~**LiveCharts2 on MAUI net10.0** — version, licensing, and iOS/Android
+   rendering behaviour need verification before the charts slice.~~
+   **Resolved at the charts slice; see Decision 10.** Version and licensing check
+   out. Rendering on a real device is the one part still unverified, and it is
+   now a manual-verification item rather than an adoption risk: the charting
+   package is confined to `Humo.App` behind `CookChartData`, so replacing it
+   would be a view change.
 5. **Photo upload retry and storage cost are unmodelled.** SAS URLs and a
    separate upload queue are specified, but not the retry policy, the per-account
    storage ceiling, or what happens when a Pro subscription lapses with photos

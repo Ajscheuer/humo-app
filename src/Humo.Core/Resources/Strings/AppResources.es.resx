@@ -379,6 +379,89 @@
   <data name="Event_Note" xml:space="preserve">
     <value>Nota</value>
   </data>
+  <data name="SignIn_Title" xml:space="preserve">
+    <value>Bienvenido a Humo</value>
+  </data>
+  <data name="SignIn_Apple" xml:space="preserve">
+    <value>Iniciar sesión con Apple</value>
+  </data>
+  <data name="SignIn_Google" xml:space="preserve">
+    <value>Iniciar sesión con Google</value>
+  </data>
+  <data name="SignIn_Email" xml:space="preserve">
+    <value>Iniciar sesión con correo</value>
+  </data>
+  <data name="SignIn_Guest" xml:space="preserve">
+    <value>Seguir sin cuenta</value>
+  </data>
+  <data name="SignIn_GuestExplanation" xml:space="preserve">
+    <value>Empezá a registrar cocciones ya mismo. Después podés crear una cuenta para respaldarlas en todos tus dispositivos.</value>
+  </data>
+  <data name="SignIn_Offline" xml:space="preserve">
+    <value>No se pudo conectar con el servicio de inicio de sesión. Igual podés seguir sin cuenta.</value>
+  </data>
+  <data name="SignIn_Failed" xml:space="preserve">
+    <value>No se completó el inicio de sesión. Podés reintentar o seguir sin cuenta.</value>
+  </data>
+  <data name="SignIn_Unconfigured" xml:space="preserve">
+    <value>El inicio de sesión no está disponible en esta versión. Seguí sin cuenta.</value>
+  </data>
+  <data name="History_Title" xml:space="preserve">
+    <value>Historial</value>
+  </data>
+  <data name="History_Empty" xml:space="preserve">
+    <value>Todavía no hay cocciones terminadas</value>
+  </data>
+  <data name="Summary_Title" xml:space="preserve">
+    <value>Resumen de la cocción</value>
+  </data>
+  <data name="Summary_Duration" xml:space="preserve">
+    <value>Tiempo total</value>
+  </data>
+  <data name="Summary_TimePerKg" xml:space="preserve">
+    <value>Tiempo por kilo</value>
+  </data>
+  <data name="Summary_TimePerLb" xml:space="preserve">
+    <value>Tiempo por libra</value>
+  </data>
+  <data name="Summary_EstimatedShort" xml:space="preserve">
+    <value>Estimado</value>
+    <comment>Badge on a history row. The full sentence is Summary_Estimated.</comment>
+  </data>
+  <data name="Summary_PeakMeatTemp" xml:space="preserve">
+    <value>Temperatura máxima de la carne</value>
+  </data>
+  <data name="Summary_PeakPitTemp" xml:space="preserve">
+    <value>Temperatura máxima del ahumador</value>
+  </data>
+  <data name="Summary_Readings" xml:space="preserve">
+    <value>Mediciones</value>
+  </data>
+  <data name="Summary_FuelLoads" xml:space="preserve">
+    <value>Cargas de leña</value>
+  </data>
+  <data name="Summary_Estimated" xml:space="preserve">
+    <value>Esta cocción se cerró automáticamente, así que la hora de fin es estimada.</value>
+  </data>
+  <data name="Summary_NotFound" xml:space="preserve">
+    <value>Esa cocción ya no existe.</value>
+  </data>
+  <data name="Summary_Unknown" xml:space="preserve">
+    <value>—</value>
+    <comment>Same em dash in both languages: a typographic placeholder, not a word.</comment>
+  </data>
+  <data name="Summary_RigDeleted" xml:space="preserve">
+    <value>Equipo eliminado</value>
+  </data>
+  <data name="Chart_MeatSeries" xml:space="preserve">
+    <value>Carne</value>
+  </data>
+  <data name="Chart_PitSeries" xml:space="preserve">
+    <value>Ahumador</value>
+  </data>
+  <data name="Chart_NoReadings" xml:space="preserve">
+    <value>No se registraron mediciones en esta cocción</value>
+  </data>
   <data name="EventType_Wrapped" xml:space="preserve">
     <value>Envuelto</value>
   </data>
@@ -390,5 +473,101 @@
   </data>
   <data name="EventType_Other" xml:space="preserve">
     <value>Otro</value>
+  </data>
+  <data name="Paywall_Title" xml:space="preserve">
+    <value>Humo Pro</value>
+  </data>
+  <data name="Paywall_Subtitle" xml:space="preserve">
+    <value>Todo tu historial, tus propias referencias y un fuego que aprende cómo cocinás.</value>
+  </data>
+  <data name="Paywall_BenefitHistory" xml:space="preserve">
+    <value>Todas las cocciones que hayas registrado</value>
+  </data>
+  <data name="Paywall_BenefitAnalytics" xml:space="preserve">
+    <value>Tendencias y anomalías frente a tus propias cocciones</value>
+  </data>
+  <data name="Paywall_BenefitFireModel" xml:space="preserve">
+    <value>Avisos de leña que aprenden tu fuego</value>
+  </data>
+  <data name="Paywall_BenefitPhotos" xml:space="preserve">
+    <value>Fotos sincronizadas y respaldadas</value>
+  </data>
+  <data name="Paywall_Restore" xml:space="preserve">
+    <value>Restaurar compras</value>
+  </data>
+  <data name="Paywall_Unconfigured" xml:space="preserve">
+    <value>Las compras no están disponibles en esta versión.</value>
+  </data>
+  <data name="Paywall_Offline" xml:space="preserve">
+    <value>No se pudo conectar con la tienda. Revisá tu conexión e intentá de nuevo.</value>
+  </data>
+  <data name="Paywall_Failed" xml:space="preserve">
+    <value>La compra no se completó.</value>
+  </data>
+  <data name="Paywall_NothingToRestore" xml:space="preserve">
+    <value>No se encontraron compras anteriores en esta cuenta de la tienda.</value>
+  </data>
+  <data name="Paywall_NeedsAccount" xml:space="preserve">
+    <value>Para suscribirte necesitás una cuenta, así tu suscripción te acompaña a un teléfono nuevo.</value>
+  </data>
+  <data name="Paywall_Thanks" xml:space="preserve">
+    <value>Ya tenés Humo Pro. Gracias.</value>
+  </data>
+  <data name="History_Locked" xml:space="preserve">
+    <value>Bloqueada</value>
+  </data>
+  <data name="History_LockedExplanation" xml:space="preserve">
+    <value>La versión gratuita guarda tus cocciones más recientes. El resto sigue acá, y Pro las abre.</value>
+  </data>
+  <data name="Settings_Subscription" xml:space="preserve">
+    <value>Suscripción</value>
+  </data>
+  <data name="Settings_TierFree" xml:space="preserve">
+    <value>Gratis</value>
+  </data>
+  <data name="Settings_TierPro" xml:space="preserve">
+    <value>Pro</value>
+  </data>
+  <data name="Settings_Upgrade" xml:space="preserve">
+    <value>Pasar a Pro</value>
+  </data>
+  <data name="Analytics_Title" xml:space="preserve">
+    <value>Análisis</value>
+  </data>
+  <data name="Analytics_Stall" xml:space="preserve">
+    <value>Meseta</value>
+  </data>
+  <data name="Analytics_PitStability" xml:space="preserve">
+    <value>Estabilidad del fuego</value>
+  </data>
+  <data name="Analytics_FuelEfficiency" xml:space="preserve">
+    <value>Consumo de leña</value>
+  </data>
+  <data name="Analytics_NeedsPro" xml:space="preserve">
+    <value>Los análisis comparan cada cocción con tus cocciones anteriores. Humo Pro los activa.</value>
+  </data>
+  <data name="Analytics_Offline" xml:space="preserve">
+    <value>Los análisis se calculan en el servidor, así que necesitan conexión. Tu cocción está a salvo en este teléfono.</value>
+  </data>
+  <data name="Analytics_NotComputed" xml:space="preserve">
+    <value>Esta cocción todavía no llegó al servidor. Los análisis aparecen cuando se sincronice.</value>
+  </data>
+  <data name="Analytics_BaselineBuilding" xml:space="preserve">
+    <value>{0} cocciones más como esta y Humo puede decirte qué es inusual para vos.</value>
+  </data>
+  <data name="Analytics_BaselineBuildingOne" xml:space="preserve">
+    <value>Una cocción más como esta y Humo puede decirte qué es inusual para vos.</value>
+  </data>
+  <data name="Analytics_NothingUnusual" xml:space="preserve">
+    <value>Nada inusual para vos en esta cocción.</value>
+  </data>
+  <data name="Analytics_UnusuallyHigh" xml:space="preserve">
+    <value>Más alto que lo habitual</value>
+  </data>
+  <data name="Analytics_UnusuallyLow" xml:space="preserve">
+    <value>Más bajo que lo habitual</value>
+  </data>
+  <data name="Analytics_NoStall" xml:space="preserve">
+    <value>No se detectó meseta</value>
   </data>
 </root>

@@ -44,7 +44,7 @@ public sealed partial class EquipmentListViewModel : ObservableObject
     [RelayCommand]
     private async Task LoadAsync(CancellationToken cancellationToken)
     {
-        var equipment = await _equipment.GetAllAsync(cancellationToken).ConfigureAwait(false);
+        var equipment = await _equipment.GetAllAsync(cancellationToken);
 
         Items.Clear();
         foreach (var rig in equipment)
@@ -76,7 +76,7 @@ public sealed partial class EquipmentListViewModel : ObservableObject
 
         try
         {
-            await _equipment.DeleteAsync(item.Id, cancellationToken).ConfigureAwait(false);
+            await _equipment.DeleteAsync(item.Id, cancellationToken);
         }
         catch (InvalidOperationException)
         {
@@ -87,6 +87,6 @@ public sealed partial class EquipmentListViewModel : ObservableObject
             return;
         }
 
-        await LoadAsync(cancellationToken).ConfigureAwait(false);
+        await LoadAsync(cancellationToken);
     }
 }

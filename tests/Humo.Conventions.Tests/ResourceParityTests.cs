@@ -39,6 +39,11 @@ public class ResourceParityTests
         AppStrings.EquipmentType_Kamado,
         AppStrings.EquipmentType_Parrilla,
 
+        // The tier is branded, so it is "Humo Pro" and "Pro" in both languages.
+        // Translating the product name would be translating a trademark.
+        AppStrings.Paywall_Title,
+        AppStrings.Settings_TierPro,
+
         // South American species: the Spanish name is the only name.
         AppStrings.WoodType_Quebracho,
         AppStrings.WoodType_Espinillo,
@@ -47,6 +52,10 @@ public class ResourceParityTests
         // unit symbol rather than a word.
         AppStrings.FuelForm_Pellets,
         AppStrings.Unit_Litres_Short,
+
+        // An em dash standing in for a statistic that could not be computed.
+        // Typography, not language.
+        AppStrings.Summary_Unknown,
     ];
 
     [Fact]

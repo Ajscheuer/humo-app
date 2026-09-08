@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:conv="clr-namespace:Humo.App.Converters"
+             xmlns:ent="clr-namespace:Humo.Core.Entitlements;assembly=Humo.Core"
+             xmlns:loc="clr-namespace:Humo.App.Localization"
+             xmlns:vm="clr-namespace:Humo.Core.ViewModels;assembly=Humo.Core"
+             x:Class="Humo.App.Views.PaywallPage"
+             x:DataType="vm:PaywallViewModel"
+             Title="{loc:Translate Paywall_Title}">
+
+    <ContentPage.Resources>
+        <conv:HasTextConverter x:Key="HasText" />
+        <conv:InvertedBoolConverter x:Key="Not" />
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="20">
+
+            <Label Text="{loc:Translate Paywall_Title}"
+                   FontSize="28"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center" />
+
+            <Label Text="{loc:Translate Paywall_Subtitle}"
+                   HorizontalTextAlignment="Center" />
+
+            <!-- No fixed width anywhere: the Spanish strings here run about a
+                 quarter longer, and a benefit that clips reads as a broken
+                 promise on the screen that asks for money. -->
+            <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Benefits}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                        <Label Text="{Binding .}" LineBreakMode="WordWrap" />
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+
+            <Label Text="{Binding Message}"
+                   HorizontalTextAlignment="Center"
+                   LineBreakMode="WordWrap"
+                   IsVisible="{Binding Message, Converter={StaticResource HasText}}" />
+
+            <!-- One button per plan, priced by the store in the user's own
+                 currency. Absent entirely when there is nothing to sell, rather
+                 than present and failing. -->
+            <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding Products}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="ent:StoreProduct">
+                        <Button Text="{Binding DisplayPrice}"
+                                Command="{Binding Path=BuyCommand, Source={RelativeSource AncestorType={x:Type vm:PaywallViewModel}}, x:DataType=vm:PaywallViewModel}"
+                                CommandParameter="{Binding .}"
+                                IsEnabled="{Binding Path=CanBuy, Source={RelativeSource AncestorType={x:Type vm:PaywallViewModel}}, x:DataType=vm:PaywallViewModel}" />
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+            <!-- A guest cannot buy, so the paywall takes them to sign-in rather
+                 than only telling them an account is required. -->
+            <Button Text="{loc:Translate SignIn_Title}"
+                    Command="{Binding CreateAccountCommand}"
+                    IsVisible="{Binding NeedsAccount}" />
+
+            <!-- Never hidden behind CanBuy: both app stores require a restore
+                 path, and the user who needs it most is on a new phone where
+                 prices may not have loaded. -->
+            <Button Text="{loc:Translate Paywall_Restore}"
+                    Command="{Binding RestoreCommand}"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource Not}}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

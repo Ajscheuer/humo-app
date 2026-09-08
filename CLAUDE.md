@@ -15,6 +15,11 @@ BBQ cook-tracking app. Cross-platform mobile, offline-first, bilingual.
 - **MVVM. No logic in code-behind** — code-behind is the constructor and
   `InitializeComponent()` only. Use behaviors, converters, or commands instead.
 - ViewModels depend on service *interfaces*, never on MAUI or platform types.
+- **Never `ConfigureAwait(false)` in a ViewModel.** ViewModels mutate bound
+  `ObservableCollection`s and observable properties, and doing that off the UI
+  thread throws on iOS and Android. Commands start on the UI thread, so awaiting
+  without it resumes there. Services and repositories still use it — nothing
+  below the ViewModel touches the UI.
 - Shared DTOs, enums, and contracts live in `Humo.Shared` and are referenced by
   both app and API so the wire contract cannot drift.
 

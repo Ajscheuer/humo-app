@@ -1,6 +1,8 @@
 using System.Globalization;
 using Humo.Core.Localization;
+using Humo.Core.Navigation;
 using Humo.Core.Settings;
+using Humo.Core.Tests.Support;
 using Humo.Core.ViewModels;
 using Humo.Shared.Units;
 using NSubstitute;
@@ -11,11 +13,13 @@ public class AppSettingsViewModelTests
 {
     private readonly Localizer _localizer = new();
     private readonly IUserSettings _settings = Substitute.For<IUserSettings>();
+    private readonly INavigationService _navigation = Substitute.For<INavigationService>();
+    private FakeEntitlements _entitlements = FakeEntitlements.Free(5);
 
     [Fact]
     public void Title_is_resolved_in_the_current_language()
     {
-        var viewModel = new AppSettingsViewModel(_localizer, _settings);
+        var viewModel = new AppSettingsViewModel(_localizer, _settings, _entitlements, _navigation);
 
         Assert.Equal("Settings", viewModel.Title);
 
@@ -28,7 +32,7 @@ public class AppSettingsViewModelTests
     [Fact]
     public void Selecting_a_language_persists_the_override()
     {
-        var viewModel = new AppSettingsViewModel(_localizer, _settings);
+        var viewModel = new AppSettingsViewModel(_localizer, _settings, _entitlements, _navigation);
 
         viewModel.SelectedLanguage = viewModel.LanguageOptions
             .First(option => option.Culture?.Name == "es");
@@ -40,7 +44,7 @@ public class AppSettingsViewModelTests
     public void Choosing_follow_the_device_clears_the_override()
     {
         _settings.LanguageOverride.Returns(new CultureInfo("es"));
-        var viewModel = new AppSettingsViewModel(_localizer, _settings);
+        var viewModel = new AppSettingsViewModel(_localizer, _settings, _entitlements, _navigation);
 
         viewModel.SelectedLanguage = viewModel.LanguageOptions.First(option => option.Culture is null);
 
@@ -52,7 +56,7 @@ public class AppSettingsViewModelTests
     {
         // The rule this whole ViewModel exists to demonstrate.
         _settings.TemperatureUnit.Returns(TemperatureUnit.Fahrenheit);
-        var viewModel = new AppSettingsViewModel(_localizer, _settings);
+        var viewModel = new AppSettingsViewModel(_localizer, _settings, _entitlements, _navigation);
 
         viewModel.SelectedLanguage = viewModel.LanguageOptions
             .First(option => option.Culture?.Name == "es");
@@ -65,7 +69,7 @@ public class AppSettingsViewModelTests
     [Fact]
     public void Switching_the_temperature_unit_does_not_change_the_language()
     {
-        var viewModel = new AppSettingsViewModel(_localizer, _settings);
+        var viewModel = new AppSettingsViewModel(_localizer, _settings, _entitlements, _navigation);
         viewModel.SelectedLanguage = viewModel.LanguageOptions
             .First(option => option.Culture?.Name == "es");
         _settings.ClearReceivedCalls();
@@ -79,7 +83,7 @@ public class AppSettingsViewModelTests
     [Fact]
     public void The_unit_symbol_follows_the_unit_setting()
     {
-        var viewModel = new AppSettingsViewModel(_localizer, _settings);
+        var viewModel = new AppSettingsViewModel(_localizer, _settings, _entitlements, _navigation);
 
         Assert.Equal("°C", viewModel.TemperatureUnitSymbol);
 
@@ -94,7 +98,7 @@ public class AppSettingsViewModelTests
     {
         _settings.LanguageOverride.Returns(new CultureInfo("es"));
 
-        var viewModel = new AppSettingsViewModel(_localizer, _settings);
+        var viewModel = new AppSettingsViewModel(_localizer, _settings, _entitlements, _navigation);
 
         Assert.Equal("es", viewModel.SelectedLanguage.Culture?.Name);
     }
@@ -102,7 +106,7 @@ public class AppSettingsViewModelTests
     [Fact]
     public void No_stored_override_preselects_follow_the_device()
     {
-        var viewModel = new AppSettingsViewModel(_localizer, _settings);
+        var viewModel = new AppSettingsViewModel(_localizer, _settings, _entitlements, _navigation);
 
         Assert.Null(viewModel.SelectedLanguage.Culture);
     }
@@ -114,7 +118,7 @@ public class AppSettingsViewModelTests
         // would. The picker must land on a real option rather than nothing.
         _settings.LanguageOverride.Returns(new CultureInfo("de"));
 
-        var viewModel = new AppSettingsViewModel(_localizer, _settings);
+        var viewModel = new AppSettingsViewModel(_localizer, _settings, _entitlements, _navigation);
 
         Assert.Null(viewModel.SelectedLanguage.Culture);
     }
@@ -125,7 +129,7 @@ public class AppSettingsViewModelTests
         // Each of these is a plain get-only property, so nothing raises change
         // notification for them automatically. If one is forgotten, that label
         // silently keeps the old language.
-        var viewModel = new AppSettingsViewModel(_localizer, _settings);
+        var viewModel = new AppSettingsViewModel(_localizer, _settings, _entitlements, _navigation);
         var notified = new List<string?>();
         viewModel.PropertyChanged += (_, args) => notified.Add(args.PropertyName);
 
@@ -139,7 +143,7 @@ public class AppSettingsViewModelTests
     [Fact]
     public void Reselecting_the_current_language_does_not_write_the_setting_again()
     {
-        var viewModel = new AppSettingsViewModel(_localizer, _settings);
+        var viewModel = new AppSettingsViewModel(_localizer, _settings, _entitlements, _navigation);
         var current = viewModel.SelectedLanguage;
         _settings.ClearReceivedCalls();
 
@@ -153,7 +157,7 @@ public class AppSettingsViewModelTests
     {
         // Options carry resource keys, not text. A key with no resource would
         // show up in the picker as the raw key.
-        var viewModel = new AppSettingsViewModel(_localizer, _settings);
+        var viewModel = new AppSettingsViewModel(_localizer, _settings, _entitlements, _navigation);
 
         foreach (var option in viewModel.LanguageOptions)
         {
@@ -164,7 +168,7 @@ public class AppSettingsViewModelTests
     [Fact]
     public void The_explanation_and_title_are_translated_together()
     {
-        var viewModel = new AppSettingsViewModel(_localizer, _settings);
+        var viewModel = new AppSettingsViewModel(_localizer, _settings, _entitlements, _navigation);
 
         viewModel.SelectedLanguage = viewModel.LanguageOptions.First(option => option.Culture?.Name == "es");
 
@@ -177,7 +181,7 @@ public class AppSettingsViewModelTests
     {
         _settings.TemperatureUnit.Returns(TemperatureUnit.Fahrenheit);
 
-        var viewModel = new AppSettingsViewModel(_localizer, _settings);
+        var viewModel = new AppSettingsViewModel(_localizer, _settings, _entitlements, _navigation);
 
         Assert.True(viewModel.UseFahrenheit);
         Assert.Equal("°F", viewModel.TemperatureUnitSymbol);
@@ -187,7 +191,7 @@ public class AppSettingsViewModelTests
     public void Turning_Fahrenheit_back_off_returns_to_Celsius()
     {
         _settings.TemperatureUnit.Returns(TemperatureUnit.Fahrenheit);
-        var viewModel = new AppSettingsViewModel(_localizer, _settings);
+        var viewModel = new AppSettingsViewModel(_localizer, _settings, _entitlements, _navigation);
 
         viewModel.UseFahrenheit = false;
 

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:conv="clr-namespace:Humo.App.Converters"
+             xmlns:identity="clr-namespace:Humo.Core.Identity;assembly=Humo.Core"
+             xmlns:loc="clr-namespace:Humo.App.Localization"
+             xmlns:vm="clr-namespace:Humo.Core.ViewModels;assembly=Humo.Core"
+             x:Class="Humo.App.Views.SignInPage"
+             x:DataType="vm:SignInViewModel"
+             Title="{loc:Translate SignIn_Title}">
+
+    <ContentPage.Resources>
+        <conv:HasTextConverter x:Key="HasText" />
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="20" VerticalOptions="Center">
+
+            <Label Text="{loc:Translate SignIn_Title}"
+                   FontSize="28"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center" />
+
+            <Label Text="{Binding ErrorMessage}"
+                   HorizontalTextAlignment="Center"
+                   IsVisible="{Binding ErrorMessage, Converter={StaticResource HasText}}" />
+
+            <!-- Hidden rather than shown-and-failing when no tenant is
+                 configured: a button that cannot work is worse than no button. -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding CanSignIn}">
+                <Button Text="{loc:Translate SignIn_Apple}"
+                        Command="{Binding SignInCommand}"
+                        CommandParameter="{x:Static identity:SignInMethod.Apple}" />
+                <Button Text="{loc:Translate SignIn_Google}"
+                        Command="{Binding SignInCommand}"
+                        CommandParameter="{x:Static identity:SignInMethod.Google}" />
+                <Button Text="{loc:Translate SignIn_Email}"
+                        Command="{Binding SignInCommand}"
+                        CommandParameter="{x:Static identity:SignInMethod.Email}" />
+            </VerticalStackLayout>
+
+            <Label Text="{loc:Translate SignIn_Unconfigured}"
+                   HorizontalTextAlignment="Center"
+                   IsVisible="{Binding IsUnconfigured}" />
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+
+            <!-- Never gated on CanSignIn, IsBusy or the network. This is the path
+                 that has to work on a phone with no signal, standing at a
+                 smoker. -->
+            <VerticalStackLayout Spacing="8">
+                <Button Text="{loc:Translate SignIn_Guest}"
+                        Command="{Binding ContinueAsGuestCommand}" />
+                <Label Text="{loc:Translate SignIn_GuestExplanation}"
+                       FontSize="13"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

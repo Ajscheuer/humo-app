@@ -113,6 +113,34 @@ test suite.
   problem above: the Xcode is incomplete or is really the Command Line Tools.
   `sudo xcodebuild -runFirstLaunch` installs the missing components.
 
+## Sign-in configuration
+
+Sign-in uses Microsoft Entra External ID. **A checkout with no tenant configured
+builds and runs normally** — the sign-in buttons are hidden, the screen says so,
+and "continue without an account" works end to end. That is the supported state
+for local development, and it is why no tenant values are committed.
+
+To enable sign-in, set these before launching the app:
+
+| Variable | Example |
+|---|---|
+| `HUMO_ENTRA_CLIENT_ID` | `11111111-2222-3333-4444-555555555555` |
+| `HUMO_ENTRA_AUTHORITY` | `https://humo.ciamlogin.com/humo.onmicrosoft.com` |
+| `HUMO_ENTRA_REDIRECT_URI` | `msal11111111-2222-3333-4444-555555555555://auth` |
+| `HUMO_ENTRA_SCOPES` | space-separated; empty until the API is registered (slice 5) |
+
+None of these are secrets — a public mobile client has no client secret, which is
+why the flow is authorization code with PKCE — but they are per-environment, and
+a client id committed to a public repository tends to stay pinned to the wrong
+tenant forever.
+
+Still outstanding for a real device sign-in, neither of which a build can prove:
+
+- **Android** needs the MSAL browser-redirect activity declared in
+  `AndroidManifest.xml`, matching the redirect URI above.
+- **iOS** needs the matching URL scheme in `Info.plist` and the keychain access
+  group entitlement MSAL uses for its token cache.
+
 ## Continuous integration
 
 `.github/workflows/ci.yml` runs on every PR to `main`, on pushes to `main`, and

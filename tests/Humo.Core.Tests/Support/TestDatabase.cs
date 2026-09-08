@@ -1,5 +1,8 @@
 using Humo.Core.Data;
+using Humo.Core.Identity;
 using Humo.Core.Services;
+using Humo.Core.Settings;
+using Humo.Core.Sync;
 
 namespace Humo.Core.Tests.Support;
 
@@ -22,12 +25,21 @@ internal sealed class TestDatabase : IDatabasePath, IAsyncDisposable
         _database = new HumoDatabase(this);
 
         Clock = clock ?? new TestClock();
-        Equipment = new EquipmentRepository(_database);
-        Cooks = new CookRepository(_database);
-        TempEntries = new TempEntryRepository(_database);
-        PitTempEntries = new PitTempEntryRepository(_database);
-        FuelEvents = new FuelEventRepository(_database);
-        Events = new EventRepository(_database);
+
+        // A real account from the start. Repositories scope every read and stamp
+        // every write with it, so a test running against Guid.Empty would be
+        // testing a state the app never reaches.
+        Account = new AccountContext();
+        Account.SetCurrent(Guid.NewGuid(), isAnonymous: true);
+        Ownership = new RecordOwnership(_database);
+        Queue = new SyncQueue(_database, Account);
+
+        Equipment = new EquipmentRepository(_database, Account);
+        Cooks = new CookRepository(_database, Account);
+        TempEntries = new TempEntryRepository(_database, Account);
+        PitTempEntries = new PitTempEntryRepository(_database, Account);
+        FuelEvents = new FuelEventRepository(_database, Account);
+        Events = new EventRepository(_database, Account);
 
         Service = new CookService(Equipment, Cooks, TempEntries, PitTempEntries, Events, Clock);
         EquipmentService = new EquipmentService(Equipment, Cooks, Clock);
@@ -37,6 +49,23 @@ internal sealed class TestDatabase : IDatabasePath, IAsyncDisposable
     public string DatabaseFilePath { get; }
 
     public TestClock Clock { get; }
+
+    /// <summary>
+    /// The account everything is scoped to. Mutable, so a test can switch
+    /// accounts the way signing in does.
+    /// </summary>
+    public AccountContext Account { get; }
+
+    public IRecordOwnership Ownership { get; }
+
+    /// <summary>The outbound queue and inbound apply, over this same database.</summary>
+    public ISyncQueue Queue { get; }
+
+    /// <summary>
+    /// The connection itself, for the rare test that has to write a row shape the
+    /// repositories will not produce — a record from before account scoping, say.
+    /// </summary>
+    public IConnectionSource Connection => _database;
 
     public IEquipmentRepository Equipment { get; }
 
@@ -56,6 +85,14 @@ internal sealed class TestDatabase : IDatabasePath, IAsyncDisposable
     public IEquipmentService EquipmentService { get; }
 
     public IFuelService FuelService { get; }
+
+    /// <summary>
+    /// Reads a cook back after it is over. Needs the user's settings for unit
+    /// conversion, so the test supplies them.
+    /// </summary>
+    public ICookSummaryService SummaryServiceWith(IUserSettings settings)
+        => new CookSummaryService(
+            Cooks, TempEntries, PitTempEntries, FuelEvents, Events, Equipment, settings);
 
     public async ValueTask DisposeAsync()
     {
