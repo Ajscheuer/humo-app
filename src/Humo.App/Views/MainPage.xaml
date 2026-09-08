@@ -48,6 +48,18 @@
                        FontSize="22" />
             </VerticalStackLayout>
 
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{Binding SubscriptionTitle}"
+                       FontAttributes="Bold" />
+                <Label Text="{Binding TierDisplay}" FontSize="18" />
+
+                <!-- Hidden from a subscriber. Offering Pro to somebody already
+                     paying for it generates support mail. -->
+                <Button Text="{Binding UpgradeLabel}"
+                        Command="{Binding UpgradeCommand}"
+                        IsVisible="{Binding CanUpgrade}" />
+            </VerticalStackLayout>
+
         </VerticalStackLayout>
     </ScrollView>
 

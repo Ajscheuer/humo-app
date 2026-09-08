@@ -13,6 +13,7 @@ public class SignInViewModelTests : IAsyncLifetime
     private readonly IAuthService _auth = Substitute.For<IAuthService>();
     private readonly INavigationService _navigation = Substitute.For<INavigationService>();
     private readonly InMemoryPreferences _preferences = new();
+    private readonly FakeEntitlements _entitlements = FakeEntitlements.Free(5);
     private readonly Localizer _localizer = new();
 
     private AccountContext _context = null!;
@@ -26,7 +27,7 @@ public class SignInViewModelTests : IAsyncLifetime
     {
         _auth.IsConfigured.Returns(configured);
         _context = new AccountContext();
-        _accounts = new AccountService(_preferences, _context, _db.Ownership);
+        _accounts = new AccountService(_preferences, _context, _db.Ownership, _entitlements);
         return new SignInViewModel(_auth, _accounts, _localizer, _navigation);
     }
 

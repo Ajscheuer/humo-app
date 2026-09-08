@@ -1,6 +1,9 @@
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Humo.Core.Entitlements;
 using Humo.Core.Localization;
+using Humo.Core.Navigation;
 using Humo.Core.Settings;
 using Humo.Shared.Units;
 
@@ -28,11 +31,19 @@ public sealed partial class AppSettingsViewModel : ObservableObject
 {
     private readonly ILocalizer _localizer;
     private readonly IUserSettings _settings;
+    private readonly IClientEntitlementService _entitlements;
+    private readonly INavigationService _navigation;
 
-    public AppSettingsViewModel(ILocalizer localizer, IUserSettings settings)
+    public AppSettingsViewModel(
+        ILocalizer localizer,
+        IUserSettings settings,
+        IClientEntitlementService entitlements,
+        INavigationService navigation)
     {
         _localizer = localizer;
         _settings = settings;
+        _entitlements = entitlements;
+        _navigation = navigation;
 
         LanguageOptions =
         [
@@ -55,6 +66,24 @@ public sealed partial class AppSettingsViewModel : ObservableObject
 
     /// <summary>Explains that the temperature unit does not follow the language.</summary>
     public string TemperatureUnitExplanation => _localizer[AppStrings.Settings_TemperatureUnit_Explanation];
+
+    /// <summary>The heading over the subscription row.</summary>
+    public string SubscriptionTitle => _localizer[AppStrings.Settings_Subscription];
+
+    /// <summary>
+    /// Which tier this account is on. "Free" while nothing is known, which is
+    /// the same rule the rest of the app follows: unknown is not Pro.
+    /// </summary>
+    public string TierDisplay => _localizer[
+        _entitlements.IsPro ? AppStrings.Settings_TierPro : AppStrings.Settings_TierFree];
+
+    /// <summary>
+    /// The upgrade row is hidden from a subscriber. Offering Pro to somebody
+    /// already paying for it is the kind of thing that generates support mail.
+    /// </summary>
+    public bool CanUpgrade => !_entitlements.IsPro;
+
+    public string UpgradeLabel => _localizer[AppStrings.Settings_Upgrade];
 
     /// <summary>The symbol currently shown next to temperatures.</summary>
     public string TemperatureUnitSymbol => _localizer[
@@ -87,5 +116,9 @@ public sealed partial class AppSettingsViewModel : ObservableObject
 
         OnPropertyChanged(nameof(TemperatureUnitSymbol));
     }
+
+    [RelayCommand]
+    private Task UpgradeAsync(CancellationToken cancellationToken)
+        => _navigation.GoToAsync(AppRoutes.Paywall, cancellationToken);
 
 }

@@ -7,6 +7,7 @@ using Humo.Core.Localization;
 using Humo.Core.Navigation;
 using Humo.Core.Identity;
 using Humo.Core.Settings;
+using Humo.Core.Entitlements;
 using Humo.Core.Sync;
 using LiveChartsCore.SkiaSharpView.Maui;
 using Microsoft.Extensions.Logging;
@@ -57,6 +58,7 @@ public static class MauiProgram
         Routing.RegisterRoute(AppRoutes.FuelSheet, typeof(FuelSheetPage));
         Routing.RegisterRoute(AppRoutes.CookSummary, typeof(CookSummaryPage));
         Routing.RegisterRoute(AppRoutes.SignIn, typeof(SignInPage));
+        Routing.RegisterRoute(AppRoutes.Paywall, typeof(PaywallPage));
     }
 
     private static void RegisterServices(IServiceCollection services)
@@ -83,6 +85,14 @@ public static class MauiProgram
             sp.GetRequiredService<IAuthService>(),
             sp.GetRequiredService<SyncOptions>()));
 
+        // The entitlement is read from the same API, over its own HttpClient:
+        // it is a small request that must not queue behind a sync batch pushing
+        // a season of cooks.
+        services.AddSingleton<IEntitlementClient>(sp => new HttpEntitlementClient(
+            new HttpClient(),
+            sp.GetRequiredService<IAuthService>(),
+            sp.GetRequiredService<SyncOptions>()));
+
         // Everything else -- services, repositories, ViewModels -- comes from
         // Humo.Core, which registers the same graph a test builds.
         services.AddHumoCore();
@@ -100,6 +110,7 @@ public static class MauiProgram
         services.AddTransient<SignInPage>();
         services.AddTransient<CookHistoryPage>();
         services.AddTransient<CookSummaryPage>();
+        services.AddTransient<PaywallPage>();
     }
 
     /// <summary>

@@ -413,9 +413,13 @@ reopened deliberately.
 2. **Privacy policy and terms do not exist yet.** Decisions 2 and 9 both create
    text that has to live in them, and both app stores require a privacy policy
    before submission.
-3. **The paywall's timing and content are unspecified.** Decision 5a says an
-   account is required to subscribe, but not when a free user first meets the
-   paywall — at the 6th cook, on opening analytics, or on a trial expiry. This
-   shapes conversion more than the tier definition does.
+3. ~~**The paywall's timing and content are unspecified.**~~ **Partly resolved
+   in the entitlements slice.** A free user meets the paywall in two places:
+   opening a cook past the free limit, and the subscription row in settings.
+   Content is the four Pro capabilities from the tier table. What is still
+   open is whether to *also* interrupt at a moment of value — the 6th cook
+   finishing, say — which is the part that shapes conversion. Nothing about
+   that is baked in: the paywall is a route, so adding an entry point is a
+   navigation call.
 4. **No trial period is defined.** Free-with-limits and a time-limited trial of
    Pro are different products; RevenueCat supports either.

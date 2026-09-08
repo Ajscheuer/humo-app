@@ -1,5 +1,6 @@
 using Humo.Api.Auth;
 using Humo.Api.Data;
+using Humo.Api.Entitlements;
 using Humo.Api.Sync;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<IAccountResolver, ClaimsAccountResolver>();
 builder.Services.AddScoped<ISyncService, SyncService>();
+builder.Services.AddScoped<IEntitlementService, EntitlementService>();
+
+// The tier numbers and the store's shared secret. Bound from configuration so
+// the free history limit is a setting rather than a release, per
+// product-spec.md 5.1.
+builder.Services
+    .AddOptions<EntitlementOptions>()
+    .Bind(builder.Configuration.GetSection(EntitlementOptions.SectionName));
 
 // Azure SQL. The connection string comes from configuration, which in App
 // Service means a managed-identity connection rather than a secret in a file.
@@ -46,6 +55,7 @@ app.UseAuthorization();
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
 app.MapSyncEndpoints();
+app.MapEntitlementEndpoints();
 
 app.Run();
 

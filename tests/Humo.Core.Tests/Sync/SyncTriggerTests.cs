@@ -1,4 +1,5 @@
 using Humo.Core.Sync;
+using Humo.Core.Tests.Support;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 
@@ -8,6 +9,7 @@ public class SyncTriggerTests
 {
     private readonly ISyncService _service = Substitute.For<ISyncService>();
     private readonly ISyncFailureLog _log = new RecordingFailureLog();
+    private readonly FakeEntitlements _entitlements = FakeEntitlements.Free(5);
 
     [Fact]
     public async Task Requesting_a_sync_runs_one()
@@ -19,7 +21,7 @@ public class SyncTriggerTests
             return Task.FromResult(SyncResult.Of(SyncOutcome.Completed));
         });
 
-        new SyncTrigger(_service, _log).RequestSync();
+        new SyncTrigger(_service, _entitlements, _log).RequestSync();
 
         await completed.Task.WaitAsync(TimeSpan.FromSeconds(5));
     }
@@ -35,7 +37,7 @@ public class SyncTriggerTests
                 return SyncResult.Of(SyncOutcome.Completed);
             });
 
-        var trigger = new SyncTrigger(_service, _log);
+        var trigger = new SyncTrigger(_service, _entitlements, _log);
 
         // If this blocked, an app resuming with a season of cooks to upload
         // would freeze on the splash screen.
@@ -51,7 +53,7 @@ public class SyncTriggerTests
         _service.SyncAsync(Arg.Any<CancellationToken>())
             .Throws(new InvalidOperationException("the database is locked"));
 
-        var trigger = new SyncTrigger(_service, _log);
+        var trigger = new SyncTrigger(_service, _entitlements, _log);
 
         trigger.RequestSync();
 
@@ -67,7 +69,7 @@ public class SyncTriggerTests
         _service.SyncAsync(Arg.Any<CancellationToken>())
             .Throws(new TimeoutException());
 
-        new SyncTrigger(_service, _log).RequestSync();
+        new SyncTrigger(_service, _entitlements, _log).RequestSync();
 
         await WaitFor(() => _log.Last is not null);
         Assert.IsType<TimeoutException>(_log.Last);
@@ -79,11 +81,38 @@ public class SyncTriggerTests
         _service.SyncAsync(Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(new SyncResult { Outcome = SyncOutcome.Completed, Pushed = 3 }));
 
-        var trigger = new SyncTrigger(_service, _log);
+        var trigger = new SyncTrigger(_service, _entitlements, _log);
         trigger.RequestSync();
 
         await WaitFor(() => trigger.LastResult is not null);
         Assert.Equal(3, trigger.LastResult!.Pushed);
+    }
+
+    [Fact]
+    public async Task A_round_also_refreshes_the_entitlement()
+    {
+        _service.SyncAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(SyncResult.Of(SyncOutcome.Completed)));
+
+        new SyncTrigger(_service, _entitlements, _log).RequestSync();
+
+        // A purchase made on the other phone arrives as an entitlement change.
+        // Without this the subscriber keeps seeing padlocks until they happen to
+        // open the paywall.
+        await WaitFor(() => _entitlements.Refreshes > 0);
+    }
+
+    [Fact]
+    public async Task A_failed_sync_does_not_skip_the_entitlement_refresh()
+    {
+        _service.SyncAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(SyncResult.Of(SyncOutcome.Offline)));
+
+        new SyncTrigger(_service, _entitlements, _log).RequestSync();
+
+        // Sync moves a lot of data and the entitlement is one small request.
+        // The first failing is no reason not to try the second.
+        await WaitFor(() => _entitlements.Refreshes > 0);
     }
 
     private static async Task WaitFor(Func<bool> condition)

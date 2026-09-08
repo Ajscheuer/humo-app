@@ -34,6 +34,8 @@ public sealed class HumoDbContext : DbContext
 
     public DbSet<AccountSequenceRow> AccountSequences => Set<AccountSequenceRow>();
 
+    public DbSet<EntitlementRow> Entitlements => Set<EntitlementRow>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

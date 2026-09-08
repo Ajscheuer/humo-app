@@ -1,19 +1,21 @@
+using Humo.Core.Entitlements;
+
 namespace Humo.Core.Sync;
 
 /// <summary>
-/// Asks for a sync without waiting for one.
+/// Catches up with the server, without waiting for it.
 /// <para>
 /// The app calls this from lifecycle events — launch, resume — where there is
 /// nothing to await into and nowhere for an exception to go. Keeping the
 /// fire-and-forget in one tested place is what stops it being written inline in
-/// a code-behind, where a failed sync would take the app down with it.
+/// a code-behind, where a failure would take the app down with it.
 /// </para>
 /// </summary>
 public interface ISyncTrigger
 {
     /// <summary>
-    /// Starts a sync if one is not already running, and returns immediately.
-    /// Never throws.
+    /// Syncs and refreshes the entitlement, if a round is not already running,
+    /// and returns immediately. Never throws.
     /// </summary>
     void RequestSync();
 
@@ -24,11 +26,13 @@ public interface ISyncTrigger
 internal sealed class SyncTrigger : ISyncTrigger
 {
     private readonly ISyncService _sync;
+    private readonly IClientEntitlementService _entitlements;
     private readonly ISyncFailureLog _log;
 
-    public SyncTrigger(ISyncService sync, ISyncFailureLog log)
+    public SyncTrigger(ISyncService sync, IClientEntitlementService entitlements, ISyncFailureLog log)
     {
         _sync = sync;
+        _entitlements = entitlements;
         _log = log;
     }
 
@@ -41,6 +45,12 @@ internal sealed class SyncTrigger : ISyncTrigger
         try
         {
             LastResult = await _sync.SyncAsync().ConfigureAwait(false);
+
+            // After the sync, not before: a purchase made on another device
+            // arrives as an entitlement change, and this is the only thing that
+            // routinely asks. Without it a subscriber would keep seeing padlocks
+            // until they happened to open the paywall.
+            await _entitlements.RefreshAsync().ConfigureAwait(false);
         }
         catch (Exception e)
         {

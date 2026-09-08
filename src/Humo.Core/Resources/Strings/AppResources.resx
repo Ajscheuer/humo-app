@@ -486,4 +486,61 @@
   <data name="EventType_Other" xml:space="preserve">
     <value>Other</value>
   </data>
+  <data name="Paywall_Title" xml:space="preserve">
+    <value>Humo Pro</value>
+  </data>
+  <data name="Paywall_Subtitle" xml:space="preserve">
+    <value>Your whole history, your own baselines, and a fire that learns how you cook.</value>
+  </data>
+  <data name="Paywall_BenefitHistory" xml:space="preserve">
+    <value>Every cook you have ever logged</value>
+  </data>
+  <data name="Paywall_BenefitAnalytics" xml:space="preserve">
+    <value>Trends and anomalies against your own cooks</value>
+  </data>
+  <data name="Paywall_BenefitFireModel" xml:space="preserve">
+    <value>Fuel reminders that learn your fire</value>
+  </data>
+  <data name="Paywall_BenefitPhotos" xml:space="preserve">
+    <value>Photos backed up and synced</value>
+  </data>
+  <data name="Paywall_Restore" xml:space="preserve">
+    <value>Restore purchases</value>
+  </data>
+  <data name="Paywall_Unconfigured" xml:space="preserve">
+    <value>Purchasing is not available in this build.</value>
+  </data>
+  <data name="Paywall_Offline" xml:space="preserve">
+    <value>The store could not be reached. Check your connection and try again.</value>
+  </data>
+  <data name="Paywall_Failed" xml:space="preserve">
+    <value>The purchase did not go through.</value>
+  </data>
+  <data name="Paywall_NothingToRestore" xml:space="preserve">
+    <value>No previous purchases were found for this store account.</value>
+  </data>
+  <data name="Paywall_NeedsAccount" xml:space="preserve">
+    <value>Subscribing needs an account, so your subscription follows you to a new phone.</value>
+  </data>
+  <data name="Paywall_Thanks" xml:space="preserve">
+    <value>You are on Humo Pro. Thank you.</value>
+  </data>
+  <data name="History_Locked" xml:space="preserve">
+    <value>Locked</value>
+  </data>
+  <data name="History_LockedExplanation" xml:space="preserve">
+    <value>Free keeps your most recent cooks. The rest are still here, and Pro opens them.</value>
+  </data>
+  <data name="Settings_Subscription" xml:space="preserve">
+    <value>Subscription</value>
+  </data>
+  <data name="Settings_TierFree" xml:space="preserve">
+    <value>Free</value>
+  </data>
+  <data name="Settings_TierPro" xml:space="preserve">
+    <value>Pro</value>
+  </data>
+  <data name="Settings_Upgrade" xml:space="preserve">
+    <value>Upgrade to Pro</value>
+  </data>
 </root>

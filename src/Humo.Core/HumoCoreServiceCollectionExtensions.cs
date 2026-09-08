@@ -1,4 +1,5 @@
 using Humo.Core.Data;
+using Humo.Core.Entitlements;
 using Humo.Core.Identity;
 using Humo.Core.Localization;
 using Humo.Core.Services;
@@ -54,6 +55,16 @@ public static class HumoCoreServiceCollectionExtensions
         services.AddSingleton<ISyncFailureLog, SyncFailureLog>();
         services.AddSingleton<ISyncTrigger, SyncTrigger>();
 
+        // Entitlements. The store itself is registered by the app, which is
+        // where the billing client lives; the cache and the rules are plain
+        // logic and belong here.
+        services.AddSingleton<IClientEntitlementService, ClientEntitlementService>();
+
+        // The store in a build that has none. Registered here so a checkout with
+        // no store keys runs and shows an honest paywall; the app registers a
+        // real one after this, and the later registration wins.
+        services.AddSingleton<IPurchaseService, UnavailablePurchaseService>();
+
         services.AddSingleton<ICookService, CookService>();
         services.AddSingleton<IEquipmentService, EquipmentService>();
         services.AddSingleton<IFuelService, FuelService>();
@@ -68,6 +79,7 @@ public static class HumoCoreServiceCollectionExtensions
         services.AddTransient<SignInViewModel>();
         services.AddTransient<CookHistoryViewModel>();
         services.AddTransient<CookSummaryViewModel>();
+        services.AddTransient<PaywallViewModel>();
 
         return services;
     }

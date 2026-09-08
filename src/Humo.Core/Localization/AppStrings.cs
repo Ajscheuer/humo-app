@@ -153,6 +153,26 @@ public static class AppStrings
     public const string Summary_Unknown = nameof(Summary_Unknown);
     public const string Summary_RigDeleted = nameof(Summary_RigDeleted);
 
+    public const string Paywall_Title = nameof(Paywall_Title);
+    public const string Paywall_Subtitle = nameof(Paywall_Subtitle);
+    public const string Paywall_BenefitHistory = nameof(Paywall_BenefitHistory);
+    public const string Paywall_BenefitAnalytics = nameof(Paywall_BenefitAnalytics);
+    public const string Paywall_BenefitFireModel = nameof(Paywall_BenefitFireModel);
+    public const string Paywall_BenefitPhotos = nameof(Paywall_BenefitPhotos);
+    public const string Paywall_Restore = nameof(Paywall_Restore);
+    public const string Paywall_Unconfigured = nameof(Paywall_Unconfigured);
+    public const string Paywall_Offline = nameof(Paywall_Offline);
+    public const string Paywall_Failed = nameof(Paywall_Failed);
+    public const string Paywall_NothingToRestore = nameof(Paywall_NothingToRestore);
+    public const string Paywall_NeedsAccount = nameof(Paywall_NeedsAccount);
+    public const string Paywall_Thanks = nameof(Paywall_Thanks);
+    public const string History_Locked = nameof(History_Locked);
+    public const string History_LockedExplanation = nameof(History_LockedExplanation);
+    public const string Settings_Subscription = nameof(Settings_Subscription);
+    public const string Settings_TierFree = nameof(Settings_TierFree);
+    public const string Settings_TierPro = nameof(Settings_TierPro);
+    public const string Settings_Upgrade = nameof(Settings_Upgrade);
+
     public const string Chart_MeatSeries = nameof(Chart_MeatSeries);
     public const string Chart_PitSeries = nameof(Chart_PitSeries);
     public const string Chart_NoReadings = nameof(Chart_NoReadings);

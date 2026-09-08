@@ -2,6 +2,7 @@ using Humo.Core;
 using Humo.Core.Data;
 using Humo.Core.Navigation;
 using Humo.Core.Services;
+using Humo.Core.Entitlements;
 using Humo.Core.Settings;
 using Humo.Core.Sync;
 using Humo.Core.Tests.Support;
@@ -28,6 +29,7 @@ public class ServiceRegistrationTests
             .AddSingleton<IDatabasePath>(new TestDatabasePath())
             .AddSingleton<INavigationService>(Substitute.For<INavigationService>())
             .AddSingleton<ISyncClient>(Substitute.For<ISyncClient>())
+            .AddSingleton<IEntitlementClient>(Substitute.For<IEntitlementClient>())
             .AddHumoCore()
             .BuildServiceProvider(validateScopes: true);
 
@@ -40,6 +42,7 @@ public class ServiceRegistrationTests
     [InlineData(typeof(FuelSheetViewModel))]
     [InlineData(typeof(CookHistoryViewModel))]
     [InlineData(typeof(CookSummaryViewModel))]
+    [InlineData(typeof(PaywallViewModel))]
     public void Every_view_model_can_be_resolved(Type viewModelType)
     {
         using var provider = BuildAppContainer();
@@ -74,6 +77,18 @@ public class ServiceRegistrationTests
         Assert.NotNull(provider.GetRequiredService<ISyncService>());
         Assert.NotNull(provider.GetRequiredService<ISyncQueue>());
         Assert.NotNull(provider.GetRequiredService<ISyncState>());
+    }
+
+    [Fact]
+    public void The_entitlement_graph_resolves()
+    {
+        using var provider = BuildAppContainer();
+
+        Assert.NotNull(provider.GetRequiredService<IClientEntitlementService>());
+
+        // A build with no store still has to resolve one, or the paywall cannot
+        // even be constructed to say purchasing is unavailable.
+        Assert.NotNull(provider.GetRequiredService<IPurchaseService>());
     }
 
     [Fact]

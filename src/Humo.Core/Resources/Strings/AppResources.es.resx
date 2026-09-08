@@ -474,4 +474,61 @@
   <data name="EventType_Other" xml:space="preserve">
     <value>Otro</value>
   </data>
+  <data name="Paywall_Title" xml:space="preserve">
+    <value>Humo Pro</value>
+  </data>
+  <data name="Paywall_Subtitle" xml:space="preserve">
+    <value>Todo tu historial, tus propias referencias y un fuego que aprende cómo cocinás.</value>
+  </data>
+  <data name="Paywall_BenefitHistory" xml:space="preserve">
+    <value>Todas las cocciones que hayas registrado</value>
+  </data>
+  <data name="Paywall_BenefitAnalytics" xml:space="preserve">
+    <value>Tendencias y anomalías frente a tus propias cocciones</value>
+  </data>
+  <data name="Paywall_BenefitFireModel" xml:space="preserve">
+    <value>Avisos de leña que aprenden tu fuego</value>
+  </data>
+  <data name="Paywall_BenefitPhotos" xml:space="preserve">
+    <value>Fotos sincronizadas y respaldadas</value>
+  </data>
+  <data name="Paywall_Restore" xml:space="preserve">
+    <value>Restaurar compras</value>
+  </data>
+  <data name="Paywall_Unconfigured" xml:space="preserve">
+    <value>Las compras no están disponibles en esta versión.</value>
+  </data>
+  <data name="Paywall_Offline" xml:space="preserve">
+    <value>No se pudo conectar con la tienda. Revisá tu conexión e intentá de nuevo.</value>
+  </data>
+  <data name="Paywall_Failed" xml:space="preserve">
+    <value>La compra no se completó.</value>
+  </data>
+  <data name="Paywall_NothingToRestore" xml:space="preserve">
+    <value>No se encontraron compras anteriores en esta cuenta de la tienda.</value>
+  </data>
+  <data name="Paywall_NeedsAccount" xml:space="preserve">
+    <value>Para suscribirte necesitás una cuenta, así tu suscripción te acompaña a un teléfono nuevo.</value>
+  </data>
+  <data name="Paywall_Thanks" xml:space="preserve">
+    <value>Ya tenés Humo Pro. Gracias.</value>
+  </data>
+  <data name="History_Locked" xml:space="preserve">
+    <value>Bloqueada</value>
+  </data>
+  <data name="History_LockedExplanation" xml:space="preserve">
+    <value>La versión gratuita guarda tus cocciones más recientes. El resto sigue acá, y Pro las abre.</value>
+  </data>
+  <data name="Settings_Subscription" xml:space="preserve">
+    <value>Suscripción</value>
+  </data>
+  <data name="Settings_TierFree" xml:space="preserve">
+    <value>Gratis</value>
+  </data>
+  <data name="Settings_TierPro" xml:space="preserve">
+    <value>Pro</value>
+  </data>
+  <data name="Settings_Upgrade" xml:space="preserve">
+    <value>Pasar a Pro</value>
+  </data>
 </root>

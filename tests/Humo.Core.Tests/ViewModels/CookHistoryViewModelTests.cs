@@ -17,12 +17,18 @@ public class CookHistoryViewModelTests : IAsyncLifetime
     private readonly INavigationService _navigation = Substitute.For<INavigationService>();
     private readonly Localizer _localizer = new();
 
+    /// <summary>
+    /// Pro by default, so the existing tests stay about history rather than
+    /// about tiers. The locking tests set their own.
+    /// </summary>
+    private FakeEntitlements _entitlements = FakeEntitlements.Pro();
+
     public Task InitializeAsync() => Task.CompletedTask;
 
     public Task DisposeAsync() => _db.DisposeAsync().AsTask();
 
     private CookHistoryViewModel CreateViewModel()
-        => new(_db.SummaryServiceWith(_settings), _localizer, _navigation, _db.Clock);
+        => new(_db.SummaryServiceWith(_settings), _localizer, _navigation, _db.Clock, _entitlements);
 
     private Task<Cook> ACookAsync(MeatType meatType = MeatType.Brisket)
         => _db.Service.StartCookAsync(new StartCookRequest

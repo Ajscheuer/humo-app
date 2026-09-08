@@ -18,13 +18,22 @@
         <loc:ResourceKeyConverter x:Key="ResourceKey" />
     </ContentPage.Resources>
 
-    <Grid Padding="24">
+    <Grid Padding="24" RowDefinitions="*,Auto">
 
-        <Label Text="{loc:Translate History_Empty}"
+        <Label Grid.Row="0"
+               Text="{loc:Translate History_Empty}"
                IsVisible="{Binding HasItems, Converter={StaticResource Not}}"
                VerticalOptions="Start" />
 
-        <CollectionView ItemsSource="{Binding Items}"
+        <Label Grid.Row="1"
+               Text="{Binding LockedExplanation}"
+               FontSize="13"
+               LineBreakMode="WordWrap"
+               Margin="0,12,0,0"
+               IsVisible="{Binding HasLockedItems}" />
+
+        <CollectionView Grid.Row="0"
+                        ItemsSource="{Binding Items}"
                         IsVisible="{Binding HasItems}"
                         SelectionMode="None">
             <CollectionView.ItemTemplate>
@@ -56,6 +65,15 @@
                                    FontSize="11"
                                    HorizontalTextAlignment="End"
                                    IsVisible="{Binding IsEstimated}" />
+                            <!-- A cook past the free limit. Still listed, dated
+                                 and named. product-spec.md 5.1 is explicit that
+                                 these are never hidden, because an empty list
+                                 reads as data loss and a locked one reads as
+                                 an offer. -->
+                            <Label Text="{loc:Translate History_Locked}"
+                                   FontSize="11"
+                                   HorizontalTextAlignment="End"
+                                   IsVisible="{Binding IsLocked}" />
                         </VerticalStackLayout>
                     </Grid>
                 </DataTemplate>

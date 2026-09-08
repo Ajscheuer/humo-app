@@ -162,6 +162,21 @@ public class HttpSyncClientTests
     }
 
     [Fact]
+    public async Task A_captive_portal_that_says_it_sent_HTML_is_not_a_crash()
+    {
+        // The realistic shape: a portal answers 200 with text/html, not with an
+        // HTML body mislabelled as JSON. ReadFromJsonAsync refuses the media
+        // type outright rather than failing to parse it, which is a different
+        // exception on a different code path.
+        var client = Build(RespondsWith(
+            HttpStatusCode.OK, "<html><body>Sign in to WiFi</body></html>", "text/html"));
+
+        var result = await client.PullAsync(Guid.NewGuid(), 0);
+
+        Assert.Equal(SyncTransportFailure.Rejected, result.Failure);
+    }
+
+    [Fact]
     public async Task An_empty_body_on_a_200_is_not_a_crash()
     {
         var result = await Build(Responds(HttpStatusCode.OK, "null")).PullAsync(Guid.NewGuid(), 0);
@@ -199,9 +214,12 @@ public class HttpSyncClientTests
     }
 
     private static StubHandler Responds(HttpStatusCode status, string body)
+        => RespondsWith(status, body, "application/json");
+
+    private static StubHandler RespondsWith(HttpStatusCode status, string body, string mediaType)
         => new((_, _) => Task.FromResult(new HttpResponseMessage(status)
         {
-            Content = new StringContent(body, Encoding.UTF8, "application/json"),
+            Content = new StringContent(body, Encoding.UTF8, mediaType),
         }));
 
     private static StubHandler Throws(Exception exception)

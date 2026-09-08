@@ -1,4 +1,5 @@
 using Humo.Core.Data;
+using Humo.Core.Entitlements;
 using Humo.Core.Settings;
 
 namespace Humo.Core.Identity;
@@ -66,15 +67,18 @@ public sealed class AccountService : IAccountService
     private readonly IAppPreferences _preferences;
     private readonly IAccountContext _context;
     private readonly IRecordOwnership _ownership;
+    private readonly IClientEntitlementService _entitlements;
 
     public AccountService(
         IAppPreferences preferences,
         IAccountContext context,
-        IRecordOwnership ownership)
+        IRecordOwnership ownership,
+        IClientEntitlementService entitlements)
     {
         _preferences = preferences;
         _context = context;
         _ownership = ownership;
+        _entitlements = entitlements;
     }
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
@@ -130,6 +134,12 @@ public sealed class AccountService : IAccountService
 
     public async Task SignedOutAsync(CancellationToken cancellationToken = default)
     {
+        // Before the account switches, not after: Clear() forgets the entitlement
+        // cached for whoever is signed in right now, and doing it afterwards
+        // would clear the guest's empty one and leave the subscriber's tier
+        // sitting on what may be a shared phone.
+        _entitlements.Clear();
+
         var anonymousId = ReadOrCreateAnonymousId();
 
         _context.SetCurrent(anonymousId, isAnonymous: true);

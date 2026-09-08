@@ -43,6 +43,12 @@ public static class AppRoutes
     /// <summary>The fuel sheet. Pushed over the cook screen.</summary>
     public const string FuelSheet = "fuel";
 
+    /// <summary>
+    /// The upgrade offer. Pushed rather than absolute, so Back returns the user
+    /// to whatever they were doing when they met it.
+    /// </summary>
+    public const string Paywall = "paywall";
+
     /// <summary>Query-string key naming the rig being edited or fed.</summary>
     public const string EquipmentIdParameter = "equipmentId";
 

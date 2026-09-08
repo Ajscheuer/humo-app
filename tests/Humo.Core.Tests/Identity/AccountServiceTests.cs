@@ -9,6 +9,7 @@ public class AccountServiceTests : IAsyncLifetime
 {
     private readonly TestDatabase _db = new();
     private readonly InMemoryPreferences _preferences = new();
+    private readonly FakeEntitlements _entitlements = FakeEntitlements.Free(5);
 
     public Task InitializeAsync() => Task.CompletedTask;
 
@@ -18,7 +19,7 @@ public class AccountServiceTests : IAsyncLifetime
     private (IAccountService Service, AccountContext Context) CreateService()
     {
         var context = new AccountContext();
-        return (new AccountService(_preferences, context, _db.Ownership), context);
+        return (new AccountService(_preferences, context, _db.Ownership, _entitlements), context);
     }
 
     private static AuthenticatedUser AUser(string subject = "entra|abc123") => new()
@@ -211,4 +212,25 @@ public class AccountServiceTests : IAsyncLifetime
 
         await Task.CompletedTask;
     }
+    [Fact]
+    public async Task Signing_out_forgets_the_subscribers_entitlement()
+    {
+        var (accounts, _) = CreateService();
+        await accounts.InitializeAsync();
+        await accounts.SignedInAsync(new AuthenticatedUser
+        {
+            Subject = "subscriber",
+            Method = SignInMethod.Email,
+        });
+
+        _entitlements.Current = FakeEntitlements.Pro().Current;
+
+        await accounts.SignedOutAsync();
+
+        // Cleared for the account that was signed in, not for the guest account
+        // it switches to: on a shared phone the subscriber's tier must not be
+        // left behind for whoever picks it up next.
+        Assert.False(_entitlements.IsPro);
+    }
+
 }

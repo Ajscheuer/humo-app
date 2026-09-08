@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -28,12 +29,25 @@ namespace Humo.Api.Tests.Support;
 /// </summary>
 public sealed class SyncApiFactory : WebApplicationFactory<Program>
 {
+    /// <summary>
+    /// The shared secret the store webhook is configured with here. A real one
+    /// comes from App Service configuration; a test needs a known value to prove
+    /// both that the right secret is accepted and that everything else is not.
+    /// </summary>
+    public const string WebhookSecret = "test-webhook-secret";
+
     private readonly SqliteConnection _connection = new("Filename=:memory:");
 
     public SyncApiFactory() => _connection.Open();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.ConfigureAppConfiguration(configuration => configuration.AddInMemoryCollection(
+            new Dictionary<string, string?>
+            {
+                ["Entitlements:WebhookSecret"] = WebhookSecret,
+            }));
+
         builder.ConfigureTestServices(services =>
         {
             // Out with Azure SQL. Every registration, not just the options object:
